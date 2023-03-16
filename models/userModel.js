@@ -1,5 +1,8 @@
 const mongoose= require('mongoose');
-// const usersRoute = require('../router/userRouter');
+// // const usersRoute = require('../router/userRouter');
+// const router=express.Router()
+
+
 
 const UserSchema= new mongoose.Schema({
 first_name:{
@@ -21,11 +24,13 @@ email_confirmation:{
 password:{
     type:String,
     required:true,
-}
+},
 
 
-});
+}, {timestamps:true} );
 
-const User= mongoose.model('User',UserSchema);
+// const User= mongoose.model('User',UserSchema);
 
-module.exports= User;
+// module.exports= User;
+// module.exports=router;
+module.exports=mongoose.model("userModel",UserSchema);
