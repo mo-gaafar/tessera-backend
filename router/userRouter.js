@@ -2,7 +2,7 @@
 const express=require('express');
 const router=express.Router();
 const { validateUserSignup, userVlidation } = require('../middlewares/validation/user');
-const {signup} =require("../controller/userController")
+const {signup,signin} =require("../controller/userController")
 //validation
 // const check= require('express-validator').check
 const {check}= require('express-validator');
@@ -11,6 +11,8 @@ const {check}= require('express-validator');
 //
 
 router.post('/signup',validateUserSignup,userVlidation ,signup);
+router.post('/signin',signin);
+
 //validation
 // router.post('/signup',check('first_name').not().isEmpty
 // , signup);

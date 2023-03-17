@@ -15,7 +15,7 @@ last_name:{
     required:true,
 },
 email:{
-    type:String,
+    type:String, 
     required:true,
 },
 email_confirmation:{
@@ -45,4 +45,13 @@ this.password= await bcrypt.hash(this.password, 10)
 }
 
 );
+
+//verify passsword
+
+UserSchema.methods.comparePassword= async function(yourPassword){
+     return await bcrypt.compare(yourPassword,this.password);
+}
+
+
+
 module.exports=mongoose.model("userModel",UserSchema);
