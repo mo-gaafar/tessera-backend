@@ -2,7 +2,7 @@ const mongoose= require('mongoose');
 // // const usersRoute = require('../router/userRouter');
 // const router=express.Router()
 const bcrypt= require('bcryptjs');
-
+const jwt=require("jsonwebtoken");
 
 const UserSchema= new mongoose.Schema({
 first_name:{
@@ -52,6 +52,11 @@ UserSchema.methods.comparePassword= async function(yourPassword){
      return await bcrypt.compare(yourPassword,this.password);
 }
 
-
+UserSchema.methods.GenerateToken=function(){
+    return jwt.sign(
+       {id:this.id},process.env.SECRETJWT,{expiresIn:'3h'}
+      
+    )
+}
 
 module.exports=mongoose.model("userModel",UserSchema);

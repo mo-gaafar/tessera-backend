@@ -82,10 +82,12 @@ try {
             message:"Invalid Email or Password"
            })
     }
+    const token= await user.GenerateToken();
     
     res.status(200).json(
        {
         success:true,
+        //token
         user
 
        }
