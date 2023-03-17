@@ -1,10 +1,24 @@
 
 const express=require('express');
 const router=express.Router();
+const { validateUserSignup, userVlidation } = require('../middlewares/validation/user');
 const {signup} =require("../controller/userController")
+//validation
+// const check= require('express-validator').check
+const {check}= require('express-validator');
 
 
-router.post('/signup', signup);
+//
+
+router.post('/signup',validateUserSignup,userVlidation ,signup);
+//validation
+// router.post('/signup',check('first_name').not().isEmpty
+// , signup);
+
+
+
+//validation
+
 // // //5atar
 // // const User = require('../models/userModel');
 // // //5atar

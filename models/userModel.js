@@ -1,13 +1,14 @@
 const mongoose= require('mongoose');
 // // const usersRoute = require('../router/userRouter');
 // const router=express.Router()
-
+const bcrypt= require('bcryptjs');
 
 
 const UserSchema= new mongoose.Schema({
 first_name:{
  type:String,
- required:true,
+ required:false,
+ maxlength: 32,
 },
 last_name:{
     type:String,
@@ -33,4 +34,15 @@ password:{
 
 // module.exports= User;
 // module.exports=router;
+UserSchema.pre('save',async function(next){
+
+if (!this.isModified('password')){
+ next()
+
+}
+this.password= await bcrypt.hash(this.password, 10)
+
+}
+
+);
 module.exports=mongoose.model("userModel",UserSchema);
