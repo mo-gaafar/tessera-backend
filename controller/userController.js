@@ -2,16 +2,18 @@ const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel")
 // const validationResult=
 
+// signup method to register a new user by taking his information
 exports.signup = async (req,res,next) =>{
-    //validation
+    
 
-    //validation
+    //getting user email
     const {email} =req.body;
     const {email_confirmation}=req.body
-    // const { first_name,last_name,email,email_confirmation,password}= req.body
+    
 
-    const userExist=await userModel.findOne({email});
+    const userExist=await userModel.findOne({email}); // checking if email already exists 
 
+    //email found
     if (userExist){
        return res.status(400).json({
         sucess:false,
@@ -19,7 +21,7 @@ exports.signup = async (req,res,next) =>{
        }
        )
     } 
-
+     // email does not match email confirmation entered
     if (email!=email_confirmation){
         return res.status(400).json({
             sucess:false,
@@ -28,7 +30,7 @@ exports.signup = async (req,res,next) =>{
            )
     }
 
-
+    // creating new user 
      try {
         const user= await userModel.create(req.body);
         res.status(201).json(
@@ -51,10 +53,12 @@ exports.signup = async (req,res,next) =>{
 
 }
 
+// sign in function
 exports.signin = async (req,res,next) =>{
 
 try {
-    const {email,password}= req.body;
+    const {email,password}= req.body; // getting email and password
+    //prompting to user  if email or password are left blank 
     if (!email || !password){
         return res.status(400).json(
             {
@@ -63,8 +67,9 @@ try {
             }
         )
         }
-
-        const user= await   userModel.findOne({email});
+        
+        const user= await   userModel.findOne({email}); // finding user email
+        // user email not found
         if (!user){
             return res.status(400).json({
              success:false,
@@ -75,14 +80,15 @@ try {
           
         }
 
-    const isMatch= await user.comparePassword(password);
+    const isMatch= await user.comparePassword(password); // verifying password
+    // password not mathced 
     if (!isMatch){
         return res.status(400).json({
             success:false,
             message:"Invalid Email or Password"
            })
     }
-    const token= await user.GenerateToken();
+    const token= await user.GenerateToken(); //generate user token
     
     res.status(200).json(
        {
