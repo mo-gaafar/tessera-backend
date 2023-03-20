@@ -113,11 +113,32 @@ try {
 
 
 }
+}
 
+exports.emailvalid= async(req,res,next)  =>{
 
+    const {email} =req.body;
 
+    const userExist=await userModel.findOne({email}); // checking if email already exists 
 
+    //email found
+    if (userExist){
+       return res.status(400).json({
+        sucess:false,
+        message:"Email already exists"
+       }
+       )
 
+}
+else(
+    res.status(200).json(
+        {
+         success:true,
+         
+ 
+        }
+     )
+)
 
 
 
