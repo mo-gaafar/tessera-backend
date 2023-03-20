@@ -2,13 +2,15 @@ const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel")
 // const validationResult=
 
-// signup method to register a new user by taking his information
-exports.signup = async (req,res,next) =>{
+/* 
+This function will create a new user in the database
+*/
+exports.signUp = async (req,res,next) =>{
     
 
     //getting user email
     const {email} =req.body;
-    const {email_confirmation}=req.body
+    const {emailConfirmation}=req.body
     
 
     const userExist=await userModel.findOne({email}); // checking if email already exists 
@@ -22,7 +24,7 @@ exports.signup = async (req,res,next) =>{
        )
     } 
      // email does not match email confirmation entered
-    if (email!=email_confirmation){
+    if (email!=emailConfirmation){
         return res.status(400).json({
             sucess:false,
             message:"Email address does not match the above"
@@ -53,8 +55,13 @@ exports.signup = async (req,res,next) =>{
 
 }
 
-// sign in function
-exports.signin = async (req,res,next) =>{
+/*
+This function will allow the user to sign in if they
+entered their email and password correctly and will
+generate token to the user
+
+*/
+exports.signIn = async (req,res,next) =>{
 
 try {
     const {email,password}= req.body; // getting email and password
@@ -93,8 +100,8 @@ try {
     res.status(200).json(
        {
         success:true,
-        //token
-        user
+        token
+        //user
 
        }
     )
@@ -115,7 +122,12 @@ try {
 }
 }
 
-exports.emailvalid= async(req,res,next)  =>{
+/*
+This function will check if the email entered by the user 
+already exists 
+*/
+
+exports.emailExist= async(req,res,next)  =>{
 
     const {email} =req.body;
 
