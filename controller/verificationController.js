@@ -10,6 +10,7 @@ async function sendVerification(req, res) {
 
     // Find user by email
     const user = await User.findOne({ email });
+    // console.log(user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -23,6 +24,8 @@ async function sendVerification(req, res) {
     // Save verification token to user
     user.verificationToken = token;
     await user.save();
+    // console.log(user.verificationToken);
+    // console.log(user);
 
     // Send verification email
     await sendVerificationEmail(email, token);
@@ -40,6 +43,7 @@ async function verifyEmail(req, res) {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.SECRETJWT);
+    console.log("decoded" + user);
 
     // Find user by decoded user ID
     const user = await User.findById(decoded.userId);

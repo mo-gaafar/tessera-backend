@@ -5,11 +5,10 @@ async function sendVerificationEmail(email, token) {
     // Send verification email
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      host: process.env.BASE_URL,
-      secure: false,
+
       auth: {
-        user: process.env.EMAIL_ADDRESS,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -19,11 +18,13 @@ async function sendVerificationEmail(email, token) {
       to: email,
       subject: "Please verify your email address",
       html: `
-        <p>Hello!</p>
-        <p>Please click the link below to verify your email address:</p>
-        <a href="${process.env.BASE_URL}/auth/verify/?token-verify=${token}">Verify Email</a>
-        <p>Here's a picture of a cat for you:</p>
-        <img src="https://cataas.com/cat" alt="A cat">
+        <p style="font-size: 20px;">Hello! </p>
+        <p style="font-size: 20px;">Please click the button below to verify your email address:</p>
+        <button style="background-color: #F05537; color: white; padding: 10px 20px; border: none; border-radius: 4px;">
+        <a href="${process.env.BASE_URL}/auth/isverify/:${token}" style="text-decoration: none; color: inherit;">Verify Email</a>
+        </button>
+        <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera">
+        
       `,
     };
 
