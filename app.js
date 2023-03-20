@@ -9,14 +9,11 @@ const verificationRoutes = require("./router/verificationRoutes");
 
 //connecting to database
 mongoose
-  .connect(
-    "mongodb+srv://mongodatabase2023:1h1jnygQ6c8mTGAS@cluster0.4l4dopm.mongodb.net/test ",
-    {
-      //   useFindAndModify:true,
-      //   useCreateIndex:true,
-      //   useNewUrlParser:true,
-    }
-  )
+  .connect(process.env.MONGODB_URI, {
+    //   useFindAndModify:true,
+    //   useCreateIndex:true,
+    //   useNewUrlParser:true,
+  })
   .then(() => console.log("DB Connected"))
   .catch((err) => console.log(err));
 // // const PORT=process.env.PORT || 5000;

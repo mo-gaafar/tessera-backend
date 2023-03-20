@@ -16,7 +16,7 @@ async function sendVerification(req, res) {
     }
 
     // Generate verification token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id }, process.env.SECRETJWT, {
       expiresIn: "1d",
     });
 
@@ -39,13 +39,12 @@ async function verifyEmail(req, res) {
     const { token } = req.query;
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.SECRETJWT);
 
     // Find user by decoded user ID
     const user = await User.findById(decoded.userId);
 
     // Responses Status
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -67,7 +66,7 @@ async function verifyEmail(req, res) {
     user.verificationToken = undefined;
     await user.save();
 
-    res.status(200).json({ message: "Email address verified" });
+    res.status(200).json({ message: "Email address verified" }, token);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });

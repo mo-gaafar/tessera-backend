@@ -60,7 +60,6 @@ exports.signin = async (req, res, next) => {
         message: "Invalid Email or Password",
       });
     }
-
     const isMatch = await user.comparePassword(password); // verifying password
     // password not mathced
     if (!isMatch) {
@@ -73,8 +72,8 @@ exports.signin = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      //token
-      user,
+      token,
+      //   user,
     });
   } catch (error) {
     console.log(error);

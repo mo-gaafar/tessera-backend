@@ -5,6 +5,8 @@ async function sendVerificationEmail(email, token) {
     // Send verification email
     const transporter = nodemailer.createTransport({
       service: "gmail",
+      host: process.env.BASE_URL,
+      secure: false,
       auth: {
         user: process.env.EMAIL_ADDRESS,
         pass: process.env.EMAIL_PASSWORD,
@@ -19,7 +21,7 @@ async function sendVerificationEmail(email, token) {
       html: `
         <p>Hello!</p>
         <p>Please click the link below to verify your email address:</p>
-        <a href="${process.env.BASE_URL}/verify-email?token=${token}">Verify Email</a>
+        <a href="${process.env.BASE_URL}/auth/verify/?token-verify=${token}">Verify Email</a>
         <p>Here's a picture of a cat for you:</p>
         <img src="https://cataas.com/cat" alt="A cat">
       `,

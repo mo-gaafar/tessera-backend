@@ -10,8 +10,8 @@ const { signup, signin } = require("../controller/userController"); // importing
 const { check } = require("express-validator");
 
 // creating a router
-router.post("/signup", validateUserSignup, userVlidation, signup);
-router.post("/signin", signin);
+router.post("/auth/signup", validateUserSignup, userVlidation, signup);
+router.post("/auth/login", signin);
 
 // // const User = require('../models/userModel');
 
