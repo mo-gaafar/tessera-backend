@@ -6,6 +6,6 @@ const router = express.Router();
 // post request
 router.post("/auth/verify/", verificationController.sendVerification);
 
-router.get("/auth/isverify/", verificationController.verifyEmail);
+router.get("/auth/isverify/:token", verificationController.verifyEmail);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
+const cors = require("cors");
 const mongoose = require("mongoose");
 
 //Import routes
@@ -20,6 +21,9 @@ mongoose
 
 // Add middleware
 app.use(express.json());
+
+// Enable CORS for all requests
+app.use(cors());
 
 app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);

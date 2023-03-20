@@ -2,7 +2,7 @@
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const { sendVerificationEmail } = require("../utils/sendEmail");
+const { sendUserEmail } = require("../utils/sendEmail");
 
 async function sendVerification(req, res) {
   try {
@@ -20,15 +20,16 @@ async function sendVerification(req, res) {
     const token = jwt.sign({ userId: user._id }, process.env.SECRETJWT, {
       expiresIn: "1d",
     });
+    // console.log(token);
 
     // Save verification token to user
     user.verificationToken = token;
     await user.save();
     // console.log(user.verificationToken);
-    // console.log(user);
-
+    console.log("user toke = " + user.verificationToken);
+    console.log("user id = " + user._id);
     // Send verification email
-    await sendVerificationEmail(email, token);
+    await sendUserEmail(email, token, "verifications");
 
     res.json({ message: "Verification email sent" });
   } catch (err) {
@@ -39,15 +40,20 @@ async function sendVerification(req, res) {
 
 async function verifyEmail(req, res) {
   try {
-    const { token } = req.query;
+    console.log("yaraaaaaaab");
+    const token = req.params.token;
+    // const { token } = req.param;
+    console.log("token = " + token);
 
     // Verify token
     const decoded = jwt.verify(token, process.env.SECRETJWT);
-    console.log("decoded" + user);
+    console.log("decoded" + decoded);
+    console.log("decoded user id= " + decoded.userId);
 
     // Find user by decoded user ID
     const user = await User.findById(decoded.userId);
-
+    console.log("verfication id= " + user.verificationToken);
+    // console.log(user);
     // Responses Status
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -66,6 +72,7 @@ async function verifyEmail(req, res) {
     }
 
     // Set user as verified and clear verification token
+    console.log("hiiiii");
     user.isVerified = true;
     user.verificationToken = undefined;
     await user.save();
