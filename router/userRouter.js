@@ -10,7 +10,7 @@ const { signUp, signIn, emailExist } = require("../controller/userController"); 
 // const {check}= require('express-validator');
 
 // creating a router
-router.post("/signUp", validateUserSignup, userVlidation, signUp);
+router.post("/auth/signup/", validateUserSignup, userVlidation, signUp);
 router.post("/signIn", signIn);
 router.post("/emailExist", emailExist);
 

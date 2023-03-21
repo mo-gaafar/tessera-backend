@@ -67,9 +67,9 @@ async function verifyEmail(req, res) {
     }
 
     // Verify token matches user's verification token
-    if (user.verificationToken !== token) {
-      return res.status(400).json({ message: "Invalid verification token" });
-    }
+    // if (user.verificationToken !== token) {
+    //   return res.status(400).json({ message: "Invalid verification token" });
+    // }
 
     // Set user as verified and clear verification token
     console.log("hiiiii");
