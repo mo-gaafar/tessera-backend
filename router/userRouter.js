@@ -1,27 +1,31 @@
-
-const express=require('express');
-const router=express.Router();
-const { validateUserSignup, userVlidation } = require('../middlewares/validation/user');
-const {signup,signin,forgotpassword,resetPassword} =require("../controller/userController")
+const express = require("express");
+const router = express.Router();
+const {
+	validateUserSignup,
+	userVlidation,
+} = require("../middlewares/validation/user");
+const {
+	signup,
+	signin,
+	forgotpassword,
+	resetPassword,
+} = require("../controller/userController");
 //validation
 // const check= require('express-validator').check
-const {check}= require('express-validator');
-
+const { check } = require("express-validator");
 
 //
 
-router.post('/signup',validateUserSignup,userVlidation ,signup);
-router.post('/signin',signin);
+router.post("/auth/signup", validateUserSignup, userVlidation, signup);
+router.post("/auth/signin", signin);
 //router.put('/auth/forgetPassword',);
 //router.post('/auth/forgetPassword',forgettingPassword);
-router.post('/auth/forgetPassword',forgotpassword)
-router.post('/auth/reset-password',resetPassword)
+router.post("/auth/forgetPassword", forgotpassword);
+router.post("/auth/reset-password", resetPassword);
 
 //validation
 // router.post('/signup',check('first_name').not().isEmpty
 // , signup);
-
-
 
 //validation
 
@@ -36,9 +40,7 @@ router.post('/auth/reset-password',resetPassword)
 //     res.send('Hi from  js');
 // });
 
-
-module.exports=router;
-
+module.exports = router;
 
 // // //5atar:
 // // userRouter.post('/signup',async (req,res) => {
@@ -51,18 +53,14 @@ module.exports=router;
 // //         console.log(error);
 // //     }
 
-// // } ); 
+// // } );
 
 // // // 5atar
 // // // // //5atar
 // // // // // usersRoute.post('/login', (req,res) =>{
 // // // // //    res.send('login route');
-   
+
 // // // // // });
-
-
-
-
 
 // // // // ///
 // // //5atar
