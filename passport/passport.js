@@ -46,7 +46,7 @@ module.exports = function (passport){
        
         verified:true,
         email:profile.emails[0].value,
-        password:newPassword.toString(),//. toString() added , remove if cause error
+        password:newPassword,//. toString() added , remove if cause error
         social_media_user:true
     }
 

@@ -4,7 +4,7 @@ const express = require('express');
 // const cookieSession=require("cookie-session")
 const session=require('express-session')
 const mongoose = require('mongoose')
-const userRouter=require('./router/userRouter')
+const userRouter=require('./router/userRouter') //import router in app
 const cors = require('cors')
 // const cookieParser = require('cookie-parser')
 const passport = require("passport")
@@ -34,6 +34,7 @@ app.use(session({
 }));
 app.use(cors())
 app.use(express.json())
+//develope api 
 app.use('/user',userRouter)
 // app.use(session(//if page is refreshed, user keep logged in
 //     {

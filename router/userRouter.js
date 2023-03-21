@@ -9,6 +9,12 @@ const nodemailer = require("nodemailer")
 const res = require("express/lib/response")
 require('../passport/passport')(passport)
 const router = require('express').Router()
+const {google_signin_and_signup}=require('../controller/userController')//importing methods from conroller
+
+//creating router
+//Google sign in using mobile app ////http://localhost:3000/user/auth/google/app
+router.post('/auth/google/app',google_signin_and_signup);
+
 ///////////redirect links
 router.get("/googlelogin/failed",(req,res)=>{
   res.status(401).json({
