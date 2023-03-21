@@ -5,13 +5,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 // creating user schema with fields
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    first_name: {
+    firstName: {
       type: String,
       required: true,
     },
-    last_name: {
+    lastName: {
       type: String,
       required: true,
     },
@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email_confirmation: {
+    emailConfirmation: {
       type: String,
       required: true,
     },
@@ -44,14 +44,13 @@ UserSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10); // encrypting password
 });
 
-//verify passsword entered by user using encryption
-UserSchema.methods.comparePassword = async function (yourPassword) {
+userSchema.methods.comparePassword = async function (yourPassword) {
   return await bcrypt.compare(yourPassword, this.password);
 };
 
 // generating user token
-UserSchema.methods.GenerateToken = function () {
+userSchema.methods.GenerateToken = function () {
   return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });
 };
 
-module.exports = mongoose.model("userModel", UserSchema); //exporting module
+module.exports = mongoose.model("userModel", userSchema); //exporting module

@@ -4,19 +4,15 @@ const {
   validateUserSignup,
   userVlidation,
 } = require("../middlewares/validation/user");
-const { signup, signin } = require("../controller/userController"); // importing methods from controller
+const { signUp, signIn, emailExist } = require("../controller/userController"); // importing methods from controller
 //validation
 // const check= require('express-validator').check
-const { check } = require("express-validator");
+// const {check}= require('express-validator');
 
 // creating a router
-router.post("/auth/signup", validateUserSignup, userVlidation, signup);
-router.post("/auth/login", signin);
-
-// // const User = require('../models/userModel');
-
-// // // // const User = require('../models/userModel');
-// // const userRouter= express.Router();
+router.post("/signUp", validateUserSignup, userVlidation, signUp);
+router.post("/signIn", signIn);
+router.post("/emailExist", emailExist);
 
 module.exports = router; //exporting the module in order to use it in other files
 

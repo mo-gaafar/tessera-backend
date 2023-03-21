@@ -3,7 +3,7 @@ const { check, validationResult } = require("express-validator");
 // validating user data input on signup
 exports.validateUserSignup = [
   // name is required, containing only letters with specific number of characters
-  check("first_name")
+  check("firstName")
     .trim()
     .not()
     .isEmpty()
@@ -12,8 +12,7 @@ exports.validateUserSignup = [
     .withMessage("First Name must be within 3 to 20 char")
     .isAlpha()
     .withMessage("First Name should contain letters only"),
-
-  check("last_name")
+  check("lastName")
     .trim()
     .not()
     .isEmpty()
@@ -22,10 +21,7 @@ exports.validateUserSignup = [
     .withMessage("Last Name must be within 3 to 20 char")
     .isAlpha()
     .withMessage("Last Name should contain letters only"),
-
-  // email must have mail format
-  check("email").isEmail().withMessage("Please enter a valid email address"),
-
+  check("email").isEmail().withMessage("Please enter a valid email address"), // email must have mail format
   // password should be strong
   check("password")
     .trim()
