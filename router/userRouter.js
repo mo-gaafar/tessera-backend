@@ -2,7 +2,7 @@
 const express=require('express');
 const router=express.Router();
 const { validateUserSignup, userVlidation } = require('../middlewares/validation/user');
-const {signup,signin} =require("../controller/userController")
+const {signup,signin,forgotpassword,resetPassword} =require("../controller/userController")
 //validation
 // const check= require('express-validator').check
 const {check}= require('express-validator');
@@ -12,6 +12,10 @@ const {check}= require('express-validator');
 
 router.post('/signup',validateUserSignup,userVlidation ,signup);
 router.post('/signin',signin);
+//router.put('/auth/forgetPassword',);
+//router.post('/auth/forgetPassword',forgettingPassword);
+router.post('/auth/forgetPassword',forgotpassword)
+router.post('/auth/reset-password',resetPassword)
 
 //validation
 // router.post('/signup',check('first_name').not().isEmpty

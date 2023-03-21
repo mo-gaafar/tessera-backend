@@ -6,7 +6,7 @@ const mongoose= require ('mongoose');
 const usersRoutes= require('./router/userRouter');
 
 //old database
-mongoose.connect( 'mongodb+srv://mongodatabase2023:1h1jnygQ6c8mTGAS@cluster0.4l4dopm.mongodb.net/test', {
+mongoose.connect( 'mongodb+srv://tessera-dev:Dy2lSeN963pBHSOh@tessera-dev.ehydg.mongodb.net/?retryWrites=true&w=majority', {
 //   useFindAndModify:true,
 //   useCreateIndex:true,
 //   useNewUrlParser:true,
@@ -15,6 +15,7 @@ mongoose.connect( 'mongodb+srv://mongodatabase2023:1h1jnygQ6c8mTGAS@cluster0.4l4
 // //old database
 app.use(express.json()); 
 app.use("/api",usersRoutes)
+//console.log(process.env.emailUser)
 
 
 
