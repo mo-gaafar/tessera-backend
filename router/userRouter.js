@@ -1,19 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const {
-  validateUserSignup,
-  userVlidation,
-} = require("../middlewares/validation/user");
-const { signUp, signIn, emailExist } = require("../controller/userController"); // importing methods from controller
+const { check } = require("express-validator");
+const {validateUserSignup,userVlidation} = require("../middlewares/validation/user");
+const { signUp, signIn, emailExist,	forgotpassword,resetPassword } = require("../controller/userController"); // importing methods from controller
 //validation
-// const check= require('express-validator').check
-// const {check}= require('express-validator');
+
 
 // creating a router
 router.post("/auth/signup/", validateUserSignup, userVlidation, signUp);
-router.post("/signIn", signIn);
-router.post("/emailExist", emailExist);
+router.post("/auth/login", signIn);
+router.post("/auth/emailexist", emailExist);
+
+
+//validation
 
 module.exports = router; //exporting the module in order to use it in other files
 
-// // module.exports=userRouter;

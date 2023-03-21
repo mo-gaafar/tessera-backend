@@ -44,13 +44,19 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10); // encrypting password
 });
 
-userSchema.methods.comparePassword = async function (yourPassword) {
-  return await bcrypt.compare(yourPassword, this.password);
+UserSchema.methods.comparePassword = async function (yourPassword) {
+  //return await bcrypt.compare(yourPassword, this.password);
+
+  const pwd = securePassword();
+  const orginalPassword = Buffer.from(yourPassword);
+  //var Hashbuf = Buffer.from(this.password);
+  const hash = await pwd.hash(orginalPassword);
+
+  return await pwd.verify(orginalPassword, hash);
 };
 
-// generating user token
-userSchema.methods.GenerateToken = function () {
+UserSchema.methods.GenerateToken = function () {
   return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });
 };
 
-module.exports = mongoose.model("userModel", userSchema); //exporting module
+module.exports = mongoose.model("userModel", UserSchema);

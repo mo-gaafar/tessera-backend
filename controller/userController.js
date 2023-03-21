@@ -1,3 +1,9 @@
+const nodemailer = require("nodemailer");
+const randomstring = require("randomstring");
+const bcrypt = require("bcryptjs");
+const securePassword = require("secure-password");
+
+const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel");
 
@@ -70,7 +76,7 @@ exports.signIn = async (req, res, next) => {
 
     const isMatch = await user.comparePassword(password); // verifying password
     // password not mathced
-    if (!isMatch) {
+    if (isMatch == securePassword.INVALID) {
       return res.status(400).json({
         success: false,
         message: "Invalid Email or Password",
