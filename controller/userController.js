@@ -9,9 +9,10 @@ const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel")
 // const validationResult=
 
+// this function contains configurations for sending email function
 const sendResetPasswordMail =async(name,email,token)=>{
 
-    try {
+   
         const transporter = nodemailer.createTransport({
             host:'smtp.gmail.com',
             port:587,
@@ -43,9 +44,6 @@ const sendResetPasswordMail =async(name,email,token)=>{
             }
 
         });
-    } catch (error) {
-       // Response.status(400).send({success:false,msg:error.message});
-    }
 }
 
 
@@ -56,10 +54,6 @@ const DOMAIN = 'sandbox045c852723954a91bec45b6804631714.mailgun.org';
 const mg = mailgun({apiKey: process.env.MAILGUN_APIKEY, domain: DOMAIN});
 
 */
-
-async function hashPassword(plaintextPassword) {
-        const hash = await bcrypt.hash(plaintextPassword, 10);
-}
 exports.signup = async (req,res,next) =>{
     //validation
 
@@ -174,31 +168,31 @@ try {
 
 
 }
-
+// this function uses the userID to find the user who forgot password
 exports.resetPassword = async(req,res)=>{
     try {
         
-        // const token = req.query.token;
-        //const token = req.query.token;
+      
 
         //abdullah use_token here instead of email
         const email = req.body.email;
         const usrData = await userModel.findOne({email:email});
-        //console.log(req.query.token)
+      
         if(usrData)
         {
             const password = req.body.password;
 
             
 
-            //this.password= await bcrypt.hash(this.password, 10);
-            //const hashPassword = await bcrypt.hash(this.password, 10)
+           // password Encryption
             const pwd = securePassword();
             const userPassword = Buffer.from(password);
             const newPassword= await pwd.hash(userPassword);
             const hash = await pwd.hash(userPassword)
 
             const result = await pwd.verify(userPassword, hash)
+
+            //Test cases to make sure encrypted Password matches the original
   
             switch (result) {
                 case securePassword.INVALID_UNRECOGNIZED_HASH:
@@ -212,14 +206,9 @@ exports.resetPassword = async(req,res)=>{
             
                 break
             }
-            
-
-
-            
-
-
             console.log(result);
-            
+
+            // Updates the user Password in MongoDB database
             const UserDataa = await userModel.findByIdAndUpdate({_id:usrData._id},{$set:{password:newPassword,token:''}},{new:true});
             res.status(200).send({success:true,msg:"User password has been reset",data:UserDataa});
         }
@@ -233,7 +222,7 @@ exports.resetPassword = async(req,res)=>{
     }
 }
 
-
+// this function Sends an Reset Email to The user who wants to change Reset Password
 exports.forgotpassword = async(req,res)=> {
     try {
         const email = req.body.email;
@@ -241,11 +230,10 @@ exports.forgotpassword = async(req,res)=> {
         const userData = await userModel.findOne({email:email});
         if(userData)
         {
-            //name:userData.first_name
-            //console.log(name)
+            //Generate Random Token for User
             const randomString = randomstring.generate();
-            //console.log({id:userData._id});
-            //const data = await userModel.updateOne({email:email},{$set:{token:randomString}});
+
+            // sends the reset email to user
             sendResetPasswordMail(userData.first_name,email,randomString);
             res.status(200).send({success:true,msg:"please check your mail inbox and reset password"});
 
