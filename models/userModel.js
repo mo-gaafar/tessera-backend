@@ -39,23 +39,10 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
   }
-
-  //this.password = await bcrypt.hash(this.password, 10);
-  this.password = passwordEncryption(this.password);
+  this.password = await passwordEncryption(this.password);
 });
 
 //verify passsword
-
-userSchema.methods.comparePassword = async function (yourPassword) {
-  //return await bcrypt.compare(yourPassword, this.password);
-
-  const pwd = securePassword();
-  const orginalPassword = Buffer.from(yourPassword);
-  //var Hashbuf = Buffer.from(this.password);
-  const hash = await pwd.hash(orginalPassword);
-  // return hash;
-  return await pwd.verify(orginalPassword, hash);
-};
 
 userSchema.methods.GenerateToken = function () {
   return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });

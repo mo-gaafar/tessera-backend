@@ -1,36 +1,38 @@
-const securePassword = require("secure-password");
+// const securePassword = require("secure-password");
+const jwt = require("jsonwebtoken");
+const userModel = require("../models/userModel");
 
-async function passwordEncryption(password) {
+async function passwordEncryption(userPassword) {
   try {
-    const pwd = securePassword();
-
-    const orginalPassword = Buffer.from(password);
-
-    const hash = await pwd.hash(orginalPassword);
-
-    const encryptedMatch = await pwd.verify(orginalPassword, hash);
-
-    //Test cases to make sure encrypted Password matches the original
-
-    // switch (encryptedMatch) {
-    //   case securePassword.INVALID_UNRECOGNIZED_HASH:
-    //     return console.error(
-    //       "This hash was not made with secure-password. Attempt legacy algorithm"
-    //     );
-    //   case securePassword.INVALID:
-    //     return console.log("Invalid password");
-    //   case securePassword.VALID:
-    //     return console.log(encryptedMatch); //authenticated
-    //   case securePassword.VALID_NEEDS_REHASH:
-    //     console.log("Yay you made it, wait for us to improve your safety");
-
-    //     break;
-
-    return hash.toString("base64");
-    // }
+    // Generate verification token
+    const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
+    console.log("password = " + encryptedPassword);
+    // const password = jwt.verify(encryptedPassword, process.env.SECRETJWT);
+    // console.log("password = " + password);
+    return encryptedPassword;
   } catch (error) {
     console.log(error);
   }
 }
 
-module.exports = { passwordEncryption };
+async function comparePassword(userStoredPassword, userPassword) {
+  try {
+    const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
+    console.log("password stored = " + userStoredPassword);
+    // const user = await userModel.findOne({ email });
+
+    if (encryptedPassword == userStoredPassword) {
+      console.log("password = " + encryptedPassword);
+      // console.log("user password = " + user.password);
+      return true;
+    } else {
+      console.log("password = " + encryptedPassword);
+      // console.log("user password = " + user.password);
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { passwordEncryption, comparePassword };

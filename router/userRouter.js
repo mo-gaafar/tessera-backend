@@ -21,6 +21,7 @@ router.post("/auth/emailexist", emailExist);
 
 // password reset
 router.post("/auth/forgetPassword", forgotpassword);
-router.post("/auth/reset-password", resetPassword);
+//router.get("/auth/reset-password/:token", resetPassword); get request to redirect to a frontend link
+router.post("/auth/reset-password/:token", resetPassword);
 
 module.exports = router; //exporting the module in order to use it in other files

@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel");
 const { sendUserEmail, forgetPasswordOption } = require("../utils/sendEmail");
-const { passwordEncryption } = require("../utils/passwords");
+const { passwordEncryption, comparePassword } = require("../utils/passwords");
 /* 
 This function will create a new user in the database
 */
@@ -75,14 +75,15 @@ exports.signIn = async (req, res, next) => {
       });
     }
 
-    const isMatch = await user.comparePassword(password); // verifying password
+    const isMatched = await comparePassword(user.password, password);
     // password not mathced
-    if (isMatch == securePassword.INVALID) {
+    if (!isMatched) {
       return res.status(400).json({
         success: false,
         message: "Invalid Email or Password",
       });
     }
+
     const token = await user.GenerateToken(); //generate user token
 
     res.status(200).json({
@@ -134,6 +135,7 @@ exports.forgotpassword = async (req, res) => {
       });
 
       await sendUserEmail(email, token, forgetPasswordOption);
+
       res.status(200).send({
         success: true,
         msg: "please check your mail inbox and reset password",
@@ -156,6 +158,8 @@ exports.resetPassword = async (req, res) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.SECRETJWT);
 
+    console.log("decoded " + decoded);
+    console.log("decoded.userId " + decoded.userId);
     const user = await userModel.findById(decoded.userId);
 
     // const user = await userModel.findOne({ email: email });
@@ -173,7 +177,6 @@ exports.resetPassword = async (req, res) => {
       res.status(200).send({
         success: true,
         msg: "User password has been reset",
-        data: userSearchById,
       });
     } else {
       res.status(400).send({ success: true, msg: "this link is expired" });
