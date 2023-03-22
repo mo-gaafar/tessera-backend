@@ -1,12 +1,13 @@
-const nodemailer = require("nodemailer");
-const randomstring = require("randomstring");
-const bcrypt = require("bcryptjs");
+// const nodemailer = require("nodemailer");
+// const randomstring = require("randomstring");
+// const bcrypt = require("bcryptjs");
 const securePassword = require("secure-password");
 
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel");
-
+const { sendUserEmail, forgetPasswordOption } = require("../utils/sendEmail");
+const { passwordEncryption } = require("../utils/passwords");
 /* 
 This function will create a new user in the database
 */
@@ -117,4 +118,67 @@ exports.emailExist = async (req, res, next) => {
     res.status(200).json({
       success: true,
     });
+};
+
+// this function Sends an Reset Email to The user who wants to change Reset Password
+exports.forgotpassword = async (req, res) => {
+  try {
+    const email = req.body.email;
+
+    const user = await userModel.findOne({ email: email });
+
+    if (user) {
+      // Generate verification token for user
+      const token = jwt.sign({ userId: user._id }, process.env.SECRETJWT, {
+        expiresIn: "1d",
+      });
+
+      await sendUserEmail(email, token, forgetPasswordOption);
+      res.status(200).send({
+        success: true,
+        msg: "please check your mail inbox and reset password",
+      });
+    } else {
+      res.status(200).send({ success: true, msg: "this email doesnt exist" });
+    }
+  } catch (error) {
+    res.status(400).send({ success: false, msg: error.message });
+  }
+};
+
+// this function uses the userID to find the user who forgot password
+exports.resetPassword = async (req, res) => {
+  try {
+    //abdullah use_token here instead of email
+    // const email = req.body.email;
+    const token = req.params.token;
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.SECRETJWT);
+
+    const user = await userModel.findById(decoded.userId);
+
+    // const user = await userModel.findOne({ email: email });
+
+    if (user) {
+      const password = req.body.password;
+      // password Encryption
+      let encryptedPassword = await passwordEncryption(password);
+      // Updates the user Password in MongoDB database
+      const userSearchById = await userModel.findByIdAndUpdate(
+        { _id: user._id },
+        { $set: { password: encryptedPassword, token: "" } },
+        { new: true }
+      );
+      res.status(200).send({
+        success: true,
+        msg: "User password has been reset",
+        data: userSearchById,
+      });
+    } else {
+      res.status(400).send({ success: true, msg: "this link is expired" });
+    }
+  } catch (error) {
+    res.status(400).send({ success: false, msg: error.message });
+  }
 };

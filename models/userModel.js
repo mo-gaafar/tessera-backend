@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-// // const usersRoute = require('../router/userRouter');
-// const router=express.Router()
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const securePassword = require("secure-password");
+const { passwordEncryption } = require("../utils/passwords");
 
 // creating user schema with fields
 const userSchema = new mongoose.Schema(
@@ -35,28 +35,30 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// encrypting password before saving
 userSchema.pre("save", async function (next) {
-  // passing password to schema
   if (!this.isModified("password")) {
     next();
   }
-  this.password = await bcrypt.hash(this.password, 10); // encrypting password
+
+  //this.password = await bcrypt.hash(this.password, 10);
+  this.password = passwordEncryption(this.password);
 });
 
-UserSchema.methods.comparePassword = async function (yourPassword) {
+//verify passsword
+
+userSchema.methods.comparePassword = async function (yourPassword) {
   //return await bcrypt.compare(yourPassword, this.password);
 
   const pwd = securePassword();
   const orginalPassword = Buffer.from(yourPassword);
   //var Hashbuf = Buffer.from(this.password);
   const hash = await pwd.hash(orginalPassword);
-
+  // return hash;
   return await pwd.verify(orginalPassword, hash);
 };
 
-UserSchema.methods.GenerateToken = function () {
+userSchema.methods.GenerateToken = function () {
   return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });
 };
 
-module.exports = mongoose.model("userModel", UserSchema);
+module.exports = mongoose.model("userModel", userSchema);
