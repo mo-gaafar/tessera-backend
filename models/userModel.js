@@ -31,6 +31,10 @@ googleId:{ //newely added
     type: String,
     trim: true,
   },
+facebookId:{ //newely added
+    type: String,
+    trim: true,
+  }, 
 verified:{
     type: Boolean,
     default:false
