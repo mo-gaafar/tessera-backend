@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const securePassword = require("secure-password");
 const { passwordEncryption } = require("../utils/passwords");
 
 // creating user schema with fields
@@ -42,10 +40,10 @@ userSchema.pre("save", async function (next) {
   this.password = await passwordEncryption(this.password);
 });
 
-//verify passsword
+// //verify passsword
 
-userSchema.methods.GenerateToken = function () {
-  return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });
-};
+// userSchema.methods.GenerateToken = function () {
+//   return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });
+// };
 
 module.exports = mongoose.model("userModel", userSchema);
