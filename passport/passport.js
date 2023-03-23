@@ -3,7 +3,6 @@ const User = require("../models/userModel");
 const Token = require("../models/Token");
 const mongoose = require("mongoose");
 const session = require("express-session");
-// require('env-cmd')
 const generator = require("generate-password");
 
 const nodemailer = require("nodemailer");
@@ -25,7 +24,7 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 //Please be noted that no duplicate emails are allowed
 
 //configure passport so that we can authenticate user google login.
-module.exports = function (passport){ //commented just before trying facebook
+module.exports = function (passport){
 //generate password
 var newPassword = generator.generate({
   length: 10,
@@ -64,14 +63,10 @@ passport.use(
       //create new user using information retreived from facebook api
       const newUser = {
         facebookId: profile.id,
-        first_name: profile.displayName, //profile.name.givenName,
-        //last_name:profile.name.familyName,
-        // tag: profile.name.givenName + Math.floor(Math.random() *10000),
-        // "profileAvater.url": profile.photos[0].value,
-
+        first_name: profile.displayName,//first name as display name 
         verified: true,
         email: profile.emails[0].value,
-        password: newPassword, //. toString() added , remove if cause error
+        password: newPassword,
         social_media_user: true,
       };
 
@@ -84,7 +79,7 @@ passport.use(
             { _id: user._id.toString() },
             process.env.SECRET,
             {
-              expiresIn: "24h", // expires in 365 days
+              expiresIn: "24h",
             }
           );
           let newtoken = {
@@ -93,9 +88,9 @@ passport.use(
             ownerId: user._id,
             expiredAt: Date.now() + 86400000,
           };
-          //save this token along with usre id 
+          //save this token along with user id 
           newtoken = await Token.create(newtoken);
-          //    console.log("signing in user using facebook ")
+          console.log("Signing in user using facebook")
           done(null, user); //everything is done & return user information
         } else {
           //New user is created and user shall be redirected to the landing page
@@ -103,22 +98,8 @@ passport.use(
           console.log("here is your emailllllllll");
           console.log(user.email);
           SetPassword(user.email, newPassword); //set to user the new password
-          //   console.log("signing up user using facebook ")
+            console.log("signing up user using facebook ")
           done(null, user);
-          //     const token=jwt.sign({_id:user._id.toString()},process.env.SECRET,{
-
-          //         expiresIn: '24h' // expires in 365 days
-
-          //    })
-          //      // creates a new user if not found and gives him a unique password
-          //     let newtoken = {
-          //         token : token,
-          //         ownerId: user._id,
-          //         expiredAt: Date.now() + 86400000
-          //     }
-          //     newtoken = await Token.create(newtoken)
-
-          //user.generateAuthToken();
         }
       } catch (err) {
         //error
@@ -160,13 +141,10 @@ passport.use(
       //create new user using information retreived from facebook api
       const newUser = {
         googleId: profile.id,
-        first_name: profile.displayName,
-        // tag: profile.name.givenName + Math.floor(Math.random() *10000),
-        // "profileAvater.url": profile.photos[0].value,
-
+        first_name: profile.displayName,//first name as display name
         verified: true,
         email: profile.emails[0].value,
-        password: newPassword, //. toString() added , remove if cause error
+        password: newPassword,
         social_media_user: true,
       };
 
@@ -180,7 +158,7 @@ passport.use(
             { _id: user._id.toString() },
             process.env.SECRET,
             {
-              expiresIn: "24h", // expires in 365 days
+              expiresIn: "24h",
             }
           );
           let newtoken = {
@@ -199,22 +177,8 @@ passport.use(
           console.log("here is your emailllllllll");
           console.log(user.email);
           SetPassword(user.email, newPassword); //set to user the new password
-          // console.log("signing up user using google ")
+          console.log("signing up user using google ")
           done(null, user);
-          //     const token=jwt.sign({_id:user._id.toString()},process.env.SECRET,{
-
-          //         expiresIn: '24h' // expires in 365 days
-
-          //    })
-          //      // creates a new user if not found and gives him a unique password
-          //     let newtoken = {
-          //         token : token,
-          //         ownerId: user._id,
-          //         expiredAt: Date.now() + 86400000
-          //     }
-          //     newtoken = await Token.create(newtoken)
-
-          //user.generateAuthToken();
         }
       } catch (err) {
         //error
@@ -228,11 +192,7 @@ passport.serializeUser((user, done) => {
   //
   done(null, user.id);
 });
-//old
-// passport.deserializeUser((id,done)=>{//
-//      User.findById(id, (err,user)=> done(err,user))
-// })
-//new methode
+
 passport.deserializeUser((id, done) => {
   User.findById(id).then((user) => {
     done(null, user);

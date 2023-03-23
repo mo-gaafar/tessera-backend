@@ -1,7 +1,6 @@
-//////////////////////////////Start of 5 hrs tutorial
+
 require("dotenv").config();
 const mongoose = require("mongoose");
-
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -46,27 +45,11 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
-    // tag:{
-    //     type:String,
-    //     required:true,
-    //     unique:true
-    //  },
-
-    // profileAvater: {
-    //     url:{ type: String,
-    //     trim: true,
-    //     default:null},
-    //     cloudnaryId:{
-    //       type: String,
-    //     trim: true,
-    //     default:null
-    // }
-    // },
   },
   { timestamps: true }
 );
 
-// const User= mongoose.model('User',UserSchema);
+
 
 // encrypting password before saving
 UserSchema.pre("save", async function (next) {

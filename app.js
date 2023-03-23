@@ -1,12 +1,9 @@
 require("dotenv").config();
 const express = require("express");
-//////start of 5 hrs tutorial
-// const cookieSession=require("cookie-session")
 const session = require("express-session");
 const mongoose = require("mongoose");
 const userRouter = require("./router/userRouter");
 const cors = require("cors");
-// const cookieParser = require('cookie-parser')
 const passport = require("passport");
 require("./passport/passport");
 /////end of 5 hrs tutorial
@@ -18,14 +15,6 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-//////start of 5 hrs tutorial
-// app.use
-// app.use(session({
-//    secret:'expresssessionsecret',
-//    cookie:{
-//     samsite:'strict',
-//    }
-// }));
 /**
  * This is an express session middleware
  * create and manage a session middleware
@@ -38,25 +27,17 @@ app.use(
     secret: "glory to the king",
     resave: false,
     saveUninitialized: true,
-    // cookie: { secure: true }
   })
 );
 app.use(cors());
 app.use(express.json());
 //call user routes 
 app.use("/user", userRouter);
-// app.use(session(//if page is refreshed, user keep logged in
-//     {
-//         name:"session",
-//         keys:["lama"],
-//         maxAge:24*60*60*100,
-//     }
-// ))
+
 //passport module initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
-//   app.use(passport.authenticate('session'));
 /**
  * CORS allows the developer to have control over what requests the server will respond to:
  * request methods, headers and origins.In this case it is "GET,POST,PUT,DELET".
@@ -70,8 +51,6 @@ app.use(
     credentials: true,
   })
 );
-//Routes
-// app.use('/user', require('./router/userRouter'))
 
 //connect to mongoose
 async function connectDB() {
@@ -80,5 +59,7 @@ async function connectDB() {
     .then(() => console.log("DB Connected"))
     .catch((err) => console.log(err));
 }
-////calling function connect to databas using the connection string
+//calling function connect to databas using the connection string
 connectDB();
+const PORT = 3000;
+app.listen(PORT, () => console.log(`It's alive on http://localhost:${PORT}`));
