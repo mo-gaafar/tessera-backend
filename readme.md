@@ -66,3 +66,10 @@ Here are some of the features that helmet provides:
 - X-Content-Type-Options header: This header prevents browsers from trying to guess the MIME type of files and serves them as the correct MIME type.
 
 - Strict-Transport-Security header: This header forces the browser to always use HTTPS when communicating with your application, helping prevent man-in-the-middle attacks.
+
+# joi (javascript object validation)
+the most widely adopted package for object schema descriptions and validation
+Joi is a schema description language and data validator for JavaScript objects. It allows you to define schemas using a fluent API that is both powerful and easy to use. Joi is used to validate the request body, URL parameters, query parameters, headers, and cookies. 
+
+# nodemailer
+Nodemailer is a module for Node.js applications to allow easy as cake email sending. The project got started back in 2010 when there was no sane option to send email messages, today it is the solution most Node.js users turn to by default.

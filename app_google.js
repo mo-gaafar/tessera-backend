@@ -1,37 +1,20 @@
 require("dotenv").config();
-require("./passport/passport");
 const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const passport = require("passport");
 const session = require("express-session");
-
-//Import routes
-const usersRoutes = require("./router/userRouter");
-const verificationRoutes = require("./router/verificationRoutes");
-const userRouter = require("./router/userRouter");
-
+const mongoose = require("mongoose");
+const userRouter = require("./router/userRouter_google");
+const cors = require("cors");
+const passport = require("passport");
+require("./passport/passport");
+/////end of 5 hrs tutorial
 const app = express();
 const Token = require("./models/Token");
-//connect to mongoose (database)
-async function connectDB() {
-  mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("DB Connected"))
-  .catch((err) => console.log(err));
-}
-//calling function connect to databas using the connection string
-connectDB();
-
-
 
 // Define a route handler for the default home page
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// Add middleware
-app.use(express.json());
 /**
  * This is an express session middleware
  * create and manage a session middleware
@@ -46,9 +29,14 @@ app.use(
     saveUninitialized: true,
   })
 );
-
-// Enable CORS for all requests
 app.use(cors());
+app.use(express.json());
+//call user routes 
+app.use("/user", userRouter);
+
+//passport module initialization
+app.use(passport.initialize());
+app.use(passport.session());
 
 /**
  * CORS allows the developer to have control over what requests the server will respond to:
@@ -64,16 +52,14 @@ app.use(
   })
 );
 
-
-app.use("/api", usersRoutes); //to develop api
-app.use("/api", verificationRoutes);
-//call user routes 
-app.use("/user", userRouter);
-
-//passport module initialization
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Start the server on port 3000
+//connect to mongoose
+async function connectDB() {
+  mongoose
+    .connect(process.env.dbUrl)
+    .then(() => console.log("DB Connected"))
+    .catch((err) => console.log(err));
+}
+//calling function connect to databas using the connection string
+connectDB();
 const PORT = 3000;
-app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`It's alive on http://localhost:${PORT}`));

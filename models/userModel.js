@@ -19,15 +19,29 @@ const userSchema = new mongoose.Schema(
     },
     emailConfirmation: {
       type: String,
-      required: true,
+      //required:true,//check
     },
     password: {
       type: String,
       required: true,
     },
+    googleId: {
+      //newely added
+      type: String,
+      trim: true,
+    },
+    facebookId: {
+      //newely added
+      type: String,
+      trim: true,
+    },
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    socialMedia: {
+      type: Boolean,
+      required: true,
     },
   },
   { timestamps: true }
