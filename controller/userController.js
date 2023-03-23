@@ -17,14 +17,14 @@ exports.signUp = async (req, res, next) => {
 
   //email found
   if (userExist) {
-    return res.status(400).json({
+    return res.status(200).json({
       sucess: false,
       message: "Email already exists",
     });
   }
   // email does not match email confirmation entered
   if (email != emailConfirmation) {
-    return res.status(400).json({
+    return res.status(200).json({
       sucess: false,
       message: "Email address does not match the above",
     });
