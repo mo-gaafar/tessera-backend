@@ -3,6 +3,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const { sendUserEmail, verficationOption } = require("../utils/sendEmail");
+const { GenerateToken, verifyToken } = require("../utils/Tokens");
 
 async function sendVerification(req, res) {
   try {
@@ -20,14 +21,8 @@ async function sendVerification(req, res) {
     const token = jwt.sign({ userId: user._id }, process.env.SECRETJWT, {
       expiresIn: "1d",
     });
-    // console.log(token);
 
-    // // Save verification token to user
-    // user.verificationToken = token;
-    // await user.save();
-    // console.log(user.verificationToken);
-    console.log("user toke = " + user.verificationToken);
-    console.log("user id = " + user._id);
+    // Save verification token to user
     // Send verification email
     await sendUserEmail(email, token, verficationOption);
 

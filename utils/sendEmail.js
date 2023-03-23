@@ -1,5 +1,8 @@
 const nodemailer = require("nodemailer");
 
+/**
+ * create the transporter for gmail so that we can send email to user.
+ */
 async function sendUserEmail(email, token, option) {
   try {
     // Send verification email
@@ -13,11 +16,6 @@ async function sendUserEmail(email, token, option) {
     });
 
     let mailOptions = option(email, token);
-    // if (options == "verifications") {
-    //   mailOptions = verficationOption(email, token);
-    // } else if (options == "forgetPassword") {
-    //   mailOptions = forgetPasswordOption(email, token);
-    // }
 
     // Send email message
     await transporter.sendMail(mailOptions);
@@ -62,10 +60,3 @@ function forgetPasswordOption(email, token) {
 }
 
 module.exports = { sendUserEmail, verficationOption, forgetPasswordOption };
-
-// async function sendUserEmail(email, token, fn) {
-//   //logic
-//   mailOptions = fn(mail, token);
-// }
-
-// sendUserEmail(mail, token, verificationOption); // function call
