@@ -48,7 +48,8 @@ exports.signUp = async (req, res, next) => {
 
 /*
 This function will allow the user to sign in if they
-entered their email and password correctly and will
+entered their 
+and password correctly and will
 generate token to the user
 
 */
@@ -110,7 +111,7 @@ exports.emailExist = async (req, res, next) => {
 
   //email found
   if (userExist) {
-    return res.status(400).json({
+    return res.status(200).json({
       exist: true,
     });
   } else
