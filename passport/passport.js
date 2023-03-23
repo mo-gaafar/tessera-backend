@@ -25,7 +25,7 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 //Please be noted that no duplicate emails are allowed
 
 //configure passport so that we can authenticate user google login
-// module.exports = function (passport){ //commented just before trying facebook
+module.exports = function (passport){ //commented just before trying facebook
 //generate password
 var newPassword = generator.generate({
   length: 10,
@@ -239,7 +239,7 @@ passport.deserializeUser((id, done) => {
   });
 });
 
-// }
+}
 //Definition of SetPassword function & mail for user to receive password through it
 const SetPassword = async (email, newPassword) => {
   //delete any existing forgot password requests by the user
