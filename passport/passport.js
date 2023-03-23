@@ -1,5 +1,5 @@
 require("dotenv").config();
-const User = require("../models/userModel");
+const User = require("../models/userModel_google");
 const Token = require("../models/Token");
 const mongoose = require("mongoose");
 const session = require("express-session");
