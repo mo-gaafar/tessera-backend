@@ -1,13 +1,10 @@
-// const nodemailer = require("nodemailer");
-// const randomstring = require("randomstring");
-// const bcrypt = require("bcryptjs");
-const securePassword = require("secure-password");
-
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const userModel = require("../models/userModel");
 const { sendUserEmail, forgetPasswordOption } = require("../utils/sendEmail");
 const { passwordEncryption, comparePassword } = require("../utils/passwords");
+const { GenerateToken, verifyToken } = require("../utils/Tokens");
+
 /* 
 This function will create a new user in the database
 */
@@ -74,8 +71,9 @@ exports.signIn = async (req, res, next) => {
         message: "Invalid Email or Password",
       });
     }
-
+    // compare the given password with the encrypted password in the database
     const isMatched = await comparePassword(user.password, password);
+
     // password not mathced
     if (!isMatched) {
       return res.status(400).json({
@@ -84,7 +82,8 @@ exports.signIn = async (req, res, next) => {
       });
     }
 
-    const token = await user.GenerateToken(); //generate user token
+    const token = await GenerateToken(user._id); //generate user token
+    console.log(token);
 
     res.status(200).json({
       success: true,
@@ -112,12 +111,11 @@ exports.emailExist = async (req, res, next) => {
   //email found
   if (userExist) {
     return res.status(400).json({
-      sucess: false,
-      message: "Email already exists",
+      exist: true,
     });
   } else
     res.status(200).json({
-      success: true,
+      exist: false,
     });
 };
 
