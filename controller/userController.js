@@ -48,7 +48,8 @@ exports.signUp = async (req, res, next) => {
 
 /*
 This function will allow the user to sign in if they
-entered their email and password correctly and will
+entered their 
+and password correctly and will
 generate token to the user
 
 */
@@ -57,7 +58,7 @@ exports.signIn = async (req, res, next) => {
     const { email, password } = req.body; // getting email and password
     //prompting to user  if email or password are left blank
     if (!email || !password) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "Email and password are required",
       });
@@ -66,7 +67,7 @@ exports.signIn = async (req, res, next) => {
     const user = await userModel.findOne({ email }); // finding user email
     // user email not found
     if (!user) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "Invalid Email or Password",
       });
@@ -76,7 +77,7 @@ exports.signIn = async (req, res, next) => {
 
     // password not mathced
     if (!isMatched) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "Invalid Email or Password",
       });
@@ -110,7 +111,7 @@ exports.emailExist = async (req, res, next) => {
 
   //email found
   if (userExist) {
-    return res.status(400).json({
+    return res.status(200).json({
       exist: true,
     });
   } else
@@ -177,7 +178,7 @@ exports.resetPassword = async (req, res) => {
         msg: "User password has been reset",
       });
     } else {
-      res.status(400).send({ success: true, msg: "this link is expired" });
+      res.status(200).send({ success: true, msg: "this link is expired" });
     }
   } catch (error) {
     res.status(400).send({ success: false, msg: error.message });
