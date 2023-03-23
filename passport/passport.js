@@ -24,7 +24,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 //Please be noted that no duplicate emails are allowed
 
-//configure passport so that we can authenticate user google login
+//configure passport so that we can authenticate user google login.
 module.exports = function (passport){ //commented just before trying facebook
 //generate password
 var newPassword = generator.generate({
