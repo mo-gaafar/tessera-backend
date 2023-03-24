@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
-    "devStart": "nodemon server.js"
+    "devStart": "nodemon server.js",
+    "test": "jest --watchAll"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
     "secure-password": "^4.0.0"
   },
   "devDependencies": {
+    "jest": "^29.5.0",
     "nodemon": "^2.0.21"
   }
 }
