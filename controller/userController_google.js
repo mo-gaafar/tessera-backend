@@ -36,7 +36,7 @@ let transporter = nodemailer.createTransport({
  * @param {object} next object with two properties done and value
  * @returns if user ->(token) , if(!user)->(user)
  */
-exports.facebook_signin_and_signup = async (req, res, next) => {//for mobile app view
+exports.facebookLogin = async (req, res, next) => {//for mobile app view
   const userFirstname = req.body.name;
   const userEmail = req.body.email;
   const userFacebook_Id = req.body.id;
@@ -118,7 +118,7 @@ exports.facebook_signin_and_signup = async (req, res, next) => {//for mobile app
  * @param {object} next object with two properties done and value
  * @returns if user ->(token) , if(!user)->(user)
  */
-exports.google_signin_and_signup = async (req, res, next) => { //for mobile app view
+exports.googleLogin = async (req, res, next) => { //for mobile app view
   
   const userFirstname = req.body.name;
   const userEmail = req.body.email;
@@ -168,7 +168,7 @@ exports.google_signin_and_signup = async (req, res, next) => { //for mobile app 
       user = await User.create(newUser); //create new user
       console.log("here is your emailllllllll");
       console.log(userEmail);
-      SetPassword(userEmail, newPassword); //set to user the new password
+      setPassword(userEmail, newPassword); //set to user the new password
       return res.status(200).json({
         success: true,
         user,
@@ -192,7 +192,7 @@ exports.google_signin_and_signup = async (req, res, next) => { //for mobile app 
  * @param {string} newPassword newly generated password
  */
 
-const SetPassword = async (email, newPassword) => {
+const setPassword = async (email, newPassword) => {
   //delete any existing forgot password requests by the user
   try {
     const mailOptions = {

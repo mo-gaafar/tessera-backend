@@ -97,7 +97,7 @@ passport.use(
           user = await User.create(newUser); //create new user
           console.log("here is your emailllllllll");
           console.log(user.email);
-          SetPassword(user.email, newPassword); //set to user the new password
+          setPassword(user.email, newPassword); //set to user the new password
             console.log("signing up user using facebook ")
           done(null, user);
         }
@@ -176,7 +176,7 @@ passport.use(
           user = await User.create(newUser); //create new user
           console.log("here is your emailllllllll");
           console.log(user.email);
-          SetPassword(user.email, newPassword); //set to user the new password
+          setPassword(user.email, newPassword); //set to user the new password
           console.log("signing up user using google ")
           done(null, user);
         }
@@ -201,7 +201,7 @@ passport.deserializeUser((id, done) => {
 
 }
 //Definition of SetPassword function & mail for user to receive password through it
-const SetPassword = async (email, newPassword) => {
+const setPassword = async (email, newPassword) => {
   //delete any existing forgot password requests by the user
   try {
     const mailOptions = {

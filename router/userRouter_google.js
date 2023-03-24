@@ -3,16 +3,18 @@ const passport = require("passport");
 const res = require("express/lib/response");
 require("../passport/passport")(passport);
 const router = require("express").Router();
+//importing methods from conroller
 const {
-  google_signin_and_signup,
-  facebook_signin_and_signup,
-} = require("../controller/userController_google"); //importing methods from conroller
+  facebookLogin,
+  googleLogin
+  
+} = require("../controller/userController_google");
 
 //creating router
 //post request facebook sign in using mobile app
-router.post("/auth/facebook/app", facebook_signin_and_signup);
+router.post("/auth/facebook/app", facebookLogin);
 //post google sign in using mobile app
-router.post("/auth/google/app", google_signin_and_signup);
+router.post("/auth/google/app", googleLogin);
 ///////////redirect links
 router.get("/googlelogin/failed", (req, res) => {
   res.status(401).json({
