@@ -3,8 +3,8 @@ const User = require("../models/userModel");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const generator = require("generate-password");
-
 const nodemailer = require("nodemailer");
+const facebook = require('../controller/facebook')
 //create the transporter part so that we can send email
 let transporter = nodemailer.createTransport({
   service: "gmail", //service type
@@ -23,11 +23,6 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 
 //configure passport so that we can authenticate user google login.
 module.exports = function (passport) {
-  //generate password
-  var newPassword = generator.generate({
-    length: 10,
-    numbers: true,
-  });
   console.log("Ana gwa passport!!");
   //start of facebook function
   /**
@@ -56,39 +51,19 @@ module.exports = function (passport) {
         callbackURL: "http://localhost:3000/user/auth/facebook/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
-        console.log("Ana m3aya profile.email");
-        console.log(profile.emails[0].value);
         //create new user using information retreived from facebook api
-        const newUser = {
-          facebookId: profile.id,
-          firstName: profile.displayName, //first name as display name
-          isVerified: true,
-          email: profile.emails[0].value,
-          password: newPassword,
-          socialMedia: true,
-        };
 
         try {
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ facebookId: profile.id }); //find user by ID
           if (user) {
-            //generate token for the signed in user
-            const token = jwt.sign(
-              { _id: user._id.toString() },
-              process.env.SECRETJWT,
-              {
-                expiresIn: "24h",
-              }
-            );
-
+            //call sign in function 
+            facebook.signIn(user)
             console.log("Signing in user using facebook");
             done(null, user); //everything is done & return user information
           } else {
-            //New user is created and user shall be redirected to the landing page
-            user = await User.create(newUser); //create new user
-            console.log("here is your emailllllllll");
-            console.log(user.email);
-            SetPassword(user.email, newPassword); //set to user the new password
+            facebook.signUp(profile)
+      
             console.log("signing up user using facebook ");
             done(null, user);
           }
@@ -126,19 +101,7 @@ module.exports = function (passport) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: "http://localhost:3000/user/auth/google/callback",
       },
-      async (accessToken, refreshToken, profile, done) => {
-        console.log("Ana m3aya profile.email");
-        console.log(profile.emails[0].value);
-        //create new user using information retreived from facebook api
-        const newUser = {
-          googleId: profile.id,
-          firstName: profile.displayName, //first name as display name
-          isVerified: true,
-          email: profile.emails[0].value,
-          password: newPassword,
-          socialMedia: true,
-        };
-
+      async (accessToken, refreshToken, profile, done) => {       
         try {
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ googleId: profile.id }); //find user by ID
@@ -159,11 +122,7 @@ module.exports = function (passport) {
               token,
             });
           } else {
-            //New user is created and user shall be redirected to the landing page
-            user = await User.create(newUser); //create new user
-            console.log("here is your emailllllllll");
-            console.log(user.email);
-            SetPassword(user.email, newPassword); //set to user the new password
+            
             console.log("signing up user using google ");
             done(null, user);
           }
