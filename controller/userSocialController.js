@@ -3,6 +3,7 @@ const User = require("../models/userModel_google");
 const Token = require("../models/Token");
 const generator = require("generate-password");
 const jwt = require("jsonwebtoken");
+const mobileSocials = require('../controller/mobileSocials')
 const {
   sendUserEmail,
   verficationOption,
@@ -27,62 +28,20 @@ const {
  */
 exports.facebookLogin = async (req, res, next) => {
   //for mobile app view
-  const userFirstname = req.body.name;
-  const userEmail = req.body.email;
-  const userFacebook_Id = req.body.id;
-
-  console.log(userFirstname);
-  console.log(userEmail);
-  console.log(userFacebook_Id);
-
-  var newPassword = generator.generate({
-    length: 10,
-    numbers: true,
-  });
-  const newUser = {
-    facebookId: userFacebook_Id,
-    firstName: userFirstname,
-    isVerified: true,
-    email: userEmail,
-    password: newPassword,
-    socialMedia: true,
-  };
   try {
+    const SocialMediaType="facebook";
+    const userInfo=req.body;
     //checks if user exist first and if so, user shall be directed to landing page
     let user = await User.findOne({
       facebookId: userFacebook_Id,
       email: userEmail,
     });
     if (user) {
-      //generate token for the signed in user
-      const token = jwt.sign(
-        { _id: user._id.toString() },
-        process.env.SECRETJWT,
-        {
-          expiresIn: "24h",
-        }
-      );
-
-      return res.status(200).json({
-        success: true,
-        token,
-        //user
-      });
+      mobileSocials.signIn(user);
     }
     if (!user) {
-      //New user is created and user shall be redirected to the landing page
-      user = await User.create(newUser); //create new user
-
-      console.log("here is your email");
-      console.log(userEmail);
-
-      // setPassword(userEmail, newPassword); //set to user the new password
-      await sendUserEmail(userEmail, newPassword, sendSocialPassword);
-
-      return res.status(200).json({
-        success: true,
-        user,
-      });
+      mobileSocials.signUp(userInfo,SocialMediaType);
+      console.log("signing up user using google ");
     }
   } catch (err) {
     //error
@@ -112,59 +71,21 @@ exports.facebookLogin = async (req, res, next) => {
  * @returns if user ->(token) , if(!user)->(user)
  */
 exports.googleLogin = async (req, res, next) => {
-  //for mobile app view
-
-  const userFirstname = req.body.name;
-  const userEmail = req.body.email;
-  const userGoogle_Id = req.body.id;
-
-  console.log(userFirstname);
-  console.log(userEmail);
-  console.log(userGoogle_Id);
-
-  var newPassword = generator.generate({
-    length: 10,
-    numbers: true,
-  });
-
-  const newUser = {
-    googleId: userGoogle_Id,
-    firstName: userFirstname,
-    isVerified: true,
-    email: userEmail,
-    password: newPassword,
-    socialMedia: true,
-  };
+  //for mobile app view  
   try {
+    const SocialMediaType="google";
+    const userInfo=req.body;
     //New user is created and user shall be redirected to the landing page
     let user = await User.findOne({
       googleId: userGoogle_Id,
       email: userEmail,
     });
     if (user) {
-      //generate token for the signed in user
-      const token = jwt.sign({ _id: user._id.toString() }, process.env.SECRET, {
-        expiresIn: "24h",
-      });
-
-      return res.status(200).json({
-        success: true,
-        token,
-        //user
-      });
+      mobileSocials.signIn(user)
     }
     if (!user) {
-      //New user is created and user shall be directed to sign in
-      user = await User.create(newUser); //create new user
-      console.log("here is your email");
-      console.log(userEmail);
-      // setPassword(userEmail, newPassword); //set to user the new password
-      await sendUserEmail(userEmail, newPassword, sendSocialPassword);
-
-      return res.status(200).json({
-        success: true,
-        user,
-      });
+      mobileSocials.signUp(userInfo,SocialMediaType);
+      console.log("signing up user using google ");
     }
   } catch (err) {
     //error

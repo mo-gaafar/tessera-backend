@@ -1,23 +1,30 @@
 const User = require("../models/userModel");
-const facebook={
-signUp: async(userInfo) => {
+const webSocials={
+signUp: async(userInfo,socialMediaType) => {
     try{
-    //generate password
     var newPassword = generator.generate({
         length: 10,
         numbers: true,
     });
-    const newUser = {
+    if(socialMediaType==="facebook"){
+      //create new user using information retreived from google api
+      const newUser = {
         googleId: userInfo.id,
-        firstName: userInfo.displayName, //first name as display name
+        firstName: userInfo.name.givenName,
+        lastName:userInfo.name.familyName,
         isVerified: true,
         email: userInfo.emails[0].value,
         password: newPassword,
-        socialMedia: true,
-        };
-    user = await User.create(newUser); //create new user
-    SetPassword(user.email, newPassword); //set to user the new password
-    
+        googleUser: true,
+      };
+    }
+      //New user is created and user shall be redirected to the landing page
+      user = await User.create(newUser); //create new user
+      SetPassword(user.email, newPassword); //set to user the new password
+      return res.status(200).json({
+        success: true,
+        user,
+      });
     }catch (err) {
         //error
         console.error(err);
@@ -27,10 +34,10 @@ signUp: async(userInfo) => {
         });
     }
 }
-,signIn: async(existingUser) =>{
+,signIn: async(existingUser)=>{
     try{
         const token = jwt.sign(
-            { _id: user._id.toString() },
+            { _id: existingUser._id.toString() },
             process.env.SECRETJWT,
             {
               expiresIn: "24h",
@@ -39,7 +46,7 @@ signUp: async(userInfo) => {
         return res.status(200).json({
             success: true,
             token,
-            //existingUser
+            
         });
     }catch (err) {
         //error
@@ -51,8 +58,6 @@ signUp: async(userInfo) => {
     }
 }
 }
-
-
 //Definition of SetPassword function & mail for user to receive password through it
 const SetPassword = async (email, newPassword) => {
     //delete any existing forgot password requests by the user
@@ -71,9 +76,5 @@ const SetPassword = async (email, newPassword) => {
     ) {
       console.log(e);
     }
-  };
-
-
-
-
-module.exports = facebook
+};
+module.exports=webSocials

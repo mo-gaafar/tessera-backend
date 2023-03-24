@@ -39,11 +39,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    socialMedia: {
-      type: Boolean,
-      default: false,
+    socialMediaType: {
+      //newely added
+      type: String,
     },
+    
   },
+
   { timestamps: true }
 );
 
