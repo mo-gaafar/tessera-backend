@@ -59,4 +59,23 @@ function forgetPasswordOption(email, token) {
   return mailOptions;
 }
 
-module.exports = { sendUserEmail, verficationOption, forgetPasswordOption };
+function sendSocialPassword(email, newPassword) {
+  const mailOptions = {
+    from: process.env.EMAIL_ADDRESS, //sender
+    to: email, //receiver
+    subject: "Arriving from Google ? ",
+    // text: `Your generarted password is : ${newPassword}`,
+    html: `
+    <p style="font-size: 20px;">Hello! </p>
+    <p style="font-size: 20px;">Your generarted password is : ${newPassword}</p>
+    <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera"> `,
+  };
+  return mailOptions;
+}
+
+module.exports = {
+  sendUserEmail,
+  verficationOption,
+  forgetPasswordOption,
+  sendSocialPassword,
+};

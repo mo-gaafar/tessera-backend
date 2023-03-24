@@ -72,6 +72,13 @@ exports.signIn = async (req, res, next) => {
         message: "Invalid Email or Password",
       });
     }
+    // check whether the user is verified or NO
+    if (!user.isVerified) {
+      return res.status(200).json({
+        success: false,
+        message: "Please verify your email address",
+      });
+    }
     // compare the given password with the encrypted password in the database
     const isMatched = await comparePassword(user.password, password);
 

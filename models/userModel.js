@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: true,
+      // required: true,
     },
     email: {
       type: String,
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
     },
     socialMedia: {
       type: Boolean,
-      required: true,
+      default: false,
     },
   },
   { timestamps: true }

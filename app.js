@@ -12,18 +12,15 @@ const verificationRoutes = require("./router/verificationRoutes");
 const userRouter = require("./router/userRouter");
 
 const app = express();
-const Token = require("./models/Token");
 //connect to mongoose (database)
 async function connectDB() {
   mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("DB Connected"))
-  .catch((err) => console.log(err));
+    .connect(process.env.MONGODB_URI)
+    .then(() => console.log("DB Connected"))
+    .catch((err) => console.log(err));
 }
-//calling function connect to databas using the connection string
+//calling function connect to database using the connection string
 connectDB();
-
-
 
 // Define a route handler for the default home page
 app.get("/", (req, res) => {
@@ -35,8 +32,8 @@ app.use(express.json());
 /**
  * This is an express session middleware
  * create and manage a session middleware
- * A session will contain some unique data about that client 
- * to allow the server to keep track of the user’s state using session unique id 
+ * A session will contain some unique data about that client
+ * to allow the server to keep track of the user’s state using session unique id
  * In session-based authentication, the user’s state is stored in the server’s memory or a database.
  */
 app.use(
@@ -64,10 +61,9 @@ app.use(
   })
 );
 
-
 app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);
-//call user routes 
+//call user routes
 app.use("/user", userRouter);
 
 //passport module initialization
