@@ -18,7 +18,7 @@ let transporter = nodemailer.createTransport({
   },
 });
 const jwt = require("jsonwebtoken");
-const { v4: uuidv4 } = require("uuid");
+//const { v4: uuidv4 } = require("uuid");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 //Please be noted that no duplicate emails are allowed

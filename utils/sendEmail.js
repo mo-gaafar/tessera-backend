@@ -20,7 +20,7 @@ async function sendUserEmail(email, token, option) {
     // Send email message
     await transporter.sendMail(mailOptions);
 
-    console.log(`Email verification sent to ${email}`);
+     console.log(`Email verification sent to ${email}`);
   } catch (err) {
     console.error(err);
   }
