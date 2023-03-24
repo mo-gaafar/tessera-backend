@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      // required: true,
+      required: true,
     },
     email: {
       type: String,
@@ -19,21 +19,11 @@ const userSchema = new mongoose.Schema(
     },
     emailConfirmation: {
       type: String,
-      //required:true,//check
+      required: true,
     },
     password: {
       type: String,
       required: true,
-    },
-    googleId: {
-      //newely added
-      type: String,
-      trim: true,
-    },
-    facebookId: {
-      //newely added
-      type: String,
-      trim: true,
     },
     isVerified: {
       type: Boolean,
