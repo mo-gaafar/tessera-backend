@@ -2,11 +2,7 @@
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const {
-  sendUserEmail,
-  verficationOption,
-  sendSocialPassword,
-} = require("../utils/sendEmail");
+const { sendUserEmail, verficationOption } = require("../utils/sendEmail");
 const { GenerateToken, verifyToken } = require("../utils/Tokens");
 
 async function sendVerification(req, res) {
@@ -30,12 +26,10 @@ async function sendVerification(req, res) {
     // Send verification email
     await sendUserEmail(email, token, verficationOption);
 
-    res.json({ success: "true", message: "Verification email sent" });
+    res.json({ message: "Verification email sent" });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ success: "false", message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -66,6 +60,11 @@ async function verifyEmail(req, res) {
         .status(400)
         .json({ message: "User has already been verified" });
     }
+
+    // Verify token matches user's verification token
+    // if (user.verificationToken !== token) {
+    //   return res.status(400).json({ message: "Invalid verification token" });
+    // }
 
     // Set user as verified and clear verification token
     console.log("hiiiii");
