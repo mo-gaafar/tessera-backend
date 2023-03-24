@@ -72,6 +72,13 @@ exports.signIn = async (req, res, next) => {
         message: "Invalid Email or Password",
       });
     }
+    // check whether the user is verified or NO
+    if (!user.isVerified) {
+      return res.status(200).json({
+        success: false,
+        message: "Please verify your email address",
+      });
+    }
     // compare the given password with the encrypted password in the database
     const isMatched = await comparePassword(user.password, password);
 
@@ -119,8 +126,22 @@ exports.emailExist = async (req, res, next) => {
       exist: false,
     });
 };
+/**
 
-// this function Sends an Reset Email to The user who wants to change Reset Password
+Send a reset password email to the user's email address.
+
+@async
+
+@function
+
+@param {Object} req - The request object.
+
+@param {Object} res - The response object.
+
+@throws {Object} Throws an error if the user email doesn't exist or if there's a server error.
+
+@returns {void}
+*/
 exports.forgotpassword = async (req, res) => {
   try {
     const email = req.body.email;
@@ -147,7 +168,18 @@ exports.forgotpassword = async (req, res) => {
   }
 };
 
-// this function uses the userID to find the user who forgot password
+/**
+
+Resets user password using a token
+
+@param {Object} req - Express request object
+
+@param {Object} res - Express response object
+
+@returns {Object} - Response object with success and message properties
+
+@throws {Error} - If there's an error verifying the token or updating the user's password
+*/
 exports.resetPassword = async (req, res) => {
   try {
     //abdullah use_token here instead of email

@@ -15,6 +15,12 @@ async function passwordEncryption(userPassword) {
   }
 }
 
+/**
+ *
+ * @param {*} userStoredPassword
+ * @param {*} userPassword
+ * @returns
+ */
 async function comparePassword(userStoredPassword, userPassword) {
   try {
     const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
