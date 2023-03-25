@@ -11,7 +11,7 @@ This function will create a new user in the database
 exports.signUp = async (req, res, next) => {
   //getting user email
   const { email } = req.body;
-  const { emailConfirmation } = req.body; 
+  const { emailConfirmation } = req.body;
 
   const userExist = await userModel.findOne({ email }); // checking if email already exists
 
