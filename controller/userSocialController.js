@@ -117,22 +117,4 @@ exports.googleLogin = async (req, res, next) => {
  * @param {string} newPassword newly generated password
  */
 
-const setPassword = async (email, newPassword) => {
-  //delete any existing forgot password requests by the user
-  try {
-    const mailOptions = {
-      //mail information
-      from: process.env.AUTH_EMAIL, //sender
-      to: email, //receiver
-      subject: "Arriving from Google ? ",
-      text: `Your generarted password is : ${newPassword}`,
-    };
 
-    await transporter.sendMail(mailOptions); //send mail
-  } catch (
-    e //error
-  ) {
-    console.log(e);
-    
-  }
-};

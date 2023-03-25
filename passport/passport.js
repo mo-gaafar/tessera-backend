@@ -4,19 +4,9 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const generator = require("generate-password");
 const nodemailer = require("nodemailer");
-const facebook = require('../controller/facebook')
+// const facebook = require('../controller/facebook')
 const webSocials = require("../controller/webSocials");
-//create the transporter part so that we can send email
-let transporter = nodemailer.createTransport({
-  service: "gmail", //service type
-  host: process.env.LOCAL_HOST,
-  secure: false,
-  auth: {
-    //sender gmail information
-    user: process.env.AUTH_EMAIL,
-    pass: process.env.EMAIL_TEST_APP_PSWD,
-  },
-});
+
 const jwt = require("jsonwebtoken");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
@@ -47,7 +37,7 @@ module.exports = function (passport) {
       {
         clientID: process.env.FACEBOOK_CLIENT_ID,
         clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/user/auth/facebook/callback",
+        callbackURL: process.env.BASE_URL+"/auth/facebook/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
         //create new user using information retreived from facebook api
@@ -99,7 +89,7 @@ module.exports = function (passport) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/user/auth/google/callback",
+        callbackURL: process.env.BASE_URL+"/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {       
         try {
@@ -134,22 +124,4 @@ module.exports = function (passport) {
     });
   });
 };
-//Definition of SetPassword function & mail for user to receive password through it
-const SetPassword = async (email, newPassword) => {
-  //delete any existing forgot password requests by the user
-  try {
-    const mailOptions = {
-      //mail information
-      from: process.env.AUTH_EMAIL, //sender
-      to: email, //receiver
-      subject: "Arriving from Google ? ",
-      text: `Your generarted password is : ${newPassword}`,
-    };
 
-    await transporter.sendMail(mailOptions); //send mail
-  } catch (
-    e //error
-  ) {
-    console.log(e);
-  }
-};

@@ -38,11 +38,21 @@ signUp: async(userInfo,socialMediaType,res) => {
         
         //New user is created and user shall be directed to sign in
         user = await User.create(newUser); //create new user
+        //generate token for the signed in user
+        const token = jwt.sign(
+            { _id: user._id.toString() },
+            process.env.SECRETJWT,
+            {
+              expiresIn: "24h",
+            }
+        );
         // setPassword(userEmail, newPassword); //set to user the new password
         await sendUserEmail(userEmail, newPassword, sendSocialPassword);
         return res.status(200).json({
             success: true,
             user,
+            token
+            
         });
         
         

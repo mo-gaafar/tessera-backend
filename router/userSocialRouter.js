@@ -1,6 +1,10 @@
 require("dotenv").config();
 const passport = require("passport");
 const res = require("express/lib/response");
+
+const {
+  redirectingFromSocial
+} = require("../controller/authUser");
 require("../passport/passport")(passport);
 const router = require("express").Router();
 const {
@@ -63,9 +67,12 @@ router.get(
 router.get(
   "/auth/facebook/callback",
   passport.authenticate("facebook", {
-    failureMessage: "Failed",
-    successRedirect: process.env.BASE_URL,
+    // failureMessage: "Failed",
+    // successRedirect:process.env.BASE_URL,
+    session:false
   })
+  ,redirectingFromSocial
+  
 );
 //get request for google login for web
 router.get(
@@ -76,13 +83,18 @@ router.get(
     res.send({ title: "User logging in" });
   }
 );
+
+
 //redirect to landing page
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureMessage: "Failed",
-    successRedirect: process.env.BASE_URL,
+    // failureRedirect:process.env.BASE_URL+"/googlelogin/failed",
+    // successRedirect: process.env.BASE_URL+"/googlelogin/success",
+    session:false
   })
+  ,redirectingFromSocial
+
 );
 
 module.exports = router;

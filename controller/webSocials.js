@@ -28,12 +28,12 @@ signUp: async(userInfo,socialMediaType) => {
     }
     else if(newUser.userType==="facebook"){
       //create new user using information retreived from google api
-     
+        await sendUserEmail(user.email, newPassword, sendSocialPassword);
         newUser.facebookId=userInfo.id
     }
       //New user is created and user shall be redirected to the landing page
       const user = await User.create(newUser); //create new user
-      SetPassword(user.email, newPassword); //set to user the new password
+      await sendUserEmail(user.email, newPassword, sendSocialPassword);
     }catch (err) {
         //error
         console.error(err);
@@ -52,7 +52,7 @@ signUp: async(userInfo,socialMediaType) => {
     }catch (err) {
         //error
         console.error(err);
-    }
+  }
 }
 }
 //Definition of SetPassword function & mail for user to receive password through it
