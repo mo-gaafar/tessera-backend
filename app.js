@@ -9,7 +9,7 @@ const session = require("express-session");
 //Import routes
 const usersRoutes = require("./router/userRouter");
 const verificationRoutes = require("./router/verificationRoutes");
-const userRouter = require("./router/userRouter");
+const userSocialRouter = require("./router/userSocialRouter");
 
 const app = express();
 //connect to mongoose (database)
@@ -64,7 +64,7 @@ app.use(
 app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);
 //call user routes
-app.use("/user", userRouter);
+app.use("/api", userSocialRouter);
 
 //passport module initialization
 app.use(passport.initialize());

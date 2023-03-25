@@ -5,6 +5,7 @@ const session = require("express-session");
 const generator = require("generate-password");
 const nodemailer = require("nodemailer");
 const facebook = require('../controller/facebook')
+const webSocials = require("../controller/webSocials");
 //create the transporter part so that we can send email
 let transporter = nodemailer.createTransport({
   service: "gmail", //service type
@@ -23,7 +24,6 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 
 //configure passport so that we can authenticate user google login.
 module.exports = function (passport) {
-  console.log("Ana gwa passport!!");
   //start of facebook function
   /**
    * this fucntion configures and registers the FacebookStrategy and a window shall open upon get request
@@ -35,7 +35,6 @@ module.exports = function (passport) {
    * then user shall be created inside database and also given as an option a password that user shall receive using their email
    * using the function we created called setpassword(email,newpassword)
    * and for that user can sign in directly through the app using email and password(OPTIONAL)
-   *
    * (About the function features):FacebookStrategy constructor must include a clientID and clientSecret,
    *  the values of which are set to the app ID and secret that were obtained
    *  when registering your application. Also a callbackURL will redirect users
@@ -54,6 +53,7 @@ module.exports = function (passport) {
         //create new user using information retreived from facebook api
 
         try {
+          const socialMediaType="facebook";
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ facebookId: profile.id }); //find user by ID
           if (user) {
@@ -62,7 +62,7 @@ module.exports = function (passport) {
             console.log("Signing in user using facebook");
             done(null, user); //everything is done & return user information
           } else {
-            facebook.signUp(profile)
+            facebook.signUp(profile,socialMediaType)
       
             console.log("signing up user using facebook ");
             done(null, user);
@@ -103,26 +103,15 @@ module.exports = function (passport) {
       },
       async (accessToken, refreshToken, profile, done) => {       
         try {
+          const socialMediaType="google";
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ googleId: profile.id }); //find user by ID
           if (user) {
-            // console.log("signing in user using google ")
-            //generate token for the signed in user
-            const token = jwt.sign(
-              { _id: user._id.toString() },
-              process.env.SECRET,
-              {
-                expiresIn: "24h",
-              }
-            );
+            webSocials.signIn(user);
+            console.log("signing in user using google");
             done(null, user); //everything is done & return user information
-
-            return res.status(200).json({
-              success: true,
-              token,
-            });
           } else {
-            
+            webSocials.signUp(profile,socialMediaType);
             console.log("signing up user using google ");
             done(null, user);
           }

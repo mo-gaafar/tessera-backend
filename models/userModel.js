@@ -39,9 +39,9 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    socialMedia: {
-      type: Boolean,
-      default: false,
+    userType: {
+      type: String,
+      default: "normal",
     },
   },
   { timestamps: true }
