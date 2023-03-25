@@ -224,7 +224,7 @@ async function forgotPassword(req, res) {
       // Return success message
       res.status(200).send({
         success: true,
-        msg: "please check your mail inbox and reset password",
+        message: "please check your mail inbox and reset password",
       });
     } else {
       // Return error message if email is not found
@@ -275,7 +275,7 @@ async function resetPassword(req, res) {
 
       res.status(200).send({
         success: true,
-        msg: "User password has been reset",
+        message: "User password has been reset",
       });
     } else {
       // If the user is not found by ID, the token is expired
