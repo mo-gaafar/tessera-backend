@@ -134,9 +134,9 @@ Send a reset password email to the user's email address.
 
 @function
 
-@param {Object} req - The request object.
+@param {Object} req - The request object --> contains email and password
 
-@param {Object} res - The response object.
+@param {Object} res - The response object. --> success if user's email found and email sent
 
 @throws {Object} Throws an error if the user email doesn't exist or if there's a server error.
 
@@ -172,9 +172,9 @@ exports.forgotpassword = async (req, res) => {
 
 Resets user password using a token
 
-@param {Object} req - Express request object
+@param {Object} req - Express request object --> contains user's new password 
 
-@param {Object} res - Express response object
+@param {Object} res - Express response object -->  contains 'success' if user's password has been reset
 
 @returns {Object} - Response object with success and message properties
 
@@ -182,7 +182,6 @@ Resets user password using a token
 */
 exports.resetPassword = async (req, res) => {
   try {
-    //abdullah use_token here instead of email
     // const email = req.body.email;
     const token = req.params.token;
 
