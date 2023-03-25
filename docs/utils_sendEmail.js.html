@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/sendEmail.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/sendEmail.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const nodemailer = require("nodemailer");
+
+/**
+ * Sends a verification email to a user
+ *
+ * @async
+ * @function sendUserEmail
+ * @param {string} email - The email address of the user to send the email to
+ * @param {string} token - The verification token to include in the email
+ * @param {Function} option - The function to generate the email options
+ * @returns {object}  - return the user's email if the email sent
+ * @throws {Error} If an error occurs while sending the email
+ */
+async function sendUserEmail(email, token, option) {
+  try {
+    // Send verification email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    let mailOptions = option(email, token);
+
+    // Send email message
+    await transporter.sendMail(mailOptions);
+
+    console.log(`Email sent to ${email}`);
+  } catch (err) {
+    console.error(err);
+    throw new Error("Error sending email");
+  }
+}
+
+function verficationOption(email, token) {
+  const mailOptions = {
+    from: process.env.EMAIL_ADDRESS,
+    to: email,
+    subject: "Please verify your email address",
+    html: `
+      &lt;p style="font-size: 20px;">Hello! &lt;/p>
+      &lt;p style="font-size: 20px;">Please click the button below to verify your email address:&lt;/p>
+      &lt;button style="background-color: #F05537; color: white; padding: 10px 20px; border: none; border-radius: 4px;">
+      &lt;a href="${process.env.BASE_URL}/auth/isverify/${token}" style="text-decoration: none; color: inherit;">Verify Email&lt;/a>
+        &lt;/button>
+        &lt;img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera"> `,
+  };
+
+  return mailOptions;
+}
+
+function forgetPasswordOption(email, token) {
+  const mailOptions = {
+    from: process.env.EMAIL_ADDRESS,
+    to: email,
+    subject: "Please verify your email address",
+    html: `
+      &lt;p style="font-size: 20px;">Hello! &lt;/p>
+      &lt;p style="font-size: 20px;">Please click the button below to reset your password:&lt;/p>
+      &lt;button style="background-color: #F05537; color: white; padding: 10px 20px; border: none; border-radius: 4px;">
+      &lt;a href="${process.env.BASE_URL}/auth/reset-password/${token}" style="text-decoration: none; color: inherit;">Reset Password&lt;/a>
+        &lt;/button>
+        &lt;img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera"> `,
+  };
+  return mailOptions;
+}
+
+function sendSocialPassword(email, newPassword) {
+  const mailOptions = {
+    from: process.env.EMAIL_ADDRESS, //sender
+    to: email, //receiver
+    subject: "Arriving from Google ? ",
+    // text: `Your generarted password is : ${newPassword}`,
+    html: `
+    &lt;p style="font-size: 20px;">Hello! &lt;/p>
+    &lt;p style="font-size: 20px;">Your generarted password is : ${newPassword}&lt;/p>
+    &lt;img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera"> `,
+  };
+  return mailOptions;
+}
+
+module.exports = {
+  sendUserEmail,
+  verficationOption,
+  forgetPasswordOption,
+  sendSocialPassword,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#GenerateToken">GenerateToken</a></li><li><a href="global.html#comparePassword">comparePassword</a></li><li><a href="global.html#emailExist">emailExist</a></li><li><a href="global.html#facebookLogin">facebookLogin</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#googleLogin">googleLogin</a></li><li><a href="global.html#passwordEncryption">passwordEncryption</a></li><li><a href="global.html#resendEmailVerification">resendEmailVerification</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#sendUserEmail">sendUserEmail</a></li><li><a href="global.html#sendVerification">sendVerification</a></li><li><a href="global.html#setPassword">setPassword</a></li><li><a href="global.html#signIn">signIn</a></li><li><a href="global.html#signUp">signUp</a></li><li><a href="global.html#verifyEmail">verifyEmail</a></li><li><a href="global.html#verifyToken">verifyToken</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sat Mar 25 2023 20:57:46 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
