@@ -72,4 +72,6 @@ app.use(passport.session());
 
 // Start the server on port 3000
 const PORT = 3000;
-app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+const server=app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+// app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+module.exports=server;
