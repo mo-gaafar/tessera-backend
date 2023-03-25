@@ -1,14 +1,21 @@
 const nodemailer = require("nodemailer");
 
 /**
- * create the transporter for gmail so that we can send email to user.
+ * Sends a verification email to a user
+ *
+ * @async
+ * @function sendUserEmail
+ * @param {string} email - The email address of the user to send the email to
+ * @param {string} token - The verification token to include in the email
+ * @param {Function} option - The function to generate the email options
+ * @returns {object}  - return the user's email if the email sent
+ * @throws {Error} If an error occurs while sending the email
  */
 async function sendUserEmail(email, token, option) {
   try {
     // Send verification email
     const transporter = nodemailer.createTransport({
       service: "gmail",
-
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -20,9 +27,10 @@ async function sendUserEmail(email, token, option) {
     // Send email message
     await transporter.sendMail(mailOptions);
 
-     console.log(`Email verification sent to ${email}`);
+    console.log(`Email sent to ${email}`);
   } catch (err) {
     console.error(err);
+    throw new Error("Error sending email");
   }
 }
 
