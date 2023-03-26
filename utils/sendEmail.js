@@ -36,7 +36,7 @@ async function sendUserEmail(email, token, option) {
 
 function verficationOption(email, token) {
   const mailOptions = {
-    from: process.env.EMAIL_ADDRESS,
+    from: process.env.EMAIL_USER,
     to: email,
     subject: "Please verify your email address",
     html: `
@@ -53,7 +53,7 @@ function verficationOption(email, token) {
 
 function forgetPasswordOption(email, token) {
   const mailOptions = {
-    from: process.env.EMAIL_ADDRESS,
+    from: process.env.EMAIL_USER,
     to: email,
     subject: "Please verify your email address",
     html: `
@@ -69,7 +69,7 @@ function forgetPasswordOption(email, token) {
 
 function sendSocialPassword(email, newPassword) {
   const mailOptions = {
-    from: process.env.EMAIL_ADDRESS, //sender
+    from: process.env.EMAIL_USER, //sender
     to: email, //receiver
     subject: "Arriving from Google ? ",
     // text: `Your generarted password is : ${newPassword}`,

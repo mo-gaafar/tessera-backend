@@ -1,9 +1,15 @@
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const userModel = require("../models/userModel");
-const { sendUserEmail, forgetPasswordOption } = require("../utils/sendEmail");
-const { passwordEncryption, comparePassword } = require("../utils/passwords");
-const { GenerateToken, verifyToken } = require("../utils/Tokens");
+const userModel = require("../../models/userModel");
+const {
+  sendUserEmail,
+  forgetPasswordOption,
+} = require("../../utils/sendEmail");
+const {
+  passwordEncryption,
+  comparePassword,
+} = require("../../utils/passwords");
+const { GenerateToken, verifyToken } = require("../../utils/Tokens");
 const { sendVerification, verifyEmail } = require("./verificationController");
 
 /**
@@ -147,51 +153,6 @@ async function signIn(req, res) {
 }
 
 /**
- * Check if a user with the given email exists in the database.
- *
- * @async
- * @function emailExist
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @param {string} req.body (email) the email to check on
- * @returns {Object} - A response object with information about whether the email exists in the database.
- *
- * @throws {Error} If an internal server error occurs.
- * @throws {400} If the request body is missing the email parameter.
- * @throws {404} If a user with the given email is not found in the database.
- * @throws {500} If an internal server error occurs.
- */
-async function emailExist(req, res) {
-  try {
-    // extract email from the request body
-    const { email } = req.body;
-
-    // find the user with the given email in the database
-    const user = await userModel.findOne({ email });
-
-    // if the user is found, return a success message
-    if (user) {
-      return res.status(200).json({
-        success: true,
-        message: "Email exists",
-      });
-    }
-
-    // if the user is not found, return an error
-    res.status(404).json({
-      success: false,
-      message: "User not found",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-}
-
-/**
 Send a reset password email to the user's email address.
 
 * @async
@@ -228,11 +189,13 @@ async function forgotPassword(req, res) {
       });
     } else {
       // Return error message if email is not found
-      res.status(200).send({ success: true, msg: "this email doesnt exist" });
+      res
+        .status(200)
+        .send({ success: true, message: "this email doesnt exist" });
     }
   } catch (error) {
     // Return error message if an error occurs
-    res.status(400).send({ success: false, msg: error.message });
+    res.status(400).send({ success: false, message: error.message });
   }
 }
 
@@ -279,12 +242,12 @@ async function resetPassword(req, res) {
       });
     } else {
       // If the user is not found by ID, the token is expired
-      res.status(200).send({ success: true, msg: "this link is expired" });
+      res.status(200).send({ success: true, message: "this link is expired" });
     }
   } catch (error) {
     // If an error occurs, return an error message
-    res.status(400).send({ success: false, msg: error.message });
+    res.status(400).send({ success: false, message: error.message });
   }
 }
 
-module.exports = { signUp, signIn, emailExist, forgotPassword, resetPassword };
+module.exports = { signUp, signIn, forgotPassword, resetPassword };

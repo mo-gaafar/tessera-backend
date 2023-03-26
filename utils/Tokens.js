@@ -10,7 +10,9 @@ const jwt = require("jsonwebtoken");
  */
 async function GenerateToken(user_id) {
   console.log("user id = " + user_id);
-  return jwt.sign(JSON.stringify(user_id), process.env.SECRETJWT);
+  return jwt.sign({ user_id }, process.env.SECRETJWT, {
+    expiresIn: "1d",
+  });
 }
 
 /**

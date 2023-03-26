@@ -5,7 +5,7 @@ const {
   validateUserSignup,
   userVlidation,
 } = require("../middlewares/validation/user");
-const userController = require("../controller/userController"); // importing methods from controller
+const userController = require("../controller/Auth/userController"); // importing methods from controller
 //validation
 
 // creating a router
@@ -15,11 +15,12 @@ router.post(
   userVlidation,
   userController.signUp
 );
+
 router.post("/auth/login", userController.signIn);
-router.post("/auth/emailexist", userController.emailExist);
 
 // password reset
 router.post("/auth/forgetPassword", userController.forgotPassword);
+
 //router.get("/auth/reset-password/:token", resetPassword); get request to redirect to a frontend link
 router.post("/auth/reset-password/:token", userController.resetPassword);
 

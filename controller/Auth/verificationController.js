@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const {
   sendUserEmail,
   verficationOption,
   sendSocialPassword,
-} = require("../utils/sendEmail");
-const { GenerateToken, verifyToken } = require("../utils/Tokens");
+} = require("../../utils/sendEmail");
+const { GenerateToken, verifyToken } = require("../../utils/Tokens");
 /**
  * Resends the email verification to the user with the given email address.
  *
@@ -54,6 +54,51 @@ async function resendEmailVerification(req, res) {
       .status(500)
       .json({ success: "false", message: "Internal server error" });
     throw err;
+  }
+}
+
+/**
+ * Check if a user with the given email exists in the database.
+ *
+ * @async
+ * @function emailExist
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {string} req.body (email) the email to check on
+ * @returns {Object} - A response object with information about whether the email exists in the database.
+ *
+ * @throws {Error} If an internal server error occurs.
+ * @throws {400} If the request body is missing the email parameter.
+ * @throws {404} If a user with the given email is not found in the database.
+ * @throws {500} If an internal server error occurs.
+ */
+async function emailExist(req, res) {
+  try {
+    // extract email from the request body
+    const { email } = req.body;
+
+    // find the user with the given email in the database
+    const user = await userModel.findOne({ email });
+
+    // if the user is found, return a success message
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "Email exists",
+      });
+    }
+
+    // if the user is not found, return an error
+    res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 }
 
@@ -161,4 +206,9 @@ async function verifyEmail(req, res) {
   }
 }
 
-module.exports = { sendVerification, verifyEmail, resendEmailVerification };
+module.exports = {
+  sendVerification,
+  verifyEmail,
+  resendEmailVerification,
+  emailExist,
+};
