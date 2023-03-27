@@ -11,21 +11,15 @@ const mobileSocials = require("./mobileSocials");
 
 
 /**
- * This fucntion does allow user to sign in or sign up to my app using facebook login ,
- * where a body is send from android mobile app once user has logged in to their facebook account
- * once the body is received , check inside database to see if using user facebook id and email
- * exists and if so sign user in and respond with token that expires after 24 hrs
- * and user shall be directed to landing page,else if user does not exist sign user up
- * using the information provided with post request body {first_name,last_name,email,id}
- * Also (OPTIONAL)a password that user shall receive using their email
- * using the function we created called setpassword(email,newpassword)
- * and for that user can sign in directly through the app using email and password
- * and respond with user object.
- *
- * @param {object} req containing information about the facebook login user (HTTP request that raised the event)
- * @param {object} res  send back the desired HTTP response
- * @param {object} next object with two properties done and value
+ * Allows mobile app user to sign in or sign up to my app using facebook login using user information.
+ * 
+ * @async
+ * @function facebookLogin
+ * @param {object} req -Information about the google login user
+ * @param {object} res -Send back the desired HTTP response
+ * @param {object} next -Object with two properties done and value
  * @returns if user ->(token) , if(!user)->(user)
+ * @throws {Error} - If could not get user information
  */
 exports.facebookLogin = async (req, res, next) => {
   //for mobile app view
@@ -59,21 +53,14 @@ exports.facebookLogin = async (req, res, next) => {
 };
 ///end of facebook function for mobile app
 /**
- * This fucntion does allow user to sign in or sign up to my app using google login ,
- * where a body is send from android mobilse app once user has logged in to their google account
- * once the body is received , check inside database to see if using user google id and email
- * exists and if so sign user in and respond with token that expires after 24 hrs
- * and user shall be directed to landing page,else if user does not exist sign user up
- * using the information provided with post request body {first_name,last_name,email,id}
- * Also (OPTIONAL)a password that user shall receive using their email
- * using the function we created called setpassword(email,newpassword)
- * and for that user can sign in directly through the app using email and password
- * and respond with user object.
- *
- * @param {object} req containing information about the google login user (HTTP request that raised the event)
- * @param {object} res  send back the desired HTTP response
- * @param {object} next object with two properties done and value
+ * Allows mobile app user to sign in or sign up to my app using google login using user information.
+ * @async
+ * @function googleLogin
+ * @param {object} req -Information about the google login user
+ * @param {object} res  - Send back the desired HTTP response
+ * @param {object} next - Object with two properties done and value
  * @returns if user ->(token) , if(!user)->(user)
+ * @throws {Error} - If could not get user information
  */
 exports.googleLogin = async (req, res, next) => {
   //for mobile app view

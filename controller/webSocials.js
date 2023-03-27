@@ -8,6 +8,15 @@ const {
   sendSocialPassword,
 } = require("../utils/sendEmail");
 const webSocials = {
+/**
+ * Sign user up using facebook or google login for web application by user information.
+ * @async
+ * @function signUp
+ * @param {Object} userInfo 
+ * @param {String} socialMediaType 
+ * @throws {Error} - If user information is not complete
+ * @throws {Error} - If could not create new user inside database
+ */
   signUp: async (userInfo, socialMediaType) => {
     try {
       var newPassword = generator.generate({
@@ -33,12 +42,20 @@ const webSocials = {
       }
       //New user is created and user shall be redirected to the landing page
       const user = await User.create(newUser); //create new user
+      //send user email with new generated password
       await sendUserEmail(user.email, newPassword, sendSocialPassword);
     } catch (err) {
       //error
       console.error(err);
     }
   },
+/**
+ * Sign user in using facebook or google login for web application by user information.
+ * @async
+ * @function signIn
+ * @param {Object} existingUser - User information from database
+ * @throws {Error} -If user is not found
+ */
   signIn: async (existingUser) => {
     try {
       const token = jwt.sign(
