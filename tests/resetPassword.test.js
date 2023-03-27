@@ -1,11 +1,9 @@
 // Import the necessary modules and functions
-const { resetPassword } = require("../controller/userController");
+//const { resetPassword } = require("../controller/userController");
+const userController = require("../controller/Auth/userController");
 const jwt = require("jsonwebtoken");
 var { passwordEncryption } = require("../utils/passwords");
 const userModel = require("../models/userModel");
-const mailer = require("../utils/sendEmail");
-const { sendUserEmail, forgetPasswordOption } = require("../utils/sendEmail");
-
 jest.mock("jsonwebtoken");
 jest.mock("../models/userModel");
 jest.mock("../utils/passwords");
@@ -40,7 +38,7 @@ describe("resetPassword function", () => {
     passwordEncryption.mockResolvedValue("encrypted_password"); // assume return encrypted password
 
     // CALLING FUNCTION
-    await resetPassword(req, res);
+    await userController.resetPassword(req, res);
 
     // EXPECTATIONS
     expect(jwt.verify).toHaveBeenCalledWith(
@@ -57,7 +55,7 @@ describe("resetPassword function", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      msg: "User password has been reset",
+      message: "User password has been reset",
     });
   });
 
@@ -81,7 +79,7 @@ describe("resetPassword function", () => {
     });
 
     // Act
-    await resetPassword(req, res);
+    await userController.resetPassword(req, res);
 
     // Assert
     expect(jwt.verify).toHaveBeenCalledWith(
@@ -94,7 +92,7 @@ describe("resetPassword function", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      msg: "Invalid token",
+      message: "Invalid token",
     });
   });
 
@@ -116,7 +114,7 @@ describe("resetPassword function", () => {
     userModel.findById.mockResolvedValue(null);
 
     // Act
-    await resetPassword(req, res);
+    await userController.resetPassword(req, res);
 
     // Assert
     expect(jwt.verify).toHaveBeenCalledWith(
@@ -129,7 +127,7 @@ describe("resetPassword function", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      msg: "this link is expired",
+      message: "this link is expired",
     });
   });
 });
