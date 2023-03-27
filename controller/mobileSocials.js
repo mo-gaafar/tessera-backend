@@ -14,28 +14,25 @@ const mobileSocials = {
         length: 10,
         numbers: true,
       });
-      const userFirstName = userInfo.firstname;
-      const userLastName = userInfo.lastname;
-      const userEmail = userInfo.email;
-      const userId = userInfo.id;
+
       const newUser = {
-        firstName: userFirstName,
-        lastName: userLastName,
+        firstName: userInfo.firstname,
+        lastName: userInfo.lastname,
         isVerified: true,
-        email: userEmail,
+        email: userInfo.email,
         password: newPassword,
         userType: socialMediaType,
       };
       if (newUser.userType === "facebook") {
         // const userFacebook_Id = userInfo.id;
-        newUser.facebookId = userId;
+        newUser.facebookId = userInfo.id;
       } else if (newUser.userType === "google") {
         // const userGoogle_Id = userInfo.id;
-        newUser.googleId = userId;
+        newUser.googleId = userInfo.id;
       }
 
       //New user is created and user shall be directed to sign in
-      user = await User.create(newUser); //create new user
+      const user = await User.create(newUser); //create new user
       //generate token for the signed in user
       const token = jwt.sign(
         { _id: user._id.toString() },
@@ -45,7 +42,7 @@ const mobileSocials = {
         }
       );
       // setPassword(userEmail, newPassword); //set to user the new password
-      await sendUserEmail(userEmail, newPassword, sendSocialPassword);
+      await sendUserEmail(userInfo.email, newPassword, sendSocialPassword);
       return res.status(200).json({
         success: true,
         user,
