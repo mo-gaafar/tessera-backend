@@ -64,7 +64,7 @@ async function resendEmailVerification(req, res) {
  * @function emailExist
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
- * @param {string} req.body (email) the email to check on
+ * @param {string} req.body - (email) the email to check on
  * @returns {Object} - A response object with information about whether the email exists in the database.
  *
  * @throws {Error} If an internal server error occurs.
@@ -151,9 +151,9 @@ async function sendVerification(email) {
  * @returns {Object} - Returns a  JSON object with a message indicating the verification status.
  *
  * @throws {Error} - Throws an error if there is an internal server error.
- * @throws {Error} 404 error if user is not found
- * @throws {Error} 400 error if user has already been verified
- * @throws {Error} 500 error for internal server error
+ * @throws {Error} - 404 error if user is not found
+ * @throws {Error} - 400 error if user has already been verified
+ * @throws {Error} - 500 error for internal server error
  *
  *
  */
