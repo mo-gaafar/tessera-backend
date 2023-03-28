@@ -1,22 +1,22 @@
 require("dotenv").config();
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const generator = require("generate-password");
 const jwt = require("jsonwebtoken");
 const {
   sendUserEmail,
   verficationOption,
   sendSocialPassword,
-} = require("../utils/sendEmail");
+} = require("../../utils/sendEmail");
 const webSocials = {
-/**
- * Sign user up using facebook or google login for web application by user information.
- * @async
- * @function signUp
- * @param {Object} userInfo 
- * @param {String} socialMediaType 
- * @throws {Error} - If user information is not complete
- * @throws {Error} - If could not create new user inside database
- */
+  /**
+   * Sign user up using facebook or google login for web application by user information.
+   * @async
+   * @function signUp
+   * @param {Object} userInfo
+   * @param {String} socialMediaType
+   * @throws {Error} - If user information is not complete
+   * @throws {Error} - If could not create new user inside database
+   */
   signUp: async (userInfo, socialMediaType) => {
     try {
       var newPassword = generator.generate({
@@ -49,13 +49,13 @@ const webSocials = {
       console.error(err);
     }
   },
-/**
- * Sign user in using facebook or google login for web application by user information.
- * @async
- * @function signIn
- * @param {Object} existingUser - User information from database
- * @throws {Error} -If user is not found
- */
+  /**
+   * Sign user in using facebook or google login for web application by user information.
+   * @async
+   * @function signIn
+   * @param {Object} existingUser - User information from database
+   * @throws {Error} -If user is not found
+   */
   signIn: async (existingUser) => {
     try {
       const token = jwt.sign(

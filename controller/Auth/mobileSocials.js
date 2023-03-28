@@ -1,24 +1,24 @@
 require("dotenv").config();
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const generator = require("generate-password");
 const jwt = require("jsonwebtoken");
 const {
   sendUserEmail,
   verficationOption,
   sendSocialPassword,
-} = require("../utils/sendEmail");
+} = require("../../utils/sendEmail");
 const mobileSocials = {
-/**
- * Sign user up using facebook or google login for mobile application by user information.
- * @async
- * @function signUp
- * @param {Object} userInfo - User information object
- * @param {String} socialMediaType - Facebook or Google
- * @param {Object} res - Express response object
- * @returns - Response object with success, user info and token
- * @throws {Error} - If user information is not complete
- * @throws {Error} - If could not create new user inside database
- */
+  /**
+   * Sign user up using facebook or google login for mobile application by user information.
+   * @async
+   * @function signUp
+   * @param {Object} userInfo - User information object
+   * @param {String} socialMediaType - Facebook or Google
+   * @param {Object} res - Express response object
+   * @returns - Response object with success, user info and token
+   * @throws {Error} - If user information is not complete
+   * @throws {Error} - If could not create new user inside database
+   */
   signUp: async (userInfo, socialMediaType, res) => {
     try {
       var newPassword = generator.generate({
@@ -68,15 +68,15 @@ const mobileSocials = {
       });
     }
   },
-/**
- * Sign user in using facebook or google login for mobile application by user information.
- * @async
- * @function signIn
- * @param {Object} existingUser - User information from database
- * @param {Object} res - Express response body
- * @returns  - Response object with success and token
- * @throws {Error} - If user is not found
- */
+  /**
+   * Sign user in using facebook or google login for mobile application by user information.
+   * @async
+   * @function signIn
+   * @param {Object} existingUser - User information from database
+   * @param {Object} res - Express response body
+   * @returns  - Response object with success and token
+   * @throws {Error} - If user is not found
+   */
   signIn: async (existingUser, res) => {
     try {
       //generate token for the signed in user

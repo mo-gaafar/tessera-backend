@@ -47,19 +47,19 @@ app.use(
 // Enable CORS for all requests
 app.use(cors());
 
-/**
- * CORS allows the developer to have control over what requests the server will respond to:
- * request methods, headers and origins.In this case it is "GET,POST,PUT,DELET".
- * It simply prevents the abnormal use of APIs (requests).
- */
-app.use(
-  cors({
-    //allow us to send client sessions
-    origin: process.env.LOCAL_HOST,
-    methodscl: "GET,POST,PUT,DELET",
-    credentials: true,
-  })
-);
+// /**
+//  * CORS allows the developer to have control over what requests the server will respond to:
+//  * request methods, headers and origins.In this case it is "GET,POST,PUT,DELET".
+//  * It simply prevents the abnormal use of APIs (requests).
+//  */
+// app.use(
+//   cors({
+//     //allow us to send client sessions
+//     origin: process.env.LOCAL_HOST,
+//     methodscl: "GET,POST,PUT,DELET",
+//     credentials: true,
+//   })
+// );
 
 app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);
@@ -72,6 +72,8 @@ app.use(passport.session());
 
 // Start the server on port 3000
 const PORT = 3000;
-const server=app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`It's aliveee on http://localhost:${PORT}`)
+);
 // app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
-module.exports=server;
+module.exports = server;

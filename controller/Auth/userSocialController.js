@@ -1,18 +1,17 @@
 require("dotenv").config();
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const generator = require("generate-password");
 const jwt = require("jsonwebtoken");
 const {
   sendUserEmail,
   verficationOption,
   sendSocialPassword,
-} = require("../utils/sendEmail");
+} = require("../../utils/sendEmail");
 const mobileSocials = require("./mobileSocials");
-
 
 /**
  * Allows mobile app user to sign in or sign up to my app using facebook login using user information.
- * 
+ *
  * @async
  * @function facebookLogin
  * @param {object} req -Information about the google login user
@@ -23,10 +22,10 @@ const mobileSocials = require("./mobileSocials");
  */
 exports.facebookLogin = async (req, res, next) => {
   //for mobile app view
-  const socialMediaType="facebook";
-  const userInfo=req.body;
-  const userFacebook_Id=userInfo.id;
-  const userEmail=userInfo.email;
+  const socialMediaType = "facebook";
+  const userInfo = req.body;
+  const userFacebook_Id = userInfo.id;
+  const userEmail = userInfo.email;
   try {
     //checks if user exist first and if so, user shall be directed to landing page
     let user = await User.findOne({
@@ -35,11 +34,11 @@ exports.facebookLogin = async (req, res, next) => {
     });
     if (user) {
       //generate token for the signed in user
-      mobileSocials.signIn(user,res);
+      mobileSocials.signIn(user, res);
       console.log("signing user in using facebook mobile app view");
     }
     if (!user) {
-      mobileSocials.signUp(userInfo,socialMediaType,res);
+      mobileSocials.signUp(userInfo, socialMediaType, res);
       console.log("signing user up using facebook mobile app view");
     }
   } catch (err) {
@@ -51,7 +50,7 @@ exports.facebookLogin = async (req, res, next) => {
     });
   }
 };
-///end of facebook function for mobile app
+
 /**
  * Allows mobile app user to sign in or sign up to my app using google login using user information.
  * @async
@@ -65,10 +64,10 @@ exports.facebookLogin = async (req, res, next) => {
 exports.googleLogin = async (req, res, next) => {
   //for mobile app view
 
-  const socialMediaType="google";
-  const userInfo=req.body;
-  userGoogle_Id=userInfo.id;
-  userEmail=userInfo.email;
+  const socialMediaType = "google";
+  const userInfo = req.body;
+  userGoogle_Id = userInfo.id;
+  userEmail = userInfo.email;
 
   try {
     //New user is created and user shall be redirected to the landing page
@@ -77,14 +76,12 @@ exports.googleLogin = async (req, res, next) => {
       email: userEmail,
     });
     if (user) {
-      mobileSocials.signIn(user,res);
+      mobileSocials.signIn(user, res);
       console.log("signing user in using google");
-      
     }
     if (!user) {
-      mobileSocials.signUp(userInfo,socialMediaType,res);
+      mobileSocials.signUp(userInfo, socialMediaType, res);
       console.log("signing user up using google");
-      
     }
   } catch (err) {
     //error
@@ -103,5 +100,3 @@ exports.googleLogin = async (req, res, next) => {
  * @param {string} email receiver email with newly generated password
  * @param {string} newPassword newly generated password
  */
-
-

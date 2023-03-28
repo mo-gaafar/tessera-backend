@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 /**
  * Sends a verification email to a user
- *
  * @async
  * @function sendUserEmail
  * @param {string} email - The email address of the user to send the email to

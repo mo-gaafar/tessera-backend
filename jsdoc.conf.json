@@ -20,6 +20,17 @@
       "monospaceLinks": false,
       "useLongnameInNav": false,
       "showInheritedInNav": true
-    }
+    },
+    "markdown": {
+      "parser": "gfm",
+      "hardwrap": true
+    },
+    "summarize": {
+      "groups": {
+        "controller": "Controller",
+        "models": "Models",
+        "utils": "Utils"
+      }
+    } 
   }
   
