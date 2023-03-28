@@ -7,71 +7,69 @@ const {
   verficationOption,
   sendSocialPassword,
 } = require("../utils/sendEmail");
-const webSocials={
-signUp: async(userInfo,socialMediaType) => {
-    try{
-    var newPassword = generator.generate({
+const webSocials = {
+/**
+ * Sign user up using facebook or google login for web application by user information.
+ * @async
+ * @function signUp
+ * @param {Object} userInfo 
+ * @param {String} socialMediaType 
+ * @throws {Error} - If user information is not complete
+ * @throws {Error} - If could not create new user inside database
+ */
+  signUp: async (userInfo, socialMediaType) => {
+    try {
+      var newPassword = generator.generate({
         length: 10,
         numbers: true,
-    });
-    const newUser = {
+      });
+      // create user
+      const newUser = {
         firstName: userInfo.name.givenName,
-        lastName:userInfo.name.familyName,
+        lastName: userInfo.name.familyName,
         isVerified: true,
         email: userInfo.emails[0].value,
         password: newPassword,
-        userType:socialMediaType,
+        userType: socialMediaType,
       };
-    if(newUser.userType==="google"){
-      //create new user using information retreived from google api
-      newUser.googleId=userInfo.id
-    }
-    else if(newUser.userType==="facebook"){
-      //create new user using information retreived from google api
-        await sendUserEmail(user.email, newPassword, sendSocialPassword);
-        newUser.facebookId=userInfo.id
-    }
+      if (newUser.userType === "google") {
+        //create new user using information retreived from google api
+        newUser.googleId = userInfo.id;
+      } else if (newUser.userType === "facebook") {
+        //create new user using information retreived from google api
+        // await sendUserEmail(user.email, newPassword, sendSocialPassword);
+        newUser.facebookId = userInfo.id;
+      }
       //New user is created and user shall be redirected to the landing page
       const user = await User.create(newUser); //create new user
+      //send user email with new generated password
       await sendUserEmail(user.email, newPassword, sendSocialPassword);
-    }catch (err) {
-        //error
-        console.error(err);
-        
+    } catch (err) {
+      //error
+      console.error(err);
     }
-}
-,signIn: async(existingUser)=>{
-    try{
-        const token = jwt.sign(
-            { _id: existingUser._id.toString() },
-            process.env.SECRETJWT,
-            {
-              expiresIn: "24h",
-            }
-        );
-    }catch (err) {
-        //error
-        console.error(err);
-  }
-}
-}
-//Definition of SetPassword function & mail for user to receive password through it
-const SetPassword = async (email, newPassword) => {
-    //delete any existing forgot password requests by the user
+  },
+/**
+ * Sign user in using facebook or google login for web application by user information.
+ * @async
+ * @function signIn
+ * @param {Object} existingUser - User information from database
+ * @throws {Error} -If user is not found
+ */
+  signIn: async (existingUser) => {
     try {
-      const mailOptions = {
-        //mail information
-        from: process.env.AUTH_EMAIL, //sender
-        to: email, //receiver
-        subject: "Arriving from Google ? ",
-        text: `Your generarted password is : ${newPassword}`,
-      };
-  
-      await transporter.sendMail(mailOptions); //send mail
-    } catch (
-      e //error
-    ) {
-      console.log(e);
+      const token = jwt.sign(
+        { _id: existingUser._id.toString() },
+        process.env.SECRETJWT,
+        {
+          expiresIn: "24h",
+        }
+      );
+    } catch (err) {
+      //error
+      console.error(err);
     }
+  },
 };
-module.exports=webSocials
+
+module.exports = webSocials;

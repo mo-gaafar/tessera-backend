@@ -37,6 +37,7 @@ describe("resetPassword function", () => {
 		userModel.findById.mockResolvedValue(user); // assume returns user by id
 		passwordEncryption.mockResolvedValue("encrypted_password"); // assume return encrypted password
 
+<<<<<<< HEAD
 		// CALLING FUNCTION
 		await userController.resetPassword(req, res);
 
@@ -58,6 +59,29 @@ describe("resetPassword function", () => {
 			message: "User password has been reset",
 		});
 	});
+=======
+    // CALLING FUNCTION
+    await userController.resetPassword(req, res);
+
+    // EXPECTATIONS
+    expect(jwt.verify).toHaveBeenCalledWith(
+      req.params.token,
+      process.env.SECRETJWT
+    );
+    expect(userModel.findById).toHaveBeenCalledWith(decoded.userId);
+    expect(passwordEncryption).toHaveBeenCalledWith(req.body.password);
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      { _id: user._id },
+      { $set: { password: "encrypted_password", token: "" } },
+      { new: true }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "User password has been reset",
+    });
+  });
+>>>>>>> 25faee1201bca5aaeacb89a0b41b95157cb8fe5c
 
 	it("should return an error message if the token is invalid", async () => {
 		// Arrange
@@ -78,6 +102,7 @@ describe("resetPassword function", () => {
 			throw new Error("Invalid token");
 		});
 
+<<<<<<< HEAD
 		// Act
 		await userController.resetPassword(req, res);
 
@@ -95,6 +120,25 @@ describe("resetPassword function", () => {
 			message: "Invalid token",
 		});
 	});
+=======
+    // Act
+    await userController.resetPassword(req, res);
+
+    // Assert
+    expect(jwt.verify).toHaveBeenCalledWith(
+      req.params.token,
+      process.env.SECRETJWT
+    );
+    expect(userModel.findById).not.toHaveBeenCalled();
+    expect(passwordEncryption).not.toHaveBeenCalled();
+    expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Invalid token",
+    });
+  });
+>>>>>>> 25faee1201bca5aaeacb89a0b41b95157cb8fe5c
 
 	it("should return an error message if the user cannot be found", async () => {
 		// Arrange
@@ -113,6 +157,7 @@ describe("resetPassword function", () => {
 		jwt.verify.mockReturnValue({ userId: "test_user_id" });
 		userModel.findById.mockResolvedValue(null);
 
+<<<<<<< HEAD
 		// Act
 		await userController.resetPassword(req, res);
 
@@ -130,4 +175,23 @@ describe("resetPassword function", () => {
 			message: "this link is expired",
 		});
 	});
+=======
+    // Act
+    await userController.resetPassword(req, res);
+
+    // Assert
+    expect(jwt.verify).toHaveBeenCalledWith(
+      req.params.token,
+      process.env.SECRETJWT
+    );
+    expect(userModel.findById).toHaveBeenCalledWith("test_user_id");
+    expect(passwordEncryption).not.toHaveBeenCalled();
+    expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "this link is expired",
+    });
+  });
+>>>>>>> 25faee1201bca5aaeacb89a0b41b95157cb8fe5c
 });
