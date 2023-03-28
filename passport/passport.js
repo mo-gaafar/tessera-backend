@@ -31,11 +31,11 @@ module.exports = function (passport) {
           let user = await User.findOne({ facebookId: profile.id }); //find user by ID
           if (user) {
             //call sign in function
-            facebook.signIn(user);
+            webSocials.signIn(user);
             console.log("Signing in user using facebook");
             done(null, user); //everything is done & return user information
           } else {
-            facebook.signUp(profile, socialMediaType);
+            webSocials.signUp(profile, socialMediaType);
 
             console.log("signing up user using facebook ");
             done(null, user);
