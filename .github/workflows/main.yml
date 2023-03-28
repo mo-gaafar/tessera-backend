@@ -11,13 +11,39 @@ on:
 jobs:
   Unit-Tests:
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      PORT: ${{ secrets.PORT }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+      EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+      EMAIL_USER: ${{ secrets.EMAIL_USER }}
+      EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+      SECRETJWT: ${{ secrets.SECRETJWT }}
+      FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}
+      FACEBOOK_CLIENT_SECRET: ${{ secrets.FACEBOOK_CLIENT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v3
       - name: Build Testing Docker image 
         run: docker build -t test ./
 
       - name: Run Unit Tests
-        run: docker run test sh -c "CI=true npm run test:ci"
+        run: docker run 
+          -e BASE_URL 
+          -e PORT 
+          -e MONGODB_URI 
+          -e EMAIL_HOST 
+          -e EMAIL_PORT 
+          -e EMAIL_USER 
+          -e EMAIL_PASS 
+          -e SECRETJWT 
+          -e FACEBOOK_CLIENT_ID 
+          -e FACEBOOK_CLIENT_SECRET 
+          -e GOOGLE_CLIENT_ID 
+          -e GOOGLE_CLIENT_SECRET 
+          test sh -c "CI=true npm run test:ci"
   
   Build-And-Push:
     needs: Unit-Tests
@@ -57,4 +83,3 @@ jobs:
         use_existing_version_if_available: true
         region: ${{ vars.AWS_REGION }}
         deployment_package: deploy.zip
-
