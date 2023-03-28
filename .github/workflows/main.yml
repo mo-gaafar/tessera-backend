@@ -17,7 +17,7 @@ jobs:
         run: docker build -t test ./
 
       - name: Run Unit Tests
-        run: docker run test sh -c "CI=true npm run test"
+        run: docker run test sh -c "CI=true npm run test:ci"
   
   Build-And-Push:
     needs: Unit-Tests
