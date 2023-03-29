@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../../models/userModel");
+const userModel = require("../../models/userModel");
 const {
   sendUserEmail,
   verficationOption,
@@ -23,7 +23,7 @@ async function resendEmailVerification(req, res) {
     const { email } = req.body;
 
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await userModel.findOne({ email });
 
     // If user is not found, return error message
     if (!user) {
@@ -117,7 +117,7 @@ async function emailExist(req, res) {
 async function sendVerification(email) {
   try {
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await userModel.findOne({ email });
 
     // If user is not found, return error message
     if (!user) {
@@ -166,7 +166,7 @@ async function verifyEmail(req, res) {
     const decoded = jwt.verify(token, process.env.SECRETJWT);
 
     // Find the user with the decoded user ID
-    const user = await User.findById(decoded.userId);
+    const user = await userModel.findById(decoded.userId);
 
     // If the user is not found, return a 404 error
     if (!user) {
