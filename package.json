@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "devStart": "nodemon server.js",
-    "test": "jest --forceExit --detectOpenHandles  --watchAll ",
+    "test": "jest --forceExit --detectOpenHandles  --watchAll",
+    "test:ci": "jest --forceExit --detectOpenHandles --watchAll=false --ci",
     "jsdoc": "jsdoc --configure jsdoc.conf.json --debug"
   },
   "repository": {
