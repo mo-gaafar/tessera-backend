@@ -87,7 +87,12 @@ const eventSchema = new mongoose.Schema({
 
   isVerified: Boolean,
   isPublic: Boolean,
-});
+ 
+},
+
+{ timestamps: true }
+
+);
 
 eventSchema.pre("save", async function (next) {
   if (!this.isModified("privatePassword")) {
