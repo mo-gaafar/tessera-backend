@@ -21,11 +21,6 @@ router.post("/auth/login", userController.signIn);
 // password reset
 router.post("/auth/forgetPassword", userController.forgotPassword);
 
-router.post(
-	"/event-management/creator/:creator-id",
-	userController.createEvent
-);
-
 //router.get("/auth/reset-password/:token", resetPassword); get request to redirect to a frontend link
 router.post("/auth/reset-password/:token", userController.resetPassword);
 
