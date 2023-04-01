@@ -20,6 +20,9 @@ async function displayfilteredTabs(req, res) {
         if (futureDate) {
           console.log(futureDate)
           if(futureDate==="today"){
+            //start
+            
+            //end
             const today = new Date()
             const yesterday=new Date(today)
             yesterday.setDate(today.getDate() - 1)
@@ -100,6 +103,15 @@ async function displayfilteredTabs(req, res) {
             //event ends before the enddate
             $lt: eventEndDate,//new Date(eventEndDate),
           };
+          /*
+
+  "$match": {
+    "year": currentDate.getFullYear(),
+    "month": currentDate.getMonth() + 1,
+    "day": currentDate.getDate()
+  }
+}
+          */
           
         }
         // if (location) {
