@@ -1,0 +1,89 @@
+void setBuildStatus(String message, String state) {
+  step([
+      $class: "GitHubCommitStatusSetter",
+      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/mo-gaafar/tessera-backend/"],
+      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+  ]);
+}
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            environment {
+                GITHUB_TOKEN = credentials('GITHUB_TOKEN')
+                DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
+            }
+            steps {
+                sh 'git clone -b dev https://${GITHUB_TOKEN}@github.com/mo-gaafar/tessera-backend.git backend'
+                sh 'docker build -f ./backend/Dockerfile -t $DOCKERHUB_USERNAME/tessera-backend-dev ./backend'
+            }
+        }
+
+        stage('Test') {
+            environment {
+                BASE_URL = credentials('BASE_URL')
+                PORT = credentials('PORT')
+                MONGODB_URI = credentials('MONGODB_URI')
+                EMAIL_HOST = credentials('EMAIL_HOST')
+                EMAIL_PORT = credentials('EMAIL_PORT')
+                EMAIL_USER = credentials('EMAIL_USER')
+                EMAIL_PASS = credentials('EMAIL_PASS')
+                SECRETJWT = credentials('SECRETJWT')
+                FACEBOOK_CLIENT_ID = credentials('FACEBOOK_CLIENT_ID')
+                FACEBOOK_CLIENT_SECRET = credentials('FACEBOOK_CLIENT_SECRET')
+                GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
+                GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
+                DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
+            }
+            steps {
+                sh 'docker run \
+                    -e BASE_URL \
+                    -e PORT \
+                    -e MONGODB_URI \
+                    -e EMAIL_HOST \
+                    -e EMAIL_PORT \
+                    -e EMAIL_USER \
+                    -e EMAIL_PASS \
+                    -e SECRETJWT \
+                    -e FACEBOOK_CLIENT_ID \
+                    -e FACEBOOK_CLIENT_SECRET \
+                    -e GOOGLE_CLIENT_ID \
+                    -e GOOGLE_CLIENT_SECRET \
+                    $DOCKERHUB_USERNAME/tessera-backend-dev sh -c "CI=true npm run test:ci"'
+            }
+        }
+
+        stage('Push') {
+            environment {
+                DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
+                DOCKERHUB_ACCESS_TOKEN = credentials('DOCKERHUB_ACCESS_TOKEN')
+            }
+            steps {
+                sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_ACCESS_TOKEN'
+                sh 'docker push $DOCKERHUB_USERNAME/tessera-backend-dev'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                build job: "deploy", wait: true
+            }
+        }
+    }
+    
+    post {
+        always {
+            deleteDir()
+        }
+        success {
+            setBuildStatus("Build succeeded", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        }
+    }
+}
