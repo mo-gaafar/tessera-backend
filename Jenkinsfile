@@ -1,11 +1,11 @@
 void setBuildStatus(String message, String state) {
-  step([
-      $class: "GitHubCommitStatusSetter",
-      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/mo-gaafar/tessera-backend/"],
-      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
-      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
-  ]);
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/mo-gaafar/tessera-backend/"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+    ]);
 }
 
 pipeline {
@@ -14,12 +14,10 @@ pipeline {
     stages {
         stage('Build') {
             environment {
-                GITHUB_TOKEN = credentials('GITHUB_TOKEN')
                 DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
             }
             steps {
-                sh 'git clone -b dev https://${GITHUB_TOKEN}@github.com/mo-gaafar/tessera-backend.git backend'
-                sh 'docker build -f ./backend/Dockerfile -t $DOCKERHUB_USERNAME/tessera-backend-dev ./backend'
+                sh 'docker build -f ./Dockerfile -t $DOCKERHUB_USERNAME/tessera-backend-dev .'
             }
         }
 
