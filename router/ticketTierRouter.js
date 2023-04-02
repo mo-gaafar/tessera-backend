@@ -10,5 +10,17 @@ router.post(
 	ticketTierController.createTicket
 );
 
+// router.put(
+//     "/event-tickets/edit-ticket/:id",
+//     ticketTierController.editTicket
+// )
+
+router.put(
+    "/event-tickets/edit-ticket/:tickID",
+    ticketTierController.editTicket
+)
+
 
 module.exports=router;
+
+

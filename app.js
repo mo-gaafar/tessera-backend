@@ -5,17 +5,23 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
+// const faker = require("faker");
+
+
+
 
 //Import routes
 const usersRoutes = require("./router/userRouter");
 const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
 const ticketTierRouter=require("./router/ticketTierRouter");
+const seeding=require("./router/seedingRouter");
+
 
 
 
 const app = express();
-//connect to mongoose (database)
+//connect to mongoose (database)n
 async function connectDB() {
   mongoose
     .connect(process.env.MONGODB_URI)
@@ -69,6 +75,7 @@ app.use("/api", verificationRoutes);
 //call user routes
 app.use("/api", userSocialRouter);
 app.use("/api", ticketTierRouter);
+app.use("/api", seeding);
 
 
 //passport module initialization
@@ -81,4 +88,10 @@ const server = app.listen(PORT, () =>
   console.log(`It's aliveee on http://localhost:${PORT}`)
 );
 // app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+//3akk
+
+
+
+
+
 module.exports = server;

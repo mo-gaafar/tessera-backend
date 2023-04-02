@@ -9,7 +9,7 @@ const eventSchema = new mongoose.Schema({
     },
     description: String,
     startDateTime: {
-      timezone: String,
+      // timezone: String,
       utc: Date,
     },
     endDateTime: {
@@ -47,23 +47,27 @@ const eventSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
+    
   },
 
   privatePassword: String,
-  ticketTiers: [
-    {
-      quantitySold: String,
+  // ticketTiers: [
+  //   {
+  //     quantitySold: String,
 
-      capacity: Number,
+  //     capacity: Number,
 
-      tier: {
-        type: String,
-        enum: ["Free", "Regular", "VIP"],
-      },
+  //     tier: {
+  //       type: String,
+  //       enum: ["Free", "Regular", "VIP"],
+  //     },
 
-      price: Number,
-    },
-  ],
+  //     price: Number,
+  //   },
+  // ],
+
+  
+
   eventStatus: {
     type: String,
     enum: ["started", "ended", "completed", "cancelled", "live"],
@@ -87,10 +91,22 @@ const eventSchema = new mongoose.Schema({
 
   isVerified: Boolean,
   isPublic: Boolean,
+
  
 },
 
-{ timestamps: true }
+
+// { timestamps: true },
+{
+  toJSON: {
+    transform: function(doc, ret) {
+      if (ret.basicInfo.startDateTime) {
+        ret.basicInfo.startDateTime.utc = ret.basicInfo.startDateTime.utc.toISOString();
+      }
+    }
+  }
+},
+
 
 );
 

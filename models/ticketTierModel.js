@@ -27,7 +27,7 @@ const ticketSchema = new mongoose.Schema(
         type: String,
       },
 
-      // ticket tier object
+      // ticket tier: object
       ticketTier: {
           quantitySold: {
             type:Number,
