@@ -1,7 +1,8 @@
 const userModel = require("../../models/userModel");
 const eventModel = require("../../models/eventModel");
 const mongoose = require('mongoose');
-
+//add location to event model
+//add online field to event model
 async function displayfilteredTabs(req, res) {
     try{
         //const { category, location, startDate, endDate } = req.query;
@@ -10,7 +11,7 @@ async function displayfilteredTabs(req, res) {
         const latitude=req.query.latitude;
         const startDate=req.query.startDate;
         const endDate=req.query.endDate;
-
+        //get online param!!
         //const eventHosted=req.query.eventhosted; ////hosted online or onground event
         const futureDate=req.query.futureDate////today/tommorw/weekend
         //prints
@@ -20,6 +21,7 @@ async function displayfilteredTabs(req, res) {
         console.log("longitude selected: ",longitude)
         console.log("latitude selected: ",latitude)
         console.log("furtue event: ",futureDate)
+        //log online param!!
         const query = {};
 
         if (category) {
@@ -38,9 +40,9 @@ async function displayfilteredTabs(req, res) {
             //convert date to UTC 
             const utcDate = new Date(userDate.getTime() - timezoneOffset * 60 * 1000);
             //get yesterday from this utcDate today
-            const yesterday=new Date(userDate)
+            const yesterday=new Date(utcDate)
             yesterday.setDate(utcDate.getDate() - 1)
-            const tomorrow= new Date(userDate)
+            const tomorrow= new Date(utcDate)
             tomorrow.setDate(utcDate.getDate() + 1)
             yesterday.setUTCHours(22,59,58)
             tomorrow.setUTCHours(0,0,58)
@@ -189,11 +191,49 @@ async function displayfilteredTabs(req, res) {
         //get events starts between these start and end dates
         if (startDate && endDate) {
         console.log("type of startdarte",typeof startDate)
+        //start
+
+        //get date as user time zone
+        const userDateStart= new Date(startDate)
+        console.log("today user timezone: ",userDateStart)
+        // Get the time zone offset in minutes
+        const timezoneOffset1 = userDateStart.getTimezoneOffset();
+        console.log("offset in minutes: ",timezoneOffset1)
+        //convert date to UTC 
+        const utcDateStart = new Date(userDateStart.getTime() - timezoneOffset1 * 60 * 1000);
+        //get date as user time zone
+        const userDateEnd= new Date(endDate)
+        console.log("today user timezone: ",userDateEnd)
+        // Get the time zone offset in minutes
+        const timezoneOffset2 = userDateEnd.getTimezoneOffset();
+        console.log("offset in minutes: ",timezoneOffset2)
+        //convert date to UTC 
+        const utcDateEnd = new Date(userDateEnd.getTime() - timezoneOffset2 * 60 * 1000);
+        utcDateStart.setUTCHours(0,0,58);
+        utcDateEnd.setUTCHours(22,59,58);
+        var eventStartDate=utcDateStart
+        var eventEndDate=utcDateEnd
+        
+        console.log("Trial for today: ",eventStartDate)
+        console.log("Trial for After tomorrow: ",eventEndDate)
+        //end
         query["basicInfo.startDateTime.utc"] = {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate),
+            $gte:eventStartDate ,
+            $lte:eventEndDate,
         };
         }
+        //Location
+        // query["basicInfo.location"] = { 
+        //   $near: {
+        //     $geometry: {
+        //       type: 'Point',
+        //       coordinates:[parseFloat(longitude), parseFloat(latitude)]
+        //     },
+        //     $maxDistance:10000 // Convert km to meters
+        //   }
+        // };
+        //end location
+        
         //prints
         console.log("category selected: ",category)
         console.log("startDate selected: ",startDate)
@@ -201,10 +241,14 @@ async function displayfilteredTabs(req, res) {
         console.log("longitude selected: ",longitude)
         console.log("latitude selected: ",latitude)
         console.log("furtue event: ",futureDate)
+        //array of events
         const events = await eventModel.find(query);
+        //retreive categories
+        const categoriesRetreived = [...new Set(events.map((eventModel) => eventModel.basicInfo.categories))];
+        console.log(categoriesRetreived); // ["Music", "Sports", "Arts"]
         res
         .status(200)
-        .json({success:"true",events})
+        .json({success:"true",events,categoriesRetreived})
     }catch (err) {
         console.error(err);
         // Return error message
