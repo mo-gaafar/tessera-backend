@@ -51,20 +51,20 @@ const eventSchema = new mongoose.Schema({
   },
 
   privatePassword: String,
-  // ticketTiers: [
-  //   {
-  //     quantitySold: String,
+  ticketTiers: [
+    {
+      quantitySold: String,
 
-  //     capacity: Number,
+      capacity: Number,
 
-  //     tier: {
-  //       type: String,
-  //       enum: ["Free", "Regular", "VIP"],
-  //     },
+      tier: {
+        type: String,
+        //enum: ["Free", "Regular", "VIP"],
+      },
 
-  //     price: Number,
-  //   },
-  // ],
+      price: Number,
+    },
+  ],
 
   
 
@@ -96,16 +96,16 @@ const eventSchema = new mongoose.Schema({
 },
 
 
-// { timestamps: true },
-{
-  toJSON: {
-    transform: function(doc, ret) {
-      if (ret.basicInfo.startDateTime) {
-        ret.basicInfo.startDateTime.utc = ret.basicInfo.startDateTime.utc.toISOString();
-      }
-    }
-  }
-},
+{ timestamps: true },
+// {
+//   toJSON: {
+//     transform: function(doc, ret) {
+//       if (ret.basicInfo.startDateTime) {
+//         ret.basicInfo.startDateTime.utc = ret.basicInfo.startDateTime.utc.toISOString();
+//       }
+//     }
+//   }
+// },
 
 
 );

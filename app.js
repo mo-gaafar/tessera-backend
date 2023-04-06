@@ -14,8 +14,8 @@ const session = require("express-session");
 const usersRoutes = require("./router/userRouter");
 const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
-const ticketTierRouter=require("./router/ticketTierRouter");
-const seeding=require("./router/seedingRouter");
+const ticketRouter=require("./router/ticketRouter");
+//const seeding=require("./router/seedingRouter");
 
 
 
@@ -74,8 +74,8 @@ app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);
 //call user routes
 app.use("/api", userSocialRouter);
-app.use("/api", ticketTierRouter);
-app.use("/api", seeding);
+app.use("/api", ticketRouter);
+//app.use("/api", seeding);
 
 
 //passport module initialization
