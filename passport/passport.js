@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const generator = require("generate-password");
 const nodemailer = require("nodemailer");
-const webSocials = require("../controller/Auth/webSocials");
+const webSocials = require("../controller/Auth/webSocialsController");
 
 const jwt = require("jsonwebtoken");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;

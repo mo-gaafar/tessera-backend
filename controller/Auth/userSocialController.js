@@ -1,13 +1,11 @@
 require("dotenv").config();
 const User = require("../../models/userModel");
-const generator = require("generate-password");
-const jwt = require("jsonwebtoken");
 const {
   sendUserEmail,
   verficationOption,
   sendSocialPassword,
 } = require("../../utils/sendEmail");
-const mobileSocials = require("./mobileSocials");
+const { mobileSignUp, mobileSignIn } = require("./mobileSocialsController");
 
 /**
  * Allows mobile app user to sign in or sign up to my app using facebook login using user information.
@@ -34,11 +32,11 @@ exports.facebookLogin = async (req, res, next) => {
     });
     if (user) {
       //generate token for the signed in user
-      mobileSocials.signIn(user, res);
+      mobileSignIn(user, res);
       console.log("signing user in using facebook mobile app view");
     }
     if (!user) {
-      mobileSocials.signUp(userInfo, socialMediaType, res);
+      mobileSignUp(userInfo, socialMediaType, res);
       console.log("signing user up using facebook mobile app view");
     }
   } catch (err) {
@@ -76,11 +74,11 @@ exports.googleLogin = async (req, res, next) => {
       email: userEmail,
     });
     if (user) {
-      mobileSocials.signIn(user, res);
+      mobileSignIn(user, res);
       console.log("signing user in using google");
     }
     if (!user) {
-      mobileSocials.signUp(userInfo, socialMediaType, res);
+      mobileSignUp(userInfo, socialMediaType, res);
       console.log("signing user up using google");
     }
   } catch (err) {
@@ -92,11 +90,3 @@ exports.googleLogin = async (req, res, next) => {
     });
   }
 };
-/**
- * This fucntion shall send the user trying to sign up whether through google or facebook login
- * the newely generated password so that he could and it's an option for the user to sign in
- * through the app directly. This function supposed to be called inside facebook and google functions.
- *
- * @param {string} email receiver email with newly generated password
- * @param {string} newPassword newly generated password
- */
