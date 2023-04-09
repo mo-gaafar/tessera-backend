@@ -7,6 +7,7 @@ const {
   verficationOption,
   sendSocialPassword,
 } = require("../../utils/sendEmail");
+const { GenerateToken, verifyToken } = require("../../utils/Tokens");
 const webSocials = {
   /**
    * Sign user up using facebook or google login for web application by user information.
@@ -58,13 +59,8 @@ const webSocials = {
    */
   signIn: async (existingUser) => {
     try {
-      const token = jwt.sign(
-        { _id: existingUser._id.toString() },
-        process.env.SECRETJWT,
-        {
-          expiresIn: "24h",
-        }
-      );
+      //generate token for the signed in user
+      const token = await GenerateToken(existingUser._id);
     } catch (err) {
       //error
       console.error(err);

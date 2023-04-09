@@ -7,6 +7,7 @@ const {
   verficationOption,
   sendSocialPassword,
 } = require("../../utils/sendEmail");
+const { GenerateToken, verifyToken } = require("../../utils/Tokens");
 const mobileSocials = {
   /**
    * Sign user up using facebook or google login for mobile application by user information.
@@ -45,13 +46,7 @@ const mobileSocials = {
       //New user is created and user shall be directed to sign in
       const user = await User.create(newUser); //create new user
       //generate token for the signed in user
-      const token = jwt.sign(
-        { _id: user._id.toString() },
-        process.env.SECRETJWT,
-        {
-          expiresIn: "24h",
-        }
-      );
+      const token = await GenerateToken(user._id);
       //send user email with new generated password
       await sendUserEmail(userInfo.email, newPassword, sendSocialPassword);
       return res.status(200).json({
@@ -80,13 +75,7 @@ const mobileSocials = {
   signIn: async (existingUser, res) => {
     try {
       //generate token for the signed in user
-      const token = jwt.sign(
-        { _id: existingUser._id.toString() },
-        process.env.SECRETJWT,
-        {
-          expiresIn: "24h",
-        }
-      );
+      const token = await GenerateToken(existingUser._id);
       return res.status(200).json({
         success: true,
         token,

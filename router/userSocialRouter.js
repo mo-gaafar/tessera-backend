@@ -2,7 +2,10 @@ require("dotenv").config();
 const passport = require("passport");
 const res = require("express/lib/response");
 
-const { redirectingFromSocial,authUserInfo } = require("../controller/authUser");
+const {
+  redirectingFromSocial,
+  authUserInfo,
+} = require("../controller/authUser");
 require("../passport/passport")(passport);
 const router = require("express").Router();
 const {
@@ -53,7 +56,7 @@ router.get("/facebooklogin/success", (req, res) => {
       message: "successful",
       user: req.user, //get my user
     });
-  } else{
+  } else {
     return res.status(401).json({
       success: true,
       message: "could not get user!",
@@ -79,8 +82,8 @@ router.get(
     // failureRedirect:process.env.BASE_URL+"/facebooklogin/failed",
     // successRedirect:process.env.BASE_URL+"/facebooklogin/success",
     session: false,
-  })
-  ,redirectingFromSocial
+  }),
+  redirectingFromSocial
 );
 //get request for google login for web
 router.get(
@@ -99,7 +102,7 @@ router.get(
     // failureRedirect:process.env.BASE_URL+"/googlelogin/failed",
     // successRedirect:process.env.BASE_URL+"/googlelogin/success",
     session: false,
-  })
+  }),
   //,
   // (req,res) => {
   //   if (req.user) {
@@ -110,9 +113,8 @@ router.get(
   //     });
   //   }
   // }
-  , redirectingFromSocial
-  
+  redirectingFromSocial
 );
-router.get("/auth/userInformation",authUserInfo);
+router.get("/auth/userInformation", authUserInfo);
 
 module.exports = router;
