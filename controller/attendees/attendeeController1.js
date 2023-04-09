@@ -258,5 +258,26 @@ async function displayfilteredTabs(req, res) {
         throw err;
     }
 }
-
-module.exports = { displayfilteredTabs};
+//retreive booked ticket
+async function getBookedTicket(req, res) {
+  try{
+    //get query params
+    const eventId=req.query.eventId;
+    const attendeeId=req.query.attendeeId;
+    //search for booked ticket by attendee
+    
+    //return booking details
+    //response
+    res
+    .status(200)
+    .json({success:"true",bookedTicket})
+  }catch (err) {
+    console.error(err);
+    // Return error message
+    res
+      .status(500)
+      .json({ success: "false", message: "Internal server error" });
+    throw err;
+}
+}
+module.exports = { displayfilteredTabs,getBookedTicket};

@@ -60,15 +60,16 @@ app.use(cors());
 //     credentials: true,
 //   })
 // );
+//passport module initialization
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);
 //call user routes
 app.use("/api", userSocialRouter);
 app.use('/api',attendeeRouter);
-//passport module initialization
-app.use(passport.initialize());
-app.use(passport.session());
+
 
 // Start the server on port 3000
 const PORT = 3000;

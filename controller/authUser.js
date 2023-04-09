@@ -13,11 +13,17 @@ async function redirectingFromSocial(req, res) {
       process.env.SECRETJWT,
       {
         expiresIn: "24h",
-      }
+      } 
     );
+    const myuser=req.user
     return res.status(200).json({
       success: true,
       token,
+      myuser
   });
 }
-module.exports = { redirectingFromSocial}
+
+async function authUserInfo(req, res) {
+  return res.json(req.user);
+}
+module.exports = { redirectingFromSocial,authUserInfo}
