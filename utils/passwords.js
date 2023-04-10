@@ -11,20 +11,17 @@ const jwt = require("jsonwebtoken");
  * @throws {Error} Throws an error if encryption fails
  */
 async function passwordEncryption(userPassword) {
-  try {
-    // Generate verification token
-    const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
+	try {
+		// Generate verification token
+		const encryptedPassword = jwt.sign({ userPassword }, process.env.SECRETJWT);
 
-    // Log encrypted password
-    console.log("password = " + encryptedPassword);
-
-    // Return encrypted password
-    return encryptedPassword;
-  } catch (error) {
-    // Handle error
-    console.log(error);
-    throw new Error("Failed to encrypt password");
-  }
+		// Return encrypted password
+		return encryptedPassword;
+	} catch (error) {
+		// Handle error
+		console.log(error);
+		throw new Error("Failed to encrypt password");
+	}
 }
 
 /**
@@ -37,20 +34,20 @@ async function passwordEncryption(userPassword) {
  * @throws {Error} - Throws an error if an error occurs while signing the user password.
  */
 async function comparePassword(userStoredPassword, userPassword) {
-  try {
-    const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
-    console.log("password stored = " + userStoredPassword);
+	try {
+		const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
+		console.log("password stored = " + userStoredPassword);
 
-    if (encryptedPassword == userStoredPassword) {
-      console.log("password = " + encryptedPassword);
-      return true;
-    } else {
-      console.log("password = " + encryptedPassword);
-      return false;
-    }
-  } catch (error) {
-    console.log(error);
-  }
+		if (encryptedPassword == userStoredPassword) {
+			console.log("password = " + encryptedPassword);
+			return true;
+		} else {
+			console.log("password = " + encryptedPassword);
+			return false;
+		}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 module.exports = { passwordEncryption, comparePassword };

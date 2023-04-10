@@ -27,6 +27,17 @@ async function GenerateToken(user_id) {
 async function verifyToken(token) {
 	return jwt.verify(token, process.env.SECRETJWT);
 }
+
+/**
+
+Asynchronous function to retrieve an authorization token from the request headers.
+@async
+@function retrieveToken
+@param {object} req - The request object containing headers.
+@param {string} req.headers.authorization - The authorization header containing a Bearer token.
+@returns {Promise<string|null>} - A Promise that resolves to a token string if found in the header,
+or null if not found or the auth type is not Bearer.
+*/
 async function retrieveToken(req) {
 	const authHeader = req.headers.authorization;
 	const [authType, token] = authHeader.split(" ");
