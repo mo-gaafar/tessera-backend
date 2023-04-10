@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
 const { passwordEncryption } = require("../utils/passwords");
 const eventSchema = new mongoose.Schema(
   {
@@ -60,7 +59,6 @@ const eventSchema = new mongoose.Schema(
 
         tier: {
           type: String,
-          //enum: ["Free", "Regular", "VIP"],
         },
       },
     ],
@@ -88,9 +86,11 @@ const eventSchema = new mongoose.Schema(
     isPublic: Boolean,
 
     eventQRimage: String,
+
     promoCodes: [{ code: String, percentage: Number, remainingUses: Number }],
 
     isVerified: Boolean,
+
     isPublic: Boolean,
 
     creatorId: String,

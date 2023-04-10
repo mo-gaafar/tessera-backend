@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "normal",
     },
-  },
+  }
   // { timestamps: true }
 );
 
@@ -53,11 +53,5 @@ userSchema.pre("save", async function (next) {
   }
   this.password = await passwordEncryption(this.password);
 });
-
-// //verify passsword
-
-// userSchema.methods.GenerateToken = function () {
-//   return jwt.sign({ id: this.id }, process.env.SECRETJWT, { expiresIn: "3h" });
-// };
 
 module.exports = mongoose.model("userModel", userSchema);
