@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const generator = require("generate-password");
 const nodemailer = require("nodemailer");
-const webSocials = require("../controller/Auth/webSocialsController");
+const { webSignUp } = require("../controller/Auth/webSocialsController");
 
 const jwt = require("jsonwebtoken");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
@@ -30,12 +30,10 @@ module.exports = function (passport) {
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ facebookId: profile.id }); //find user by ID
           if (user) {
-            //call sign in function
-            webSocials.signIn(user);
             console.log("Signing in user using facebook");
             done(null, user); //everything is done & return user information
           } else {
-            webSocials.signUp(profile, socialMediaType);
+            webSignUp(profile, socialMediaType);
 
             console.log("signing up user using facebook ");
             done(null, user);
@@ -63,11 +61,10 @@ module.exports = function (passport) {
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ googleId: profile.id }); //find user by ID
           if (user) {
-            webSocials.signIn(user);
             console.log("signing in user using google");
             done(null, user); //everything is done & return user information
           } else {
-            webSocials.signUp(profile, socialMediaType);
+            webSignUp(profile, socialMediaType);
             console.log("signing up user using google ");
             done(null, user);
           }
