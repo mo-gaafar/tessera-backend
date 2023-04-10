@@ -5,16 +5,22 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
+// const faker = require("faker");
 
 //Import routes
 const usersRoutes = require("./router/userRouter");
 const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
+<<<<<<< HEAD
 const ticketTierRouter = require("./router/ticketTierRouter");
 const eventRouter = require("./router/eventRouter");
+=======
+const ticketRouter = require("./router/ticketRouter");
+//const seeding=require("./router/seedingRouter");
+>>>>>>> phase2_ahmed
 
 const app = express();
-//connect to mongoose (database)
+//connect to mongoose (database)n
 async function connectDB() {
 	mongoose
 		.connect(process.env.MONGODB_URI)
@@ -67,8 +73,13 @@ app.use("/api", usersRoutes); //to develop api
 app.use("/api", verificationRoutes);
 //call user routes
 app.use("/api", userSocialRouter);
+<<<<<<< HEAD
 app.use("/api", ticketTierRouter);
 app.use("/api", eventRouter);
+=======
+app.use("/api", ticketRouter);
+//app.use("/api", seeding);
+>>>>>>> phase2_ahmed
 
 //passport module initialization
 app.use(passport.initialize());
@@ -80,4 +91,6 @@ const server = app.listen(PORT, () =>
 	console.log(`It's aliveee on http://localhost:${PORT}`)
 );
 // app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
+//3akk
+
 module.exports = server;

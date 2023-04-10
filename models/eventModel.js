@@ -10,7 +10,7 @@ const eventSchema = new mongoose.Schema(
       },
       description: String,
       startDateTime: {
-        timezone: String,
+        // timezone: String,
         utc: Date,
       },
       endDateTime: {
@@ -51,6 +51,7 @@ const eventSchema = new mongoose.Schema(
     },
 
     privatePassword: String,
+
     ticketTiers: [
       {
         quantitySold: String,
@@ -59,12 +60,11 @@ const eventSchema = new mongoose.Schema(
 
         tier: {
           type: String,
-          enum: ["Free", "Regular", "VIP"],
+          //enum: ["Free", "Regular", "VIP"],
         },
-
-        price: Number,
       },
     ],
+
     eventStatus: {
       type: String,
       enum: ["started", "ended", "completed", "cancelled", "live"],
@@ -83,11 +83,19 @@ const eventSchema = new mongoose.Schema(
     },
     emailMessage: String,
 
+    isVerified: Boolean,
+
+    isPublic: Boolean,
+
     eventQRimage: String,
     promoCodes: [{ code: String, percentage: Number, remainingUses: Number }],
 
     isVerified: Boolean,
     isPublic: Boolean,
+
+    creatorId: string,
+
+    isOnline: string, // to be discussed
   },
 
   {
