@@ -93,7 +93,9 @@ const eventSchema = new mongoose.Schema(
 
     isPublic: Boolean,
 
-    creatorId: String,
+    creatorId: {
+      type: String,
+    },
 
     isOnline: Boolean, // to be discussed
   },

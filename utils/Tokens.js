@@ -9,10 +9,10 @@ const jwt = require("jsonwebtoken");
  * @throws {Error} If there is an error generating the token.
  */
 async function GenerateToken(user_id) {
-  console.log("user id = " + user_id);
-  return jwt.sign({ user_id }, process.env.SECRETJWT, {
-    expiresIn: "1d",
-  });
+	console.log("user id = " + user_id);
+	return jwt.sign({ user_id }, process.env.SECRETJWT, {
+		expiresIn: "1d",
+	});
 }
 
 /**
@@ -25,7 +25,26 @@ async function GenerateToken(user_id) {
  * @throws {Error} - if the token is invalid or cannot be verified
  */
 async function verifyToken(token) {
-  return jwt.verify(token, process.env.SECRETJWT);
+	return jwt.verify(token, process.env.SECRETJWT);
 }
 
-module.exports = { GenerateToken, verifyToken };
+/**
+
+Asynchronous function to retrieve an authorization token from the request headers.
+@async
+@function retrieveToken
+@param {object} req - The request object containing headers.
+@param {string} req.headers.authorization - The authorization header containing a Bearer token.
+@returns {Promise<string|null>} - A Promise that resolves to a token string if found in the header,
+or null if not found or the auth type is not Bearer.
+*/
+async function retrieveToken(req) {
+	const authHeader = req.headers.authorization;
+	const [authType, token] = authHeader.split(" ");
+	if (authType !== "Bearer" || !token) {
+		return null;
+	}
+	return token;
+}
+
+module.exports = { GenerateToken, verifyToken, retrieveToken };

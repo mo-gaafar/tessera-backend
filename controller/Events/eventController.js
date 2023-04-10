@@ -1,19 +1,34 @@
 const eventModel = require("../../models/eventModel");
+const {
+	GenerateToken,
+	retrieveToken,
+	verifyToken,
+} = require("../../utils/Tokens");
+const jwt = require("jsonwebtoken");
 
 /**
- * Creates a new event.
- *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} req.body - The request body containing the event information.
- * @param {Object} res - The HTTP response object.
- * @returns {Object} The response object indicating whether the event was successfully created.
- * @throws {Object} An error message if there was an error creating the event.
- */
+Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
+@async
+@function createEvent
+@param {Object} req - The HTTP request object.
+@param {Object} req.body - The request body containing the event information.
+@param {Object} res - The HTTP response object.
+@returns {Object} The response object indicating whether the event was successfully created.
+@throws {Object} An error message if there was an error creating the event.
+*/
 async function createEvent(req, res) {
 	try {
-		await eventModel.create(req.body); //await for Creating collection based of req body
+		const event = await eventModel.create(req.body); //await for Creating collection based of req body
+		const token = await retrieveToken(req);
+
+		const decoded = await verifyToken(token);
+		await eventModel.findByIdAndUpdate(
+			{ _id: event._id },
+			{ $set: { creatorId: decoded.user_id } },
+			{ new: true }
+		);
+		await event.save();
+
 		return res.status(200).json({
 			success: true,
 			message: "Event has been created successfully",
