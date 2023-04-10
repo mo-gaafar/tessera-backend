@@ -93,9 +93,9 @@ const eventSchema = new mongoose.Schema(
     isVerified: Boolean,
     isPublic: Boolean,
 
-    creatorId: string,
+    creatorId: String,
 
-    isOnline: string, // to be discussed
+    isOnline: Boolean, // to be discussed
   },
 
   {
