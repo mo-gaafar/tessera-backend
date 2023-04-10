@@ -1,7 +1,10 @@
 const passport = require("passport");
 const res = require("express/lib/response");
 
-const { redirectingFromSocial } = require("../controller/authUser");
+const {
+  redirectingFromSocial,
+  authUserInfo,
+} = require("../controller/authUser");
 require("../passport/passport")(passport);
 const router = require("express").Router();
 const {
@@ -16,7 +19,7 @@ router.post("/auth/facebook/app", facebookLogin);
 router.post("/auth/google/app", googleLogin);
 ///////////redirect links
 router.get("/googlelogin/failed", (req, res) => {
-  res.status(401).json({
+  return res.status(401).json({
     success: false,
     message: "failure",
   });
@@ -25,16 +28,21 @@ router.get("/googlelogin/failed", (req, res) => {
 //incase of success login , return user and return to homepage
 router.get("/googlelogin/success", (req, res) => {
   if (req.user) {
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "successful",
       user: req.user, //get my user
+    });
+  } else {
+    return res.status(401).json({
+      success: true,
+      message: "could not get user!",
     });
   }
 });
 //facebook redirect links
 router.get("/facebooklogin/failed", (req, res) => {
-  res.status(401).json({
+  return res.status(401).json({
     success: false,
     message: "failure",
   });
@@ -42,10 +50,15 @@ router.get("/facebooklogin/failed", (req, res) => {
 //incase of success login , return user and return to landing page
 router.get("/facebooklogin/success", (req, res) => {
   if (req.user) {
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "successful",
       user: req.user, //get my user
+    });
+  } else {
+    return res.status(401).json({
+      success: true,
+      message: "could not get user!",
     });
   }
 });
@@ -64,12 +77,21 @@ router.get(
 router.get(
   "/auth/facebook/callback",
   passport.authenticate("facebook", {
+<<<<<<< HEAD
     failureMessage: "Failed",
     failureRedirect:process.env.BASE_URL+"/facebooklogin/failed",
     successRedirect:process.env.BASE_URL+"/facebooklogin/success",
     //session: false,
   })
   //,redirectingFromSocial
+=======
+    // failureMessage: "Failed",
+    // failureRedirect:process.env.BASE_URL+"/facebooklogin/failed",
+    // successRedirect:process.env.BASE_URL+"/facebooklogin/success",
+    session: false,
+  }),
+  redirectingFromSocial
+>>>>>>> Landing-page
 );
 //get request for google login for web
 router.get(
@@ -85,11 +107,30 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
+<<<<<<< HEAD
     failureRedirect:process.env.BASE_URL+"/googlelogin/failed",
     successRedirect:process.env.BASE_URL+"/googlelogin/success",
     //session: false,
   })
   //,redirectingFromSocial
+=======
+    // failureRedirect:process.env.BASE_URL+"/googlelogin/failed",
+    // successRedirect:process.env.BASE_URL+"/googlelogin/success",
+    session: false,
+  }),
+  //,
+  // (req,res) => {
+  //   if (req.user) {
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "successful",
+  //       user: req.user, //get my user
+  //     });
+  //   }
+  // }
+  redirectingFromSocial
+>>>>>>> Landing-page
 );
+router.get("/auth/userInformation", authUserInfo);
 
 module.exports = router;

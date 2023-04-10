@@ -5,7 +5,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
-// const faker = require("faker");
 
 //Import routes
 const usersRoutes = require("./router/userRouter");
@@ -14,6 +13,7 @@ const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 //const seeding=require("./router/seedingRouter");
 
+const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
 //connect to mongoose (database)n
 async function connectDB() {
@@ -50,31 +50,17 @@ app.use(
 // Enable CORS for all requests
 app.use(cors());
 
-// /**
-//  * CORS allows the developer to have control over what requests the server will respond to:
-//  * request methods, headers and origins.In this case it is "GET,POST,PUT,DELET".
-//  * It simply prevents the abnormal use of APIs (requests).
-//  */
-// app.use(
-//   cors({
-//     //allow us to send client sessions
-//     origin: process.env.LOCAL_HOST,
-//     methodscl: "GET,POST,PUT,DELET",
-//     credentials: true,
-//   })
-// );
-
-app.use("/api", usersRoutes); //to develop api
-app.use("/api", verificationRoutes);
-//call user routes
-app.use("/api", userSocialRouter);
-app.use("/api", eventRouter);
-app.use("/api", ticketRouter);
-//app.use("/api", seeding);
-
 //passport module initialization
 app.use(passport.initialize());
 app.use(passport.session());
+
+//call user routes
+app.use("/api", usersRoutes);
+app.use("/api", verificationRoutes);
+app.use("/api", userSocialRouter);
+app.use("/api", eventRouter);
+app.use("/api", ticketRouter);
+app.use("/api", attendeeRouter);
 
 // Start the server on port 3000
 const PORT = 3000;
@@ -82,6 +68,5 @@ const server = app.listen(PORT, () =>
   console.log(`It's aliveee on http://localhost:${PORT}`)
 );
 // app.listen(PORT, () => console.log(`It's aliveee on http://localhost:${PORT}`));
-//3akk
 
 module.exports = server;
