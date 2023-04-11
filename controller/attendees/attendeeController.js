@@ -10,7 +10,8 @@ async function displayfilteredTabs(req, res) {
     const endDate = req.query.endDate;
     const futureDate = req.query.futureDate;
     const eventHosted = req.query.eventHosted;
-    const location = req.query.location;
+    const city = req.query.administrative_area_level_1;
+    const country = req.query.country;
     //prints
     console.log("category selected: ", category);
     console.log("startDate selected: ", startDate);
@@ -19,7 +20,8 @@ async function displayfilteredTabs(req, res) {
     console.log("latitude selected: ", latitude);
     console.log("furtue event: ", futureDate);
     console.log("eventHosted: ", eventHosted);
-    console.log("location: ", location);
+    console.log("location: ", city);
+    console.log("location: ", country);
     const query = {};
 
     if (category) {
@@ -28,9 +30,11 @@ async function displayfilteredTabs(req, res) {
     if (eventHosted) {
       query["isOnline"] = true;
     }
-    if (location) {
-      query["basicInfo.location.city"] = location;
-      //query["basicInfo.location.country"] = location;
+    if (city) {
+      query["basicInfo.location.administrative_area_level_1"] = city;
+    }
+    if (country) {
+      query["basicInfo.location.country"] = country;
     }
     if (futureDate && startDate) {
       console.log(futureDate);
