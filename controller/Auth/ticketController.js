@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const ticketModel = require("../../models/ticketModel");
 const eventModel = require("../../models/eventModel");
+const { retrieveToken, verifyToken, GenerateToken } = require("../../utils/Tokens");
+const { authenticate } = require("passport");
+const { boolean } = require("joi");
+const { generate } = require("generate-password");
 
 // /**
 // //  * * Creates a new ticket that is linked to a specific event by event ID
@@ -61,19 +65,117 @@ async function bookTicket(req, res) {
   }
 }
 
+// const generatedtoken=  GenerateToken("64166c7ecbbe595954ec662d")
+// console.log("generated token is:",generatedtoken)
+
+
 async function createTicketTier(req, res) {
-  // const {quantitySold,capacity,tier,price}=req.body;
+  //getting the attributes of ticket tier from body
   const { quantitySold, capacity, tier, price } = req.body;
-  const event = await eventModel.findById(req.params.eventID);
-  console.log("ticket tier is added in this eventtttt:", event);
+  const token=await retrieveToken(req) //getting the token of the ticket tier creator
+  console.log("token is:",token)
+  const decodedToken=verifyToken(token) //decoding the token
+  
+  decodedToken.then((resolvedValue) => {
+    tierCreatorID=resolvedValue.user_id
+    console.log("tier Creator ID:",tierCreatorID); // getting ID of ticket tier creator
+  });
+  
+  
+  const event = await eventModel.findById(req.params.eventID);//getting event by its ID
+  console.log("ticket tier is to be added in this event:", event);
+  console.log("creator ID:",event.creatorId) 
+  if (event.creatorId==tierCreatorID){
+
+  console.log("creator of the event is the one who edits:",event.creatorId) 
+
 
   const newTicketTier = { quantitySold, capacity, tier, price };
-  console.log("new tierrrrrr", newTicketTier);
-  event.ticketTiers.push(newTicketTier);
+  console.log("new tier is:", newTicketTier);
+  event.ticketTiers.push(newTicketTier); // adding new tier to the array of tiers 
 
   const eventWithNewTier = await event.save();
 
-  console.log("new event is:", eventWithNewTier);
+  // console.log("new event with the tier is:", eventWithNewTier);
+
+  res.status(200).json({
+    success: true,
+    message: "Ticket Tier Created",
+    newTicketTier
+  });
+
+  }
+else{
+  console.log("Can't add new tier as creator and editor not same");
+
+  res.status(201).json({
+    success: false,
+    message: "Can't add new tier as event creator and editor are not the same",
+    
+  });
+
 }
 
-module.exports = { bookTicket, createTicketTier }; //,editTicket };
+}
+
+async function retrieveTicketTier(req,res){
+
+console.log("inside retrieveTicketTier")
+// const event=await eventModel.findById(req.params.eventID);
+try {
+  		const event = await eventModel.findById(req.params.eventID); //returns event of given id
+  		if (!event) {
+  			return res.status(404).json({ message: "Event is not found" });
+  		}
+      const {ticketTiers}=event
+      return res.status(200).json({
+        
+        message:"Ticket tier details for the event",
+        ticketTiers });
+}
+
+catch (error) {
+  		res.status(400).json({
+  			success: false,
+  			message: "invalid details",
+  		});
+  	}
+
+// if (!event){
+
+//    res.status(404).json({
+//    message:"Event Not found"
+//   })
+// }
+
+// console.log("event is:",event)
+
+// const {ticketTiers}=event
+//  res.status(200).json({
+
+//   message:"Ticket tier details for the event",
+//   ticketTiers
+
+// })
+
+}
+
+
+// async function getEventById(req, res) {
+// 	const eventId = req.params.eventID;
+// 	try {
+// 		const event = await eventModel.findById(eventId); //returns event of given id
+// 		if (!event) {
+// 			return res.status(404).json({ message: "Event is not found" });
+// 		}
+// 		return res.status(200).json({ event });
+// 	} catch (error) {
+// 		res.status(400).json({
+// 			success: false,
+// 			message: error.message,
+// 		});
+// 	}
+// }
+
+
+module.exports = { bookTicket, createTicketTier,retrieveTicketTier }; //,editTicket };

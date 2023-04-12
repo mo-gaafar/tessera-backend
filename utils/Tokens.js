@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+//const userModel = require("../../models/userModel");
 
 /**
  * Generates a JSON Web Token for the provided user ID using the SECRETJWT environment variable.
@@ -26,6 +27,9 @@ async function GenerateToken(user_id) {
  */
 async function verifyToken(token) {
 	return jwt.verify(token, process.env.SECRETJWT);
+	// const decoded=jwt.verify(token,process.env.SECRETJWT);
+	// const myID=decoded.id
+	// return myID
 }
 
 /**
@@ -40,6 +44,10 @@ or null if not found or the auth type is not Bearer.
 */
 async function retrieveToken(req) {
 	const authHeader = req.headers.authorization;
+	//const authHeader = req.headers.authorization.split(' ');
+    // const authHeader= req.headers.authorization.split(' ')[1] || '';
+
+
 	const [authType, token] = authHeader.split(" ");
 	if (authType !== "Bearer" || !token) {
 		return null;
