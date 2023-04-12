@@ -118,6 +118,7 @@ else{
 
 }
 
+
 async function retrieveTicketTier(req,res){
 
 console.log("inside retrieveTicketTier")
@@ -125,7 +126,9 @@ console.log("inside retrieveTicketTier")
 try {
   		const event = await eventModel.findById(req.params.eventID); //returns event of given id
   		if (!event) {
-  			return res.status(404).json({ message: "Event is not found" });
+  			return res.status(404).json({
+          success:false,
+          message: "Event is not found" });
   		}
       const {ticketTiers}=event
       return res.status(200).json({
@@ -141,41 +144,11 @@ catch (error) {
   		});
   	}
 
-// if (!event){
-
-//    res.status(404).json({
-//    message:"Event Not found"
-//   })
-// }
-
-// console.log("event is:",event)
-
-// const {ticketTiers}=event
-//  res.status(200).json({
-
-//   message:"Ticket tier details for the event",
-//   ticketTiers
-
-// })
 
 }
 
 
-// async function getEventById(req, res) {
-// 	const eventId = req.params.eventID;
-// 	try {
-// 		const event = await eventModel.findById(eventId); //returns event of given id
-// 		if (!event) {
-// 			return res.status(404).json({ message: "Event is not found" });
-// 		}
-// 		return res.status(200).json({ event });
-// 	} catch (error) {
-// 		res.status(400).json({
-// 			success: false,
-// 			message: error.message,
-// 		});
-// 	}
-// }
+
 
 
 module.exports = { bookTicket, createTicketTier,retrieveTicketTier }; //,editTicket };
