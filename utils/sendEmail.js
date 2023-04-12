@@ -60,7 +60,7 @@ function forgetPasswordOption(email, token) {
       <p style="font-size: 20px;">Hello! </p>
       <p style="font-size: 20px;">Please click the button below to reset your password:</p>
       <button style="background-color: #F05537; color: white; padding: 10px 20px; border: none; border-radius: 4px;">
-      <a href="${process.env.BASE_URL}/auth/reset-password/${token}" style="text-decoration: none; color: inherit;">Reset Password</a>
+      <a href="https://www.tessera.social/forgetPassword/:${token}" style="text-decoration: none; color: inherit;">Reset Password</a>
         </button>
         <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera"> `,
   };
