@@ -15,6 +15,12 @@ router.put(
 	ticketController.createTicketTier
 );
 
+router.get(
+	"/event-tickets/retrieve-event-ticket-tier/:eventID",
+	ticketController.retrieveTicketTier
+);
+
+
 // router.put(
 //     "/event-tickets/edit-ticket/:id",
 //     ticketTierController.editTicket

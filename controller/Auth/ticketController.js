@@ -65,7 +65,7 @@ async function bookTicket(req, res) {
   }
 }
 
-// const generatedtoken=  GenerateToken("6417b9099e62572b43c9267e")
+// const generatedtoken=  GenerateToken("64166c7ecbbe595954ec662d")
 // console.log("generated token is:",generatedtoken)
 
 
@@ -96,7 +96,7 @@ async function createTicketTier(req, res) {
 
   const eventWithNewTier = await event.save();
 
-  console.log("new event with the tier is:", eventWithNewTier);
+  // console.log("new event with the tier is:", eventWithNewTier);
 
   res.status(200).json({
     success: true,
@@ -118,4 +118,64 @@ else{
 
 }
 
-module.exports = { bookTicket, createTicketTier }; //,editTicket };
+async function retrieveTicketTier(req,res){
+
+console.log("inside retrieveTicketTier")
+// const event=await eventModel.findById(req.params.eventID);
+try {
+  		const event = await eventModel.findById(req.params.eventID); //returns event of given id
+  		if (!event) {
+  			return res.status(404).json({ message: "Event is not found" });
+  		}
+      const {ticketTiers}=event
+      return res.status(200).json({
+        
+        message:"Ticket tier details for the event",
+        ticketTiers });
+}
+
+catch (error) {
+  		res.status(400).json({
+  			success: false,
+  			message: "invalid details",
+  		});
+  	}
+
+// if (!event){
+
+//    res.status(404).json({
+//    message:"Event Not found"
+//   })
+// }
+
+// console.log("event is:",event)
+
+// const {ticketTiers}=event
+//  res.status(200).json({
+
+//   message:"Ticket tier details for the event",
+//   ticketTiers
+
+// })
+
+}
+
+
+// async function getEventById(req, res) {
+// 	const eventId = req.params.eventID;
+// 	try {
+// 		const event = await eventModel.findById(eventId); //returns event of given id
+// 		if (!event) {
+// 			return res.status(404).json({ message: "Event is not found" });
+// 		}
+// 		return res.status(200).json({ event });
+// 	} catch (error) {
+// 		res.status(400).json({
+// 			success: false,
+// 			message: error.message,
+// 		});
+// 	}
+// }
+
+
+module.exports = { bookTicket, createTicketTier,retrieveTicketTier }; //,editTicket };
