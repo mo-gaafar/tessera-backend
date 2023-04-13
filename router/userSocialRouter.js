@@ -82,7 +82,13 @@ router.get(
     // successRedirect:process.env.BASE_URL+"/facebooklogin/success",
     session: false,
   }),
-  redirectingFromSocial
+  //redirectingFromSocial
+  (req, res) => {
+    res.send({
+      user: req.user, //user info
+      message: "User logged in successfully",
+    });
+  }
 );
 //get request for google login for web
 router.get(
@@ -102,6 +108,12 @@ router.get(
     // successRedirect:process.env.BASE_URL+"/googlelogin/success",
     session: false,
   }),
+  (req, res) => {
+    res.send({
+      user: req.user, //user info
+      message: "User logged in successfully",
+    });
+  }
   //,
   // (req,res) => {
   //   if (req.user) {
@@ -112,7 +124,8 @@ router.get(
   //     });
   //   }
   // }
-  redirectingFromSocial
+
+  //redirectingFromSocial
 );
 router.get("/auth/userInformation", authUserInfo);
 
