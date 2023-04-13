@@ -12,7 +12,6 @@ const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
-const seedingRouter = require("./router/seedingRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -40,16 +39,23 @@ app.use(express.json());
  * to allow the server to keep track of the user’s state using session unique id
  * In session-based authentication, the user’s state is stored in the server’s memory or a database.
  */
-// app.use(
-//   session({
-//     secret: "glory to the king",
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// );
+app.use(
+  session({
+    secret: "glory to the king",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
-// Enable CORS for all requests
-// app.use(cors());
+const corsOptions = {
+  origin: '*',
+  methods: 'GET,POST,PATCH,DELETE,PUT',
+  allowedHeaders: 'Content-Type,X-Forwarded-For,Token,Authorization,',
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
 
 //passport module initialization
 app.use(passport.initialize());
@@ -62,8 +68,6 @@ app.use("/api", userSocialRouter);
 app.use("/api", eventRouter);
 app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
-// app.use("/api", attendeeRouter);
-app.use("/api", seedingRouter);
 
 // Start the server on port 3000
 const PORT = 3000;
