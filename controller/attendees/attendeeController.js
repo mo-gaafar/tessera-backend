@@ -94,6 +94,7 @@ async function displayfilteredTabs(req, res) {
       } = eventModel._doc;
       return filtered;
     });
+    console.log("displaying filtered tabs");
     res
       .status(200)
       .json({ success: "true", filteredEvents, categoriesRetreived });
@@ -366,7 +367,7 @@ async function queryWithOnline(query) {
  */
 async function queryWithCity(query, city) {
   try {
-    query["basicInfo.location.administrative_area_level_1"] = city;
+    query["basicInfo.location.administrativeAreaLevel1"] = city;
   } catch (err) {
     console.error(err);
     res
@@ -395,4 +396,24 @@ async function queryWithCountry(query, country) {
     throw err;
   }
 }
-module.exports = { displayfilteredTabs };
+/**
+ * retreive events categories inside event schema
+ *
+ * @param {Object} req
+ * @param {object} res -enum of categories
+ */
+async function listAllCategories(req, res) {
+  try {
+    const CategoriesList = eventModel.schema.path(
+      "basicInfo.categories"
+    ).enumValues;
+    res.status(200).json({ success: "true", CategoriesList });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: "false", message: "Internal server error" });
+    throw err;
+  }
+}
+module.exports = { displayfilteredTabs, listAllCategories };
