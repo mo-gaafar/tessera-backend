@@ -1,11 +1,8 @@
-const mongoose = require("mongoose"); 
-// require the necessary libraries
-//const faker = require("faker");
+
+const mongoose = require("mongoose");
+const eventModel = require("../../models/eventModel");
 
 const {faker} = require('@faker-js/faker');
-
-const eventModel=require("../../models/eventModel");
-
 
 
 async function connectDB() {
@@ -19,25 +16,46 @@ async function connectDB() {
 
 
 async function seedDB(req,res){
-events=[]
 
+await eventModel.deleteMany({});
+
+events=[]
+const numEvents = 10;
+const numConcerts = Math.floor(numEvents / 4);
+console.log("ana gowa el zft sedding")
 //  const events=[];
- for (let i = 0; i < 2; i++){
-    console.log('ana gwa')
+ for (let i = 0; i < 5; i++){
+    console.log('ana gwa');
+
 
    const newEvent= new eventModel({
-    basicInfo: {
-      eventName: faker.lorem.words(),
-      description: faker.lorem.sentences(),
+    
+      basicInfo: {
+      eventName: faker.helpers.arrayElement([
+       "Where does Depression route from? _ Free Lecture",
+       "Learn How To Increase your Potential and Push yourself more! FREE EVENT!",
+        "OPEN DAY EXECUTIVE MBA",
+        "Living Machines 2023",
+        "Tour Day Pontremoli",
+        "Warhammer Fest 3-Day Pass - Standard"]
+      ),
+      description: faker.helpers.arrayElement([
+        "Learn why your mind reacts in a negative way and why this can have an affect on our potential! Did you know we only use 10% of our potential",
+        "Attend this free lecture on How To Achieve Self Confidence and remove self doubt from your mind!",
+        "This conference highlights the most exciting research in the fields of biomimetics and biohybrid systems under the theme of Living Machines.",
+        "SWL Imaging Training Academy in collaboration with Medicare and Health Education England present a Thoracic Imaging Study Day",
+        "Get ready for the greatest Warhammer convention the world has ever seen – Warhammer Fest 2023!"
+      ]
+      ),
       startDateTime: {
-        // timezone: faker.address.timeZone(),
+         timezone: faker.address.timeZone(),
         utc: faker.date.future(),
         // console.console.log(utc),
 
       },
       endDateTime: {
         timezone: faker.address.timeZone(),
-        utc: faker.date.future().toISOString(),
+        utc: faker.date.future(),
       },
       categories: faker.helpers.arrayElement([
         "Boat & Air",
@@ -71,9 +89,9 @@ events=[]
         venueName: faker.lorem.words(),
         streetNumber:faker.datatype.number(),   
         route:faker.lorem.words(),
-        administrativeAreaLevel1:faker.city(),       
-        country:faker.country(),
-        city:faker.city(),
+        administrativeAreaLevel1:faker.lorem.words(),       
+        country:faker.lorem.words(),
+        city:faker.lorem.words(),
           
       },
 
@@ -160,10 +178,12 @@ res.status(201).json(
   }
 )
 
+
+
   }
 
 
-console.log('Database seeded!')
+// console.log('Database seeded!')
 
 
 
@@ -173,7 +193,7 @@ console.log('Database seeded!')
 
 //  }
  
-seedDB();
+//  seedDB();
 // Seed the database with 10 events
 // for (let i = 0; i < 10; i++) {
 //   const event = generateEvent();

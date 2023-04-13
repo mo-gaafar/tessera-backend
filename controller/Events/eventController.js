@@ -137,6 +137,32 @@ async function updateEvent(req, res) {
 			message: error.message,
 		});
 	}
+} 
+
+async function publishEvent(req,res){
+
+ const event = await eventModel.findById(req.params.eventID);
+ console.log("event is:",event)
+
+
+
+
+
+
+
 }
 
-module.exports = { createEvent, getEventById, deleteEvent, updateEvent };
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { createEvent, getEventById, deleteEvent, updateEvent ,publishEvent };
