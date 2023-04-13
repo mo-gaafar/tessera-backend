@@ -3,19 +3,21 @@ const { passwordEncryption } = require("../utils/passwords");
 const eventSchema = new mongoose.Schema(
   {
     basicInfo: {
+      // event Title
       eventName: {
         type: String,
         required: true,
       },
-      description: String,
       startDateTime: {
-        // timezone: String,
         utc: Date,
+        required: true,
       },
       endDateTime: {
-        timezone: String,
         utc: Date,
+        required: true,
       },
+      eventImage: String,
+
       categories: {
         type: String,
         enum: [
@@ -50,8 +52,9 @@ const eventSchema = new mongoose.Schema(
         latitude: {
           type: Number,
         },
+        // Id of location in google maps
         placeId: {
-          type: Number,
+          type: String,
         },
         venueName: {
           type: String,
@@ -74,17 +77,28 @@ const eventSchema = new mongoose.Schema(
       },
     },
 
-    privatePassword: String,
+    summary: String,
+
+    description: String,
 
     ticketTiers: [
       {
-        quantitySold: String,
+        tierName: String,
 
-        capacity: Number,
+        quantitySold: Number,
 
-        tier: {
-          type: String,
+        maxCapacity: Number,
+
+        price: String, // String because it could be Free
+
+        startSelling: {
+          utc: Date,
         },
+        endSelling: {
+          utc: Date,
+        },
+        // derived attribute: capacityFull of tickets  --for Frontend and Cross-Platform
+        // derived attribute: isFree  --for Frontend and Cross-Platform
       },
     ],
 
@@ -92,42 +106,39 @@ const eventSchema = new mongoose.Schema(
       type: String,
       enum: ["started", "ended", "completed", "cancelled", "live"],
     },
-    startSelling: {
-      timezone: String,
-      utc: Date,
-    },
-    endSelling: {
-      timezone: String,
-      utc: Date,
-    },
-    publicDate: {
-      timezone: String,
-      utc: Date,
-    },
-    emailMessage: String,
-
-    isVerified: Boolean,
-
-    isPublic: Boolean, // if true so the event will be public - if false the event will be private
 
     published: Boolean, // if the creator have published the event ( it will be availble for the users to book tickets)
 
-    eventQRimage: {
-      type: String,
-      default:
-        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
+    isPublic: Boolean, // if true so the event will be public - if false the event will be private
+
+    publicDate: {
+      utc: Date,
     },
-    eventImage: {
-      type: String,
-      default:
-        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
-    },
+
+    isOnline: Boolean,
+
+    eventUrl: String,
+
+    privatePassword: String, // if the event is private so the creator will set a password for the event
+
+    soldTickets: [
+      {
+        ticketId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ticketModel",
+        },
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "userModel",
+        },
+      },
+    ],
 
     creatorId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "userModel",
+      required: true,
     },
-
-    isOnline: Boolean, // to be discussed
 
     promocode: [
       {
