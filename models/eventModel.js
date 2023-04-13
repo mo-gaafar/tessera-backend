@@ -79,12 +79,23 @@ const eventSchema = new mongoose.Schema(
     ticketTiers: [
       {
         quantitySold: String,
-
+         
         capacity: Number,
 
         tier: {
           type: String,
         },
+
+        price:Number,
+        startSelling: {
+          timezone: String,
+          utc: Date,
+        },
+        endSelling: {
+          timezone: String,
+          utc: Date,
+        },
+
       },
     ],
 
