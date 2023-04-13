@@ -77,13 +77,12 @@ async function displayfilteredTabs(req, res) {
     //exclude unnecessary fields
     const filteredEvents = events.map((eventModel) => {
       const {
-        _id,
         createdAt,
         updatedAt,
         __v,
         privatePassword,
         isVerified,
-        promoCodes,
+        promocode,
         startSelling,
         endSelling,
         publicDate,
