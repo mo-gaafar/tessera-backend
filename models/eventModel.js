@@ -9,11 +9,11 @@ const eventSchema = new mongoose.Schema(
         required: true,
       },
       startDateTime: {
-        utc: Date,
+        type: Date,
         required: true,
       },
       endDateTime: {
-        utc: Date,
+        type: Date,
         required: true,
       },
       eventImage: String,
@@ -92,10 +92,10 @@ const eventSchema = new mongoose.Schema(
         price: String, // String because it could be Free
 
         startSelling: {
-          utc: Date,
+          type: Date,
         },
         endSelling: {
-          utc: Date,
+          type: Date,
         },
         // derived attribute: capacityFull of tickets  --for Frontend and Cross-Platform
         // derived attribute: isFree  --for Frontend and Cross-Platform
@@ -112,7 +112,7 @@ const eventSchema = new mongoose.Schema(
     isPublic: Boolean, // if true so the event will be public - if false the event will be private
 
     publicDate: {
-      utc: Date,
+      type: Date,
     },
 
     isOnline: Boolean,

@@ -25,7 +25,7 @@ const promocodeSchema = new mongoose.Schema(
       type: Number,
       required: true, // The remaining uses for the promocode
     },
-    events: {
+    event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "eventModel", // An array of ObjectIds referencing the events associated with this promocode
     },
