@@ -12,7 +12,7 @@ const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
-const seedingRouter=require("./router/seedingRouter");
+const seedingRouter = require("./router/seedingRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -49,7 +49,7 @@ app.use(express.json());
 // );
 
 // Enable CORS for all requests
-app.use(cors());
+// app.use(cors());
 
 //passport module initialization
 app.use(passport.initialize());
@@ -64,7 +64,6 @@ app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
 // app.use("/api", attendeeRouter);
 app.use("/api", seedingRouter);
-
 
 // Start the server on port 3000
 const PORT = 3000;
@@ -82,4 +81,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = server;
-
