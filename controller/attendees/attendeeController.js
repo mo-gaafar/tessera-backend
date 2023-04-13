@@ -46,12 +46,14 @@ async function displayfilteredTabs(req, res) {
     if (futureDate && startDate) {
       if (futureDate === "today") {
         var { eventStartDate, eventEndDate } = await getToday(startDate);
+        queryWithDate(query, eventStartDate, eventEndDate, 1);
       } else if (futureDate === "tomorrow" && startDate) {
         var { eventStartDate, eventEndDate } = await getTomorrow(startDate);
+        queryWithDate(query, eventStartDate, eventEndDate, 1);
       } else if (futureDate === "weekend" && startDate) {
         var { eventStartDate, eventEndDate } = await getWeekend(startDate);
+        queryWithDate(query, eventStartDate, eventEndDate, 2);
       }
-      queryWithDate(query, eventStartDate, eventEndDate);
     }
 
     //get events that starts within the highlighted period on calender
@@ -61,9 +63,10 @@ async function displayfilteredTabs(req, res) {
         endDate
       );
 
-      queryWithDate(query, eventStartDate, eventEndDate);
+      queryWithDate(query, eventStartDate, eventEndDate, 2);
     }
-
+    //remove private events from array
+    query["isPublic"] = true;
     //array of events filtered using the query object
     const events = await eventModel.find(query);
 
@@ -71,8 +74,31 @@ async function displayfilteredTabs(req, res) {
     const categoriesRetreived = [
       ...new Set(events.map((eventModel) => eventModel.basicInfo.categories)),
     ];
-
-    res.status(200).json({ success: "true", events, categoriesRetreived });
+    //exclude unnecessary fields
+    const filteredEvents = events.map((eventModel) => {
+      const {
+        _id,
+        createdAt,
+        updatedAt,
+        __v,
+        privatePassword,
+        isVerified,
+        promoCodes,
+        startSelling,
+        endSelling,
+        publicDate,
+        emailMessage,
+        ticketTiers,
+        creatorId,
+        eventQRimage,
+        ...filtered
+      } = eventModel._doc;
+      return filtered;
+    });
+    console.log("displaying filtered tabs");
+    res
+      .status(200)
+      .json({ success: "true", filteredEvents, categoriesRetreived });
   } catch (err) {
     console.error(err);
     // Return error message
@@ -106,8 +132,8 @@ async function getTomorrow(startDate) {
     const afterTomorrow = new Date(utcDate);
     afterTomorrow.setDate(utcDate.getDate() + 2);
 
-    utcDate.setUTCHours(0, 0, 58);
-    afterTomorrow.setUTCHours(0, 0, 58);
+    utcDate.setUTCHours(23, 0, 0);
+    afterTomorrow.setUTCHours(0, 0, 0);
     var eventStartDate = utcDate;
     var eventEndDate = afterTomorrow;
     return { eventStartDate, eventEndDate };
@@ -147,8 +173,8 @@ async function getToday(startDate) {
     const tomorrow = new Date(utcDate);
     tomorrow.setDate(utcDate.getDate() + 1);
 
-    yesterday.setUTCHours(22, 59, 58);
-    tomorrow.setUTCHours(0, 0, 58);
+    yesterday.setUTCHours(23, 0, 0);
+    tomorrow.setUTCHours(0, 0, 0);
     var eventStartDate = yesterday;
     var eventEndDate = tomorrow;
     return { eventStartDate, eventEndDate };
@@ -189,8 +215,8 @@ async function getWeekend(startDate) {
     const sunday = new Date(friday);
     sunday.setDate(friday.getDate() + 3);
 
-    friday.setUTCHours(0, 0, 59);
-    sunday.setUTCHours(22, 59, 59); //last second in Sunday
+    friday.setUTCHours(0, 0, 0);
+    sunday.setUTCHours(23, 0, 0); //last second in Sunday
     var eventStartDate = friday;
     var eventEndDate = sunday;
     return { eventStartDate, eventEndDate };
@@ -235,8 +261,8 @@ async function getCalender(startDate, endDate) {
       userDateEnd.getTime() - timezoneOffset2 * 60 * 1000
     );
 
-    utcDateStart.setUTCHours(0, 0, 58);
-    utcDateEnd.setUTCHours(22, 59, 58);
+    utcDateStart.setUTCHours(0, 0, 0);
+    utcDateEnd.setUTCHours(23, 0, 0);
 
     var eventStartDate = utcDateStart;
     var eventEndDate = utcDateEnd;
@@ -249,6 +275,7 @@ async function getCalender(startDate, endDate) {
     throw err;
   }
 }
+
 /**
  * query with given startDate and endDate inside events in DB
  *
@@ -257,15 +284,31 @@ async function getCalender(startDate, endDate) {
  * @param {Object} query
  * @param {Date} eventStartDate
  * @param {Date} eventEndDate
+ * @param {number} key
  * @throws {Error} -couldn't query with dates
  */
-async function queryWithDate(query, eventStartDate, eventEndDate) {
+async function queryWithDate(query, eventStartDate, eventEndDate, key) {
   try {
+    if (key === 1) {
+      query["basicInfo.startDateTime.utc"] = {
+        //event starts after the startdate
+        $gt: eventStartDate,
+        //event ends before the enddate
+        $lt: eventEndDate,
+      };
+    } else {
+      query["basicInfo.startDateTime.utc"] = {
+        //event starts after the startdate
+        $gte: eventStartDate,
+        //event ends before the enddate
+        $lte: eventEndDate,
+      };
+    }
     query["basicInfo.startDateTime.utc"] = {
       //event starts after the startdate
-      $gt: eventStartDate,
+      $gte: eventStartDate,
       //event ends before the enddate
-      $lt: eventEndDate,
+      $lte: eventEndDate,
     };
   } catch (err) {
     console.error(err);
@@ -354,4 +397,24 @@ async function queryWithCountry(query, country) {
     throw err;
   }
 }
-module.exports = { displayfilteredTabs };
+/**
+ * retreive events categories inside event schema
+ *
+ * @param {Object} req
+ * @param {object} res -enum of categories
+ */
+async function listAllCategories(req, res) {
+  try {
+    const CategoriesList = eventModel.schema.path(
+      "basicInfo.categories"
+    ).enumValues;
+    res.status(200).json({ success: "true", CategoriesList });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: "false", message: "Internal server error" });
+    throw err;
+  }
+}
+module.exports = { displayfilteredTabs, listAllCategories };

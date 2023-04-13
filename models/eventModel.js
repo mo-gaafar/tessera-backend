@@ -112,9 +112,16 @@ const eventSchema = new mongoose.Schema(
 
     published: Boolean, // if the creator have published the event ( it will be availble for the users to book tickets)
 
-    eventQRimage: String,
-
-    eventImage: String,
+    eventQRimage: {
+      type: String,
+      default:
+        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
+    },
+    eventImage: {
+      type: String,
+      default:
+        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
+    },
 
     creatorId: {
       type: String,
