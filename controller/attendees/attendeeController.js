@@ -65,7 +65,7 @@ async function displayfilteredTabs(req, res) {
 
       queryWithDate(query, eventStartDate, eventEndDate, 2);
     }
-    //remove private events from array
+    //remove private events from array //published or not to be added later
     query["isPublic"] = true;
     //array of events filtered using the query object
     const events = await eventModel.find(query);
@@ -89,6 +89,8 @@ async function displayfilteredTabs(req, res) {
         emailMessage,
         ticketTiers,
         creatorId,
+        soldTickets,
+        eventUrl,
         ...filtered
       } = eventModel._doc;
       return filtered;
@@ -418,9 +420,18 @@ async function listAllCategories(req, res) {
 async function getEventInfo(req, res) {
   try {
     const eventId = req.params.eventID;
+
+    const query = {};
+    //remove private events from array
+    query["isPublic"] = true;
+    query["_id"] = eventId;
+    //array of events filtered using the query object
+    const events = await eventModel.find(query);
+
     //exclude unnecessary fields
     const filteredEvents = events.map((eventModel) => {
       const {
+        _id,
         createdAt,
         updatedAt,
         __v,
@@ -434,10 +445,15 @@ async function getEventInfo(req, res) {
         endSelling,
         publicDate,
         emailMessage,
+        soldTickets,
+        eventUrl,
+
         ...filtered
       } = eventModel._doc;
       return filtered;
     });
+    console.log("getting event information");
+    res.status(200).json({ success: "true", filteredEvents });
   } catch (err) {
     console.error(err);
     res
