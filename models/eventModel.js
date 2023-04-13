@@ -85,7 +85,11 @@ const eventSchema = new mongoose.Schema(
 
     isPublic: Boolean,
 
-    eventQRimage: String,
+    eventQRimage: {
+      type: String,
+      default:
+        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-116-768x445.png",
+    },
 
     promoCodes: [{ code: String, percentage: Number, remainingUses: Number }],
 
