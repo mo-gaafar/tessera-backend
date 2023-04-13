@@ -31,7 +31,7 @@ events=[]
       description: faker.lorem.sentences(),
       startDateTime: {
         // timezone: faker.address.timeZone(),
-        utc: faker.date.future().toISOString(),
+        utc: faker.date.future(),
         // console.console.log(utc),
 
       },
@@ -62,7 +62,22 @@ events=[]
         "Sports & Fitness",
         "Travel & Outdoor",
       ]),
-      location: faker.address.city(),
+      // location: faker.address.city(),
+
+      location: {
+        longitude:faker.datatype.number(), 
+        latitude: faker.datatype.number(),
+        placeId:faker.datatype.number(),
+        venueName: faker.lorem.words(),
+        streetNumber:faker.datatype.number(),   
+        route:faker.lorem.words(),
+        administrativeAreaLevel1:faker.city(),       
+        country:faker.country(),
+        city:faker.city(),
+          
+      },
+
+    
     },
     privatePassword: faker.internet.password(),
     // ticketTiers: [
@@ -106,6 +121,9 @@ events=[]
     },
     emailMessage: faker.lorem.sentences(),
     eventQRimage: faker.image.imageUrl(),
+    evenImage: faker.image.imageUrl(),
+    creatorID:faker.datatype.number(),
+    streetNumber:faker.datatype.number(),
     promoCodes: [
       {
         code: faker.random.alphaNumeric(10),
@@ -120,6 +138,8 @@ events=[]
     ],
     isVerified: faker.datatype.boolean(),
     isPublic: faker.datatype.boolean(),
+    published:faker.datatype.boolean(),
+
   });
 
   events.push(newEvent);
@@ -153,7 +173,7 @@ console.log('Database seeded!')
 
 //  }
  
-//  seedDB();
+seedDB();
 // Seed the database with 10 events
 // for (let i = 0; i < 10; i++) {
 //   const event = generateEvent();

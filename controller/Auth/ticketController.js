@@ -151,4 +151,5 @@ catch (error) {
 
 
 
-module.exports = { bookTicket, createTicketTier,retrieveTicketTier }; //,editTicket };
+
+module.exports = { bookTicket, createTicketTier,retrieveTicketTier}; //,editTicket };
