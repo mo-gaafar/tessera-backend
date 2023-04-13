@@ -44,8 +44,33 @@ const eventSchema = new mongoose.Schema(
         default: "Other",
       },
       location: {
-        type: String,
-        required: true,
+        longitude: {
+          type: Number,
+        },
+        latitude: {
+          type: Number,
+        },
+        placeId: {
+          type: Number,
+        },
+        venueName: {
+          type: String,
+        },
+        streetNumber: {
+          type: Number,
+        },
+        route: {
+          type: String,
+        },
+        administrativeAreaLevel1: {
+          type: String,
+        },
+        country: {
+          type: String,
+        },
+        city: {
+          type: String,
+        },
       },
     },
 
@@ -83,6 +108,7 @@ const eventSchema = new mongoose.Schema(
 
     isVerified: Boolean,
 
+<<<<<<< HEAD
     isPublic: Boolean,
 
     eventQRimage: {
@@ -90,18 +116,28 @@ const eventSchema = new mongoose.Schema(
       default:
         "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-116-768x445.png",
     },
+=======
+    isPublic: Boolean, // if true so the event will be public - if false the event will be private
+>>>>>>> 6be14d615efe029a0b21eadcf2e2bce31ce065a1
 
-    promoCodes: [{ code: String, percentage: Number, remainingUses: Number }],
+    published: Boolean, // if the creator have published the event ( it will be availble for the users to book tickets)
 
-    isVerified: Boolean,
+    eventQRimage: String,
 
-    isPublic: Boolean,
+    eventImage: String,
 
     creatorId: {
       type: String,
     },
 
     isOnline: Boolean, // to be discussed
+
+    promocode: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "promocodeModel",
+      },
+    ],
   },
 
   {
