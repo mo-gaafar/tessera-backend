@@ -108,23 +108,20 @@ const eventSchema = new mongoose.Schema(
 
     isVerified: Boolean,
 
-<<<<<<< HEAD
-    isPublic: Boolean,
+    isPublic: Boolean, // if true so the event will be public - if false the event will be private
+
+    published: Boolean, // if the creator have published the event ( it will be availble for the users to book tickets)
 
     eventQRimage: {
       type: String,
       default:
-        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-116-768x445.png",
+        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
     },
-=======
-    isPublic: Boolean, // if true so the event will be public - if false the event will be private
->>>>>>> 6be14d615efe029a0b21eadcf2e2bce31ce065a1
-
-    published: Boolean, // if the creator have published the event ( it will be availble for the users to book tickets)
-
-    eventQRimage: String,
-
-    eventImage: String,
+    eventImage: {
+      type: String,
+      default:
+        "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
+    },
 
     creatorId: {
       type: String,
