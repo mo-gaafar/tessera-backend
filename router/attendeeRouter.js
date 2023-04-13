@@ -6,4 +6,5 @@ router.get(
   "/landing-page/retrieve-categories",
   attendeeController.listAllCategories
 );
+router.get("/api/attendee/event/:eventID", attendeeController.getEventInfo);
 module.exports = router; //exporting the module in order to use it in other files

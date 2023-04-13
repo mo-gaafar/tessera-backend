@@ -16,8 +16,11 @@ const eventSchema = new mongoose.Schema(
         type: Date,
         required: true,
       },
-      eventImage: String,
-
+      eventImage: {
+        type: String,
+        default:
+          "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
+      },
       categories: {
         type: String,
         enum: [

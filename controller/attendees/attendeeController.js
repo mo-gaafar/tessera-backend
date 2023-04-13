@@ -89,7 +89,6 @@ async function displayfilteredTabs(req, res) {
         emailMessage,
         ticketTiers,
         creatorId,
-        eventQRimage,
         ...filtered
       } = eventModel._doc;
       return filtered;
@@ -416,4 +415,35 @@ async function listAllCategories(req, res) {
     throw err;
   }
 }
-module.exports = { displayfilteredTabs, listAllCategories };
+async function getEventInfo(req, res) {
+  try {
+    const eventId = req.params.eventID;
+    //exclude unnecessary fields
+    const filteredEvents = events.map((eventModel) => {
+      const {
+        createdAt,
+        updatedAt,
+        __v,
+        ticketTiers,
+        eventStatus,
+        published,
+        isPublic,
+        isVerified,
+        promocode,
+        startSelling,
+        endSelling,
+        publicDate,
+        emailMessage,
+        ...filtered
+      } = eventModel._doc;
+      return filtered;
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: "false", message: "Internal server error" });
+    throw err;
+  }
+}
+module.exports = { displayfilteredTabs, listAllCategories, getEventInfo };
