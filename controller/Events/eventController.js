@@ -172,13 +172,19 @@ async function updateEvent(req, res) {
 			message: error.message,
 		});
 	}
+<<<<<<< HEAD
 }
+=======
+} 
+
+>>>>>>> 9ed6e8981026adfa05299658d0d43ccc2c3ce108
 
 async function publishEvent(req, res) {
 	const event = await eventModel.findById(req.params.eventID);
 	console.log("event is:", event);
 }
 
+<<<<<<< HEAD
 module.exports = {
 	createEvent,
 	getEventById,
@@ -186,3 +192,19 @@ module.exports = {
 	updateEvent,
 	publishEvent,
 };
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { createEvent, getEventById, deleteEvent, updateEvent  };
+>>>>>>> 9ed6e8981026adfa05299658d0d43ccc2c3ce108
