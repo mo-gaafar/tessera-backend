@@ -23,7 +23,6 @@ async function displayfilteredTabs(req, res) {
     const eventHosted = req.query.eventHosted;
     const city = req.query.administrative_area_level_1;
     const country = req.query.country;
-
     //use query object to filter by
     const query = {};
 
@@ -452,7 +451,7 @@ async function getEventInfo(req, res) {
     var isEventFree = true;
     var counter1 = 0;
     var counter2 = 0;
-
+    console.log();
     //loop over ticketTiers array
     for (let i = 0; i < event[0].ticketTiers.length; i++) {
       const tier = event[0].ticketTiers[i];
