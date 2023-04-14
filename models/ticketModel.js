@@ -1,22 +1,25 @@
 const mongoose = require("mongoose");
-const object = mongoose.Schema.Types.ObjectId;
 // creating ticket schema
 const ticketSchema = new mongoose.Schema(
   {
     // reference to the objectID of the event, to link ticket to a certain event
-    eventID: {
-      type: object,
+    eventId: {
+      type: mongoose.Schema.Types.ObjectId,
       ref: "eventModel",
       required: true,
     },
 
     // reference to the objectID of the user, to link ticket to user
-    userID: {
-      type: object,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
       ref: "userModel",
       required: true,
     },
 
+    promocodeUsed: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "promocodeModel",
+    },
     purchaseDate: {
       type: String,
       required: true,
@@ -25,12 +28,10 @@ const ticketSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    type: {
+    tierName: {
       type: String,
       required: true,
     },
-
-    // creator:req.userID
   },
 
   { timestamps: true }

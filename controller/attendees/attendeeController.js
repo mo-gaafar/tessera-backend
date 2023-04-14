@@ -1,4 +1,5 @@
 const userModel = require("../../models/userModel");
+const Promocode = require("../../models/promocodeModel");
 const eventModel = require("../../models/eventModel");
 const mongoose = require("mongoose");
 const { func } = require("joi");
@@ -22,7 +23,6 @@ async function displayfilteredTabs(req, res) {
     const eventHosted = req.query.eventHosted;
     const city = req.query.administrative_area_level_1;
     const country = req.query.country;
-
     //use query object to filter by
     const query = {};
 
@@ -65,7 +65,7 @@ async function displayfilteredTabs(req, res) {
 
       queryWithDate(query, eventStartDate, eventEndDate, 2);
     }
-    //remove private events from array
+    //remove private events from array //published or not to be added later
     query["isPublic"] = true;
     //array of events filtered using the query object
     const events = await eventModel.find(query);
@@ -89,7 +89,8 @@ async function displayfilteredTabs(req, res) {
         emailMessage,
         ticketTiers,
         creatorId,
-        eventQRimage,
+        soldTickets,
+        eventUrl,
         ...filtered
       } = eventModel._doc;
       return filtered;
@@ -416,4 +417,109 @@ async function listAllCategories(req, res) {
     throw err;
   }
 }
-module.exports = { displayfilteredTabs, listAllCategories };
+/**
+ * This function shall return a public event information using eventId
+ *
+ * @async
+ * @function
+ * @param {Object} req -evetnId as as path parameter
+ * @param {Object} res -event information
+ * @returns -response with event information required
+ * @throws {Error} -internal server error
+ */
+async function getEventInfo(req, res) {
+  //!!! online url to be added
+  try {
+    //get eventId from path parameter
+    const eventId = req.params.eventID;
+
+    //create query object
+    const query = {};
+    //remove private events from array
+    query["isPublic"] = true;
+    query["_id"] = eventId;
+
+    //event filtered using the query object
+    const event = await eventModel
+      .find(query)
+      //get only these fields from creator
+      .populate("creatorId", "_id firstName lastName");
+
+    //create dictionary to store ticketCapacity information
+    const tierCapacity = {};
+    var isEventCapacityFull = true;
+    var isEventFree = true;
+    var counter1 = 0;
+    var counter2 = 0;
+    console.log();
+    //loop over ticketTiers array
+    for (let i = 0; i < event[0].ticketTiers.length; i++) {
+      const tier = event[0].ticketTiers[i];
+      //checks if capacity full for each tier
+      const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
+
+      if (isTierCapacityFull === false) {
+        counter1 = counter1 + 1;
+      }
+      if (tier.price != "Free") {
+        counter2 = counter2 + 1;
+      }
+
+      // Store capacity full as a value in dictionary with tier name as key
+      tierCapacity[tier.tierName] = isTierCapacityFull;
+    }
+    //if counter greater than zero,then event overall capacity is not full
+    if (counter1 > 0) {
+      isEventCapacityFull = false;
+    } else {
+      isEventCapacityFull = true;
+    }
+    //if counter greater than zero,then event overall is not full
+    if (counter2 > 0) {
+      isEventFree = false;
+    } else {
+      isEventFree = true;
+    }
+
+    //exclude unnecessary fields
+    const filteredEvents = event.map((eventModel) => {
+      const {
+        _id,
+        createdAt,
+        updatedAt,
+        __v,
+        eventStatus,
+        published,
+        isPublic,
+        isVerified,
+        promocode,
+        startSelling,
+        endSelling,
+        publicDate,
+        emailMessage,
+        soldTickets,
+        privatePassword,
+
+        ...filtered
+      } = eventModel._doc;
+      return filtered;
+    });
+
+    console.log("getting event information");
+
+    res.status(200).json({
+      success: "true",
+      filteredEvents,
+      tierCapacity,
+      isEventCapacityFull,
+      isEventFree,
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: "false", message: "Internal server error" });
+    throw err;
+  }
+}
+module.exports = { displayfilteredTabs, listAllCategories, getEventInfo };

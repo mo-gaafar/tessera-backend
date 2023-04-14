@@ -18,15 +18,12 @@ Asynchronous function that creates a new event based on the request body and add
 */
 async function createEvent(req, res) {
 	try {
-		const event = await eventModel.create(req.body); //await for Creating collection based of req body
 		const token = await retrieveToken(req);
-
 		const decoded = await verifyToken(token);
-		await eventModel.findByIdAndUpdate(
-			{ _id: event._id },
-			{ $set: { creatorId: decoded.user_id } },
-			{ new: true }
-		);
+		const event = await eventModel.create({
+			...req.body,
+			creatorId: decoded.user_id,
+		});
 		await event.save();
 
 		return res.status(200).json({
@@ -42,7 +39,6 @@ async function createEvent(req, res) {
 }
 
 /**
-
 Retrieves an event from the database by its ID.
 @async
 @function
@@ -53,9 +49,19 @@ Retrieves an event from the database by its ID.
 @throws {Error} - If an error occurs while retrieving the event.
 */
 async function getEventById(req, res) {
-	const eventId = req.params.eventID;
 	try {
-		const event = await eventModel.findById(eventId); //returns event of given id
+		const eventId = req.params.eventID;
+		const event = await eventModel.findById(eventId); //search event by id
+		const token = await retrieveToken(req);
+		const decoded = await verifyToken(token);
+		if (event.creatorId.toString() !== decoded.user_id) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to retrieve this event",
+			});
+		}
+		//const event = await eventModel.findById(eventId); //returns event of given id
 		if (!event) {
 			return res.status(404).json({ message: "Event is not found" });
 		}
@@ -80,10 +86,18 @@ Deletes an event from the database by its ID.
 @throws {Error} - If an error occurs while deleting the event.
 */
 async function deleteEvent(req, res) {
-	const eventIdd = req.params.eventID;
-
 	try {
+		const eventIdd = req.params.eventID;
 		const event = await eventModel.findById(eventIdd); //search event by id
+		const token = await retrieveToken(req);
+		const decoded = await verifyToken(token);
+		if (event.creatorId.toString() !== decoded.user_id) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to delete this event",
+			});
+		}
 
 		if (!event) {
 			return res.status(404).json({ message: "No event Found" });
@@ -91,7 +105,9 @@ async function deleteEvent(req, res) {
 
 		await eventModel.findByIdAndDelete(eventIdd); // delete the found event
 
-		return res.status(200).json({ message: "success !! the event is deleted" });
+		return res
+			.status(200)
+			.json({ success: true, message: "the event is deleted" });
 	} catch (error) {
 		res.status(400).json({
 			success: false,
@@ -116,6 +132,18 @@ async function updateEvent(req, res) {
 	try {
 		const eventId = req.params.eventID; // get the event ID from the request URL
 		const update = req.body; // get the update object from the request body
+		const event = await eventModel.findById(eventId);
+		const token = await retrieveToken(req);
+		const decoded = await verifyToken(token);
+		console.log(event.creatorId.toString());
+		console.log(decoded.user_id);
+		if (event.creatorId.toString() !== decoded.user_id) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to update this event",
+			});
+		}
 
 		// update the document in the database using findOneAndUpdate
 		const updatedEvent = await eventModel.findOneAndUpdate(
@@ -130,39 +158,26 @@ async function updateEvent(req, res) {
 		}
 
 		// return the updated document
-		return res.status(200).json({ message: "success !! the event is updated" });
+		return res
+			.status(200)
+			.json({ success: true, message: "the event is updated" });
 	} catch (error) {
 		res.status(400).json({
 			success: false,
 			message: error.message,
 		});
 	}
-} 
-
-async function publishEvent(req,res){
-
- const event = await eventModel.findById(req.params.eventID);
- console.log("event is:",event)
-
-
-
-
-
-
-
 }
 
+async function publishEvent(req, res) {
+	const event = await eventModel.findById(req.params.eventID);
+	console.log("event is:", event);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = { createEvent, getEventById, deleteEvent, updateEvent ,publishEvent };
+module.exports = {
+	createEvent,
+	getEventById,
+	deleteEvent,
+	updateEvent,
+	publishEvent,
+};
