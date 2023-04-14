@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const userModel = require("../../models/userModel");
+const bcrypt = require("bcrypt");
 
 const {
 	sendUserEmail,
@@ -10,7 +11,11 @@ const {
 	passwordEncryption,
 	comparePassword,
 } = require("../../utils/passwords");
-const { GenerateToken, verifyToken } = require("../../utils/Tokens");
+const {
+	GenerateToken,
+	verifyToken,
+	retrieveToken,
+} = require("../../utils/Tokens");
 const { sendVerification, verifyEmail } = require("./verificationController");
 
 /**
@@ -122,7 +127,8 @@ async function signIn(req, res) {
 		}
 
 		// Compare the given password with the encrypted password in the database
-		const isMatched = await comparePassword(user.password, password);
+		//const isMatched = await comparePassword(user.password, password);
+		const isMatched = await bcrypt.compare(password, user.password);
 
 		// Password not matched
 		if (!isMatched) {
@@ -214,13 +220,13 @@ async function forgotPassword(req, res) {
 async function resetPassword(req, res) {
 	try {
 		// Get token from request params
-		const token = req.params.token;
-
+		//const token = req.params.token;
+		const token = await retrieveToken(req);
+		const decoded = await verifyToken(token);
 		// Verify token
-		const decoded = jwt.verify(token, process.env.SECRETJWT);
-
+		//const decoded = jwt.verify(token, process.env.SECRETJWT);
 		// Find user by ID
-		const user = await userModel.findById(decoded.userId);
+		const user = await userModel.findById(decoded.user_id);
 
 		// If the user is found by ID
 		if (user) {

@@ -1,4 +1,4 @@
-const express = require("express");
+/*const express = require("express");
 const router = express.Router();
 
 const seedingEvent=require("../controller/Auth/seedingController");
@@ -12,3 +12,4 @@ router.post(
 
 module.exports=router;
 
+*/

@@ -1,5 +1,4 @@
-
-const mongoose = require("mongoose");
+/*const mongoose = require("mongoose");
 const eventModel = require("../../models/eventModel");
 const {faker} = require('@faker-js/faker');
 const shortid = require('shortid');
@@ -257,94 +256,5 @@ res.status(201).json(
 // }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 module.exports = { seedDB };
+*/

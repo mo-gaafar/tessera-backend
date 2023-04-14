@@ -18,12 +18,7 @@ Asynchronous function that creates a new event based on the request body and add
 */
 async function createEvent(req, res) {
 	try {
-		//const event = await eventModel.create(req.body); //await for Creating collection based of req body
 		const token = await retrieveToken(req);
-		const useridid = "64282ab3eb31d64f9152d48c";
-		const tok = GenerateToken(useridid);
-		console.log(tok);
-
 		const decoded = await verifyToken(token);
 		const event = await eventModel.create({
 			...req.body,
@@ -55,19 +50,19 @@ Retrieves an event from the database by its ID.
 @throws {Error} - If an error occurs while retrieving the event.
 */
 async function getEventById(req, res) {
-	const eventId = req.params.eventID;
-	const event = await eventModel.findById(eventId); //search event by id
-	const token = await retrieveToken(req);
-	const decoded = await verifyToken(token);
-	if (event.creatorId.toString() !== decoded.user_id) {
-		// check if the creator of the event matches the user making the delete request
-		return res.status(401).json({
-			success: false,
-			message: "You are not authorized to retrieve this event",
-		});
-	}
 	try {
-		const event = await eventModel.findById(eventId); //returns event of given id
+		const eventId = req.params.eventID;
+		const event = await eventModel.findById(eventId); //search event by id
+		const token = await retrieveToken(req);
+		const decoded = await verifyToken(token);
+		if (event.creatorId.toString() !== decoded.user_id) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to retrieve this event",
+			});
+		}
+		//const event = await eventModel.findById(eventId); //returns event of given id
 		if (!event) {
 			return res.status(404).json({ message: "Event is not found" });
 		}
@@ -92,9 +87,8 @@ Deletes an event from the database by its ID.
 @throws {Error} - If an error occurs while deleting the event.
 */
 async function deleteEvent(req, res) {
-	const eventIdd = req.params.eventID;
-
 	try {
+		const eventIdd = req.params.eventID;
 		const event = await eventModel.findById(eventIdd); //search event by id
 		const token = await retrieveToken(req);
 		const decoded = await verifyToken(token);
@@ -142,6 +136,8 @@ async function updateEvent(req, res) {
 		const event = await eventModel.findById(eventId);
 		const token = await retrieveToken(req);
 		const decoded = await verifyToken(token);
+		console.log(event.creatorId.toString());
+		console.log(decoded.user_id);
 		if (event.creatorId.toString() !== decoded.user_id) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
@@ -172,19 +168,13 @@ async function updateEvent(req, res) {
 			message: error.message,
 		});
 	}
-<<<<<<< HEAD
 }
-=======
-} 
-
->>>>>>> 9ed6e8981026adfa05299658d0d43ccc2c3ce108
 
 async function publishEvent(req, res) {
 	const event = await eventModel.findById(req.params.eventID);
 	console.log("event is:", event);
 }
 
-<<<<<<< HEAD
 module.exports = {
 	createEvent,
 	getEventById,
@@ -192,19 +182,3 @@ module.exports = {
 	updateEvent,
 	publishEvent,
 };
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = { createEvent, getEventById, deleteEvent, updateEvent  };
->>>>>>> 9ed6e8981026adfa05299658d0d43ccc2c3ce108

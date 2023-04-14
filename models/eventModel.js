@@ -173,9 +173,7 @@ const { passwordEncryption } = require("../utils/passwords");
 // });
 // module.exports = mongoose.model("eventModel", eventSchema);
 
-
-// 
-
+//
 
 // const mongoose = require("mongoose");
 // const { passwordEncryption } = require("../utils/passwords");
@@ -333,11 +331,9 @@ const { passwordEncryption } = require("../utils/passwords");
 //   }
 // );
 
-
 // const mongoose = require("mongoose");
 // const { passwordEncryption } = require("../utils/passwords");
 const eventSchema = new mongoose.Schema(
-<<<<<<< HEAD
 	{
 		basicInfo: {
 			// event Title
@@ -416,87 +412,6 @@ const eventSchema = new mongoose.Schema(
 				},
 			},
 		},
-=======
-  {
-    basicInfo: {
-      // event Title
-      eventName: {
-        type: String,
-        required: true,
-      },
-      startDateTime: {
-        type: Date,
-        required: true,
-      },
-      endDateTime: {
-        type: Date,
-        required: true,
-      },
-      eventImage: {
-        type: String,
-        default:
-          "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
-      },
-      categories: {
-        type: String,
-        enum: [
-          "Boat & Air",
-          "Business & Profession",
-          "Charity & Causes",
-          "Community & Culture",
-          "Family & Education",
-          "Fashion & Beauty",
-          "Film , Media & Entertainment",
-          "Food & Drink",
-          "Government & Politics",
-          "Health & Wellness",
-          "Hobbies & Special Interest",
-          "Home & Lifestyle",
-          "Music",
-          "Other",
-          "Performing & Visual Arts",
-          "Religion & Spirtuality",
-          "School Activities",
-          "Science & Technology",
-          "Seasonal Holiday",
-          "Sports & Fitness",
-          "Travel & Outdoor",
-        ],
-        default: "Other",
-      },
-      location: {
-        longitude: {
-          type: Number,
-        },
-        latitude: {
-          type: Number,
-        },
-        // Id of location in google maps
-        placeId: {
-          type: String,
-        },
-        venueName: {
-          type: String,
-        },
-        streetNumber: {
-          type: Number,
-        },
-        
-        route: {
-          type: String,
-        },
-        administrativeAreaLevel1: {
-          type: String,
-        },
-        country: {
-          type: String,
-        },
-        city: {
-          type: String,
-        },
-      },
-    },
->>>>>>> 9ed6e8981026adfa05299658d0d43ccc2c3ce108
 
 		summary: String,
 
@@ -556,19 +471,11 @@ const eventSchema = new mongoose.Schema(
 			},
 		],
 
-<<<<<<< HEAD
 		creatorId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "userModel",
 			required: true,
 		},
-=======
-    creatorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "userModel",
-      //required: true cc725f934939454a126b6fd0df17dd40082156e3
-    },
->>>>>>> 9ed6e8981026adfa05299658d0d43ccc2c3ce108
 
 		promocode: [
 			{
@@ -601,102 +508,21 @@ eventSchema.pre("findOneAndUpdate", function (next) {
 });
 module.exports = mongoose.model("eventModel", eventSchema);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 eventSchema.pre("save", async function (next) {
-  if (!this.isModified("privatePassword")) {
-    next();
-  }
-  this.privatePassword = await passwordEncryption(this.privatePassword);
+	if (!this.isModified("privatePassword")) {
+		next();
+	}
+	this.privatePassword = await passwordEncryption(this.privatePassword);
 });
 
 eventSchema.pre("findOneAndUpdate", function (next) {
-  const update = this.getUpdate();
-  if (update.basicInfo) {
-    const err = new Error("Cannot update basicInfo");
-    err.status = 403;
-    return next(err);
-  }
-  next();
+	const update = this.getUpdate();
+	if (update.basicInfo) {
+		const err = new Error("Cannot update basicInfo");
+		err.status = 403;
+		return next(err);
+	}
+	next();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports = mongoose.model("eventModel", eventSchema);

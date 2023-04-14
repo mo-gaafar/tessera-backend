@@ -39,14 +39,13 @@ Asynchronous function to retrieve an authorization token from the request header
 @function retrieveToken
 @param {object} req - The request object containing headers.
 @param {string} req.headers.authorization - The authorization header containing a Bearer token.
-@returns {Promise<string|null>} - A Promise that resolves to a token string if found in the header,
+@returns {Token} - A Promise that resolves to a token string if found in the header,
 or null if not found or the auth type is not Bearer.
 */
 async function retrieveToken(req) {
 	const authHeader = req.headers.authorization;
 	//const authHeader = req.headers.authorization.split(' ');
-    // const authHeader= req.headers.authorization.split(' ')[1] || '';
-
+	// const authHeader= req.headers.authorization.split(' ')[1] || '';
 
 	const [authType, token] = authHeader.split(" ");
 	if (authType !== "Bearer" || !token) {

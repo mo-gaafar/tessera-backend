@@ -12,7 +12,7 @@ const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
-const seedingRouter=require("./router/seedingRouter");
+//const seedingRouter=require("./router/seedingRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -33,10 +33,6 @@ app.get("/", (req, res) => {
 
 // Add middleware
 app.use(express.json());
-
-
-
-
 
 /**
  * This is an express session middleware
@@ -64,18 +60,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
-const seedingRouter=require("./router/seedingRouter");
-
-
-
-
-
-
-
-
-
-
+//const seedingRouter = require("./router/seedingRouter");
 
 // Enable CORS for all requests
 app.use(cors());
@@ -92,8 +77,7 @@ app.use("/api", eventRouter);
 app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
 // app.use("/api", attendeeRouter);
-app.use("/api", seedingRouter);
-
+//app.use("/api", seedingRouter);
 
 // Start the server on port 3000
 const PORT = 3000;
@@ -111,4 +95,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = server;
-
