@@ -159,7 +159,7 @@ const uploadImage = async (req, res) => {
     const eventId = req.params.eventID;
     const base64data = Buffer.from(req.files.image.data, 'base64');
     // generate a unique filename for the uploaded image
-    const filename = '${uuidv4()}.png';
+    const filename = `S${uuidv4()}.png`;
 
     // upload the image to your S3 bucket
     const uploadParams = {
