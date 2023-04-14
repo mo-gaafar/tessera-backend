@@ -23,6 +23,7 @@ async function displayfilteredTabs(req, res) {
     const eventHosted = req.query.eventHosted;
     const city = req.query.administrative_area_level_1;
     const country = req.query.country;
+    const freeEvent = req.query.freeEvent;
     //use query object to filter by
     const query = {};
 
@@ -69,7 +70,21 @@ async function displayfilteredTabs(req, res) {
     query["isPublic"] = true;
     //array of events filtered using the query object
     const events = await eventModel.find(query);
-
+    //
+    var counter3 = 0;
+    const isEventFreeArray = [];
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      for (let j = 0; j < event.ticketTiers.length; j++) {
+        const tier = event.ticketTiers[j];
+        if (tier.price != "Free") {
+          counter3 = counter3 + 1;
+        }
+      }
+      const isEventFree = counter3 > 0 ? false : true;
+      isEventFreeArray.push(isEventFree);
+    }
+    //
     //retreive categories
     const categoriesRetreived = [
       ...new Set(events.map((eventModel) => eventModel.basicInfo.categories)),
@@ -96,9 +111,12 @@ async function displayfilteredTabs(req, res) {
       return filtered;
     });
     console.log("displaying filtered tabs");
-    res
-      .status(200)
-      .json({ success: "true", filteredEvents, categoriesRetreived });
+    res.status(200).json({
+      success: "true",
+      filteredEvents,
+      isEventFreeArray,
+      categoriesRetreived,
+    });
   } catch (err) {
     console.error(err);
     // Return error message
@@ -290,26 +308,20 @@ async function getCalender(startDate, endDate) {
 async function queryWithDate(query, eventStartDate, eventEndDate, key) {
   try {
     if (key === 1) {
-      query["basicInfo.startDateTime.utc"] = {
+      query["basicInfo.startDateTime"] = {
         //event starts after the startdate
         $gt: eventStartDate,
         //event ends before the enddate
         $lt: eventEndDate,
       };
     } else {
-      query["basicInfo.startDateTime.utc"] = {
+      query["basicInfo.startDateTime"] = {
         //event starts after the startdate
         $gte: eventStartDate,
         //event ends before the enddate
         $lte: eventEndDate,
       };
     }
-    query["basicInfo.startDateTime.utc"] = {
-      //event starts after the startdate
-      $gte: eventStartDate,
-      //event ends before the enddate
-      $lte: eventEndDate,
-    };
   } catch (err) {
     console.error(err);
     res
