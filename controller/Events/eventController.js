@@ -146,7 +146,6 @@ async function publishEvent(req, res) {
 }
 
 const AWS = require("aws-sdk");
-const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 
 // configure AWS SDK with your S3 bucket credentials
@@ -155,35 +154,18 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_S3_SECRET_KEY,
 });
 const s3 = new AWS.S3();
-
-// configure multer to accept png files
-const upload = multer({
-  limits: { fileSize: 5242880 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype !== "image/png") {
-      cb(new Error("Only PNG files are allowed"));
-    } else {
-      cb(null, true);
-    }
-  },
-});
-
 const uploadImage = async (req, res) => {
   try {
     const eventId = req.params.eventID;
+    const base64data = Buffer.from(req.files.image.data, 'base64');
     // generate a unique filename for the uploaded image
-    const filename = `${uuidv4()}.png`;
-    console.log(
-      util.inspect(req, {
-        depth: 5,
-        colors: true,
-      })
-    );
+    const filename = '${uuidv4()}.png';
+
     // upload the image to your S3 bucket
     const uploadParams = {
       Bucket: process.env.AWS_S3_BUCKET,
       Key: filename,
-      Body: req.file.buffer,
+      Body: base64data,
       ContentType: "image/png",
     };
     const s3data = await s3.upload(uploadParams).promise();
