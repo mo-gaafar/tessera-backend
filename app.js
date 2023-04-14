@@ -12,6 +12,7 @@ const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
+const promocodeRouter = require("./router/promocodeRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -48,12 +49,12 @@ app.use(
 );
 
 const corsOptions = {
-  origin: '*',
-  methods: 'GET,POST,PATCH,DELETE,PUT',
-  allowedHeaders: 'Content-Type,X-Forwarded-For,Token,Authorization,',
+  origin: "*",
+  methods: "GET,POST,PATCH,DELETE,PUT",
+  allowedHeaders: "Content-Type,X-Forwarded-For,Token,Authorization,",
   credentials: true,
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
 };
 app.use(cors(corsOptions));
 
@@ -68,6 +69,7 @@ app.use("/api", userSocialRouter);
 app.use("/api", eventRouter);
 app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
+app.use("/api", promocodeRouter);
 
 // Start the server on port 3000
 const PORT = 3000;
