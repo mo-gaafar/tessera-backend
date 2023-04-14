@@ -115,7 +115,7 @@ async function addPromocodeToEvent(eventId, promocode) {
     }
 
     // Add the promocode to the event's promocodes array.
-    event.promocode.push(promocode);
+    event.promocodes.push(promocode);
 
     // Save the updated event to the database.
     await event.save();

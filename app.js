@@ -13,7 +13,7 @@ const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
 const promocodeRouter = require("./router/promocodeRouter");
-const seedingRouter = require("./router/seedingRouter");
+// const seedingRouter = require("./router/seedingRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -79,7 +79,7 @@ app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
 app.use("/api", promocodeRouter);
 // app.use("/api", attendeeRouter);
-app.use("/api", seedingRouter);
+// app.use("/api", seedingRouter);
 
 // Start the server on port 3000
 const PORT = 3000;
