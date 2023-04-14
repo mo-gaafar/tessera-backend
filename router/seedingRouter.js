@@ -3,9 +3,12 @@
 
 // const seedingEvent=require("../controller/Auth/seedingController");
 
+
 // router.post(
 // 	"/auth/seedingevent",
 // 	seedingEvent.seedDB
 // );
 
+
 // module.exports=router;
+
