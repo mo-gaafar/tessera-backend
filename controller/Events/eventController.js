@@ -1,8 +1,8 @@
 const eventModel = require("../../models/eventModel");
 const {
-	GenerateToken,
-	retrieveToken,
-	verifyToken,
+  GenerateToken,
+  retrieveToken,
+  verifyToken,
 } = require("../../utils/Tokens");
 const jwt = require("jsonwebtoken");
 
@@ -17,32 +17,31 @@ Asynchronous function that creates a new event based on the request body and add
 @throws {Object} An error message if there was an error creating the event.
 */
 async function createEvent(req, res) {
-	try {
-		const event = await eventModel.create(req.body); //await for Creating collection based of req body
-		const token = await retrieveToken(req);
+  try {
+    const event = await eventModel.create(req.body); //await for Creating collection based of req body
+    const token = await retrieveToken(req);
 
-		const decoded = await verifyToken(token);
-		await eventModel.findByIdAndUpdate(
-			{ _id: event._id },
-			{ $set: { creatorId: decoded.user_id } },
-			{ new: true }
-		);
-		await event.save();
+    const decoded = await verifyToken(token);
+    await eventModel.findByIdAndUpdate(
+      { _id: event._id },
+      { $set: { creatorId: decoded.user_id } },
+      { new: true }
+    );
+    await event.save();
 
-		return res.status(200).json({
-			success: true,
-			message: "Event has been created successfully",
-		});
-	} catch (error) {
-		res.status(400).json({
-			success: false,
-			message: error.message,
-		});
-	}
+    return res.status(200).json({
+      success: true,
+      message: "Event has been created successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
 }
 
 /**
-
 Retrieves an event from the database by its ID.
 @async
 @function
@@ -53,19 +52,19 @@ Retrieves an event from the database by its ID.
 @throws {Error} - If an error occurs while retrieving the event.
 */
 async function getEventById(req, res) {
-	const eventId = req.params.eventID;
-	try {
-		const event = await eventModel.findById(eventId); //returns event of given id
-		if (!event) {
-			return res.status(404).json({ message: "Event is not found" });
-		}
-		return res.status(200).json({ event });
-	} catch (error) {
-		res.status(400).json({
-			success: false,
-			message: error.message,
-		});
-	}
+  const eventId = req.params.eventID;
+  try {
+    const event = await eventModel.findById(eventId); //returns event of given id
+    if (!event) {
+      return res.status(404).json({ message: "Event is not found" });
+    }
+    return res.status(200).json({ event });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
 }
 
 /**
@@ -80,24 +79,24 @@ Deletes an event from the database by its ID.
 @throws {Error} - If an error occurs while deleting the event.
 */
 async function deleteEvent(req, res) {
-	const eventIdd = req.params.eventID;
+  const eventIdd = req.params.eventID;
 
-	try {
-		const event = await eventModel.findById(eventIdd); //search event by id
+  try {
+    const event = await eventModel.findById(eventIdd); //search event by id
 
-		if (!event) {
-			return res.status(404).json({ message: "No event Found" });
-		}
+    if (!event) {
+      return res.status(404).json({ message: "No event Found" });
+    }
 
-		await eventModel.findByIdAndDelete(eventIdd); // delete the found event
+    await eventModel.findByIdAndDelete(eventIdd); // delete the found event
 
-		return res.status(200).json({ message: "success !! the event is deleted" });
-	} catch (error) {
-		res.status(400).json({
-			success: false,
-			message: error.message,
-		});
-	}
+    return res.status(200).json({ message: "success !! the event is deleted" });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
 }
 
 /**
@@ -113,56 +112,41 @@ Updates an event in the database by its ID.
 @throws {Error} - If an error occurs while updating the event.
 */
 async function updateEvent(req, res) {
-	try {
-		const eventId = req.params.eventID; // get the event ID from the request URL
-		const update = req.body; // get the update object from the request body
+  try {
+    const eventId = req.params.eventID; // get the event ID from the request URL
+    const update = req.body; // get the update object from the request body
 
-		// update the document in the database using findOneAndUpdate
-		const updatedEvent = await eventModel.findOneAndUpdate(
-			{ _id: eventId },
-			update,
-			{ new: true, runValidators: true }
-		);
+    // update the document in the database using findOneAndUpdate
+    const updatedEvent = await eventModel.findOneAndUpdate(
+      { _id: eventId },
+      update,
+      { new: true, runValidators: true }
+    );
 
-		// check if the updatedEvent exists
-		if (!updatedEvent) {
-			return res.status(404).json({ error: "Event not found" });
-		}
+    // check if the updatedEvent exists
+    if (!updatedEvent) {
+      return res.status(404).json({ error: "Event not found" });
+    }
 
-		// return the updated document
-		return res.status(200).json({ message: "success !! the event is updated" });
-	} catch (error) {
-		res.status(400).json({
-			success: false,
-			message: error.message,
-		});
-	}
-} 
-
-async function publishEvent(req,res){
-
- const event = await eventModel.findById(req.params.eventID);
- console.log("event is:",event)
-
-
-
-
-
-
-
+    // return the updated document
+    return res.status(200).json({ message: "success !! the event is updated" });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
 }
 
+async function publishEvent(req, res) {
+  const event = await eventModel.findById(req.params.eventID);
+  console.log("event is:", event);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = { createEvent, getEventById, deleteEvent, updateEvent ,publishEvent };
+module.exports = {
+  createEvent,
+  getEventById,
+  deleteEvent,
+  updateEvent,
+  publishEvent,
+};
