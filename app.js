@@ -40,13 +40,13 @@ app.use(express.json());
  * to allow the server to keep track of the user’s state using session unique id
  * In session-based authentication, the user’s state is stored in the server’s memory or a database.
  */
-// app.use(
-//   session({
-//     secret: "glory to the king",
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// );
+app.use(
+  session({
+    secret: "glory to the king",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 // Enable CORS for all requests
 app.use(cors());

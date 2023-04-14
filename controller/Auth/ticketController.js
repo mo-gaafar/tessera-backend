@@ -65,13 +65,17 @@ async function bookTicket(req, res) {
   }
 }
 
-// const generatedtoken=  GenerateToken("64166c7ecbbe595954ec662d")
+// const generatedtoken=  GenerateToken("641eddf055c9b5c70ae4ecdf")
+  
+
 // console.log("generated token is:",generatedtoken)
 
 
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
-  const { quantitySold, capacity, tier, price } = req.body;
+  console.log("ana gowa el create ticket tier ")
+  try{
+  const { tierName,quantitySold, maxCapacity,  price,startSelling,endSelling } = req.body;
   const token=await retrieveToken(req) //getting the token of the ticket tier creator
   console.log("token is:",token)
   const decodedToken=verifyToken(token) //decoding the token
@@ -90,7 +94,10 @@ async function createTicketTier(req, res) {
   console.log("creator of the event is the one who edits:",event.creatorId) 
 
 
-  const newTicketTier = { quantitySold, capacity, tier, price };
+  // const newTicketTier = { quantitySold, capacity, tier, price };
+  // const newTicketTier = { quantitySold, capacity, tier, price };
+  const newTicketTier={tierName,quantitySold, maxCapacity,  price,startSelling,endSelling}
+
   console.log("new tier is:", newTicketTier);
   event.ticketTiers.push(newTicketTier); // adding new tier to the array of tiers 
 
@@ -115,6 +122,15 @@ else{
   });
 
 }
+  }
+  catch(error){
+
+    res.status(400).json({
+      success: false,
+      message: "invalid details",
+    });
+
+  }
 
 }
 
@@ -132,7 +148,7 @@ try {
   		}
       const {ticketTiers}=event
       return res.status(200).json({
-        
+        success:true,
         message:"Ticket tier details for the event",
         ticketTiers });
 }
@@ -147,9 +163,66 @@ catch (error) {
 
 }
 
+async function editTicketTier(req,res){
+
+try {
+
+  const eventId = req.params.eventID; // get the event ID from the request URL
+  const update = req.body; // get the update object from the request body
+
+  const updatedEvent = await eventModel.findOneAndUpdate(
+    { _id: eventId },
+    update,
+    { new: true, runValidators: true }
+  );
+
+  console.log("updated project:",updatedEvent)
+
+  
+  
+} 
+
+
+catch (error) {
+  res.status(400).json({
+    success: false,
+    message: "invalid details",
+  });
+
+}
 
 
 
 
 
-module.exports = { bookTicket, createTicketTier,retrieveTicketTier}; //,editTicket };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { bookTicket, createTicketTier,retrieveTicketTier,editTicketTier}; //,editTicket };

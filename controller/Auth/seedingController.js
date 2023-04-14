@@ -1,9 +1,9 @@
 
 const mongoose = require("mongoose");
 const eventModel = require("../../models/eventModel");
-
 const {faker} = require('@faker-js/faker');
-
+const shortid = require('shortid');
+const { resendEmailVerification } = require("./verificationController");
 
 async function connectDB() {
     mongoose
@@ -16,20 +16,21 @@ async function connectDB() {
 
 
 async function seedDB(req,res){
-
+  let loc1;
+  let loc2;
+  objects=[]
+  
 await eventModel.deleteMany({});
-
 events=[]
-const numEvents = 10;
-const numConcerts = Math.floor(numEvents / 4);
 console.log("ana gowa el zft sedding")
 //  const events=[];
+// const countries= ["United States","UK","Germany","Spain","Italy" ];
+// const randomIndex = faker.datatype.number({ min: 0, max: 6 });
+
+
  for (let i = 0; i < 5; i++){
-    console.log('ana gwa');
-
-
+  console.log('ana gwa el for');
    const newEvent= new eventModel({
-    
       basicInfo: {
       eventName: faker.helpers.arrayElement([
        "Where does Depression route from? _ Free Lecture",
@@ -37,26 +38,16 @@ console.log("ana gowa el zft sedding")
         "OPEN DAY EXECUTIVE MBA",
         "Living Machines 2023",
         "Tour Day Pontremoli",
-        "Warhammer Fest 3-Day Pass - Standard"]
+        "Warhammer Fest 3-Day Pass - Standard",
+        "Emerson Park Community Fun Day",
+        "Anime North 2023"
+        ]
       ),
-      description: faker.helpers.arrayElement([
-        "Learn why your mind reacts in a negative way and why this can have an affect on our potential! Did you know we only use 10% of our potential",
-        "Attend this free lecture on How To Achieve Self Confidence and remove self doubt from your mind!",
-        "This conference highlights the most exciting research in the fields of biomimetics and biohybrid systems under the theme of Living Machines.",
-        "SWL Imaging Training Academy in collaboration with Medicare and Health Education England present a Thoracic Imaging Study Day",
-        "Get ready for the greatest Warhammer convention the world has ever seen – Warhammer Fest 2023!"
-      ]
-      ),
-      startDateTime: {
-         timezone: faker.address.timeZone(),
-        utc: faker.date.future(),
-        // console.console.log(utc),
+      startDateTime: faker.date.future(),
+      endDateTime:faker.date.future(),
+      // evenImage: faker.image.imageUrl(),
+      eventImage:faker.image.imageUrl(),
 
-      },
-      endDateTime: {
-        timezone: faker.address.timeZone(),
-        utc: faker.date.future(),
-      },
       categories: faker.helpers.arrayElement([
         "Boat & Air",
         "Business & Profession",
@@ -80,44 +71,71 @@ console.log("ana gowa el zft sedding")
         "Sports & Fitness",
         "Travel & Outdoor",
       ]),
-      // location: faker.address.city(),
+      
+    
+
+
+       objects :[loc1 ,loc2],
+
+       location :faker.helpers.arrayElement([objects]),
+      
 
       location: {
-        longitude:faker.datatype.number(), 
-        latitude: faker.datatype.number(),
-        placeId:faker.datatype.number(),
+        longitude:faker.datatype.number(0,180), 
+        latitude: faker.datatype.number(0,90),
+        placeId:faker.random.alphaNumeric(),
         venueName: faker.lorem.words(),
-        streetNumber:faker.datatype.number(),   
+        streetNumber:faker.datatype.number(1,999),   
         route:faker.lorem.words(),
-        administrativeAreaLevel1:faker.lorem.words(),       
         country:faker.lorem.words(),
         city:faker.lorem.words(),
+        administrativeAreaLevel1:faker.lorem.words(),
+        // country:faker.lorem.words(),
+        // city:faker.lorem.words(),
           
+  // l
+        // const country=countries[Math.floor.random(1,5)],
+
+},
+
       },
 
-    
-    },
+
+    summary:faker.lorem.sentences(),
+
+    description: faker.helpers.arrayElement([
+      "Learn why your mind reacts in a negative way and why this can have an affect on our potential! Did you know we only use 10% of our potential",
+      "Attend this free lecture on How To Achieve Self Confidence and remove self doubt from your mind!",
+      "This conference highlights the most exciting research in the fields of biomimetics and biohybrid systems under the theme of Living Machines.",
+      "SWL Imaging Training Academy in collaboration with Medicare and Health Education England present a Thoracic Imaging Study Day",
+      "Get ready for the greatest Warhammer convention the world has ever seen – Warhammer Fest 2023!",
+      "Come join us for a fun packed family day out to celebrate the King's Coronation!",
+      "Anime North is Toronto's largest fan-run Japanese Animation convention, being held May 26-28, 2023 at the Toronto Congress Centre"
+    ]
+    ),
+
     privatePassword: faker.internet.password(),
-    // ticketTiers: [
-    //   {
-    //     quantitySold: faker.datatype.number(),
-    //     capacity: faker.datatype.number(),
-    //     tier: faker.random.arrayElement(["Free", "Regular", "VIP"]),
-    //     price: faker.finance.amount(),
-    //   },
-    //   {
-    //     quantitySold: faker.datatype.number(),
-    //     capacity: faker.datatype.number(),
-    //     tier: faker.random.arrayElement(["Free", "Regular", "VIP"]),
-    //     price: faker.finance.amount(),
-    //   },
-    //   {
-    //     quantitySold: faker.datatype.number(),
-    //     capacity: faker.datatype.number(),
-    //     tier: faker.random.arrayElement(["Free", "Regular", "VIP"]),
-    //     price: faker.finance.amount(),
-    //   },
-    // ],
+     ticketTiers: [
+      {
+        tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+        quantitySold: faker.datatype.number(0,2500),
+        maxcapacity: faker.datatype.number(200),
+        price: faker.finance.amount(),
+        startSelling: faker.date.future(),
+        endSelling:faker.date.future()
+      },
+      
+
+      {
+        tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+        quantitySold: faker.datatype.number(0,2500),
+        maxcapacity: faker.datatype.number(200),
+        price: faker.finance.amount(),
+        startSelling: faker.date.future(),
+        endSelling:faker.date.future()
+      },
+
+    ],
     eventStatus: faker.helpers.arrayElement([
       "started",
       "ended",
@@ -125,42 +143,78 @@ console.log("ana gowa el zft sedding")
       "cancelled",
       "live",
     ]),
-    startSelling: {
-      timezone: faker.address.timeZone(),
-      utc: faker.date.future(),
-    },
-    endSelling: {
-      timezone: faker.address.timeZone(),
-      utc: faker.date.future(),
-    },
-    publicDate: {
-      timezone: faker.address.timeZone(),
-      utc: faker.date.future(),
-    },
-    emailMessage: faker.lorem.sentences(),
-    eventQRimage: faker.image.imageUrl(),
-    evenImage: faker.image.imageUrl(),
-    creatorID:faker.datatype.number(),
-    streetNumber:faker.datatype.number(),
-    promoCodes: [
-      {
-        code: faker.random.alphaNumeric(10),
-        percentage: faker.datatype.number({ min: 10, max:60 }),
-        remainingUses: faker.datatype.number(),
-      },
-      {
-        code: faker.random.alphaNumeric(10),
-        percentage: faker.datatype.number({ min: 10, max: 60 }),
-        remainingUses: faker.datatype.number(),
-      },
-    ],
-    isVerified: faker.datatype.boolean(),
-    isPublic: faker.datatype.boolean(),
+    // startSelling: {
+    //   timezone: faker.address.timeZone(),
+    //   utc: faker.date.future(),
+    // },
+    // endSelling: {
+    //   timezone: faker.address.timeZone(),
+    //   utc: faker.date.future(),
+    // },
     published:faker.datatype.boolean(),
+    isPublic: faker.datatype.boolean(),
+    publicDate:faker.date.future(),
+    isOnline: faker.datatype.boolean(),
+    // emailMessage: faker.lorem.sentences(),
+    // eventQRimage: faker.image.imageUrl(),
+    eventUrl:  shortid.generate(),
 
-  });
+    soldTickets: [
+      {
+        ticketId:faker.helpers.arrayElement([
+         "6434110d4537615b85caea52"
+        ]),
 
-  events.push(newEvent);
+      },
+
+      {
+        userId:faker.helpers.arrayElement([
+          "6417b9099e62572b43c9267e",
+          "6418b9920a40ca7bd287fcd4",
+          "641d66a88344a16b3df1019a",
+          "641ee21476e39de14334bff3",
+          "641eddf055c9b5c70ae4ecdf"
+         ]
+         )
+          
+        } 
+    
+    ],
+
+    creatorId: faker.helpers.arrayElement([
+     "6417b9099e62572b43c9267e",
+     "6418b9920a40ca7bd287fcd4",
+     "641d66a88344a16b3df1019a",
+     "641ee21476e39de14334bff3",
+     "641eddf055c9b5c70ae4ecdf"
+
+    ]
+    ),
+
+   
+
+
+
+  }
+
+  );
+
+  // events.push(newEvent);
+//   newEvent.save(),
+
+// }
+//   res.status(201).json(
+//     {
+//     success:true,
+//     message: "Database Seeded",
+//     }
+//   )
+  
+  
+ 
+// }
+
+events.push(newEvent);
 // newEvent.save((err) => {
 //     if (err) {
 //       console.log(err);
@@ -178,18 +232,20 @@ res.status(201).json(
   }
 )
 
+}
 
 
-  }
+  // });
+
+
+  
 
 
 // console.log('Database seeded!')
 
 
 
-// await eventModel.insertMany(events);
 
-// process.exit();
 
 //  }
  
@@ -200,5 +256,95 @@ res.status(201).json(
 //   event.save();
 // }
 
-module.exports = { seedDB };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { seedDB };

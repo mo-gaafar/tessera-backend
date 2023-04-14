@@ -139,18 +139,6 @@ async function updateEvent(req, res) {
 	}
 } 
 
-async function publishEvent(req,res){
-
- const event = await eventModel.findById(req.params.eventID);
- console.log("event is:",event)
-
-
-
-
-
-
-
-}
 
 
 
@@ -165,4 +153,5 @@ async function publishEvent(req,res){
 
 
 
-module.exports = { createEvent, getEventById, deleteEvent, updateEvent ,publishEvent };
+
+module.exports = { createEvent, getEventById, deleteEvent, updateEvent  };
