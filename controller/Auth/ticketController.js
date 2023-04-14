@@ -1,15 +1,11 @@
-const mongoose = require("mongoose");
-
 const ticketModel = require("../../models/ticketModel");
 const eventModel = require("../../models/eventModel");
+
 const {
   retrieveToken,
   verifyToken,
   GenerateToken,
 } = require("../../utils/Tokens");
-const { authenticate } = require("passport");
-const { boolean } = require("joi");
-const { generate } = require("generate-password");
 
 // /**
 // //  * * Creates a new ticket that is linked to a specific event by event ID
@@ -31,19 +27,6 @@ async function bookTicket(req, res) {
   // getting parameters from request body
   const { eventID, userID, purchaseDate, purchasePrice, type } = req.body;
 
-  // const event=await eventModel.findById(eventID);
-
-  // if (!event){
-
-  //   res.status(200).json(
-  //     {
-  //     success:false,
-  //     message: "Invalid event Id",
-  //     }
-  // )
-  // }
-
-  // create ticket object
   try {
     const ticket = new ticketModel({
       eventID: eventID,
