@@ -2,18 +2,17 @@
 
 // const mongoose = require("mongoose");
 // const eventModel = require("../../models/eventModel");
+// // const {faker} = require('@faker-js/faker');
+// // const shortid = require('shortid');
+// // const { resendEmailVerification } = require("./verificationController");
+
+// const eventModel = require("../../models/eventModel");
 // const {faker} = require('@faker-js/faker');
 // const shortid = require('shortid');
 // const { resendEmailVerification } = require("./verificationController");
 
-const eventModel = require("../../models/eventModel");
-const {faker} = require('@faker-js/faker');
-const shortid = require('shortid');
-const { resendEmailVerification } = require("./verificationController");
->>>>>>> f1ccb203c1031b9ccaf3ed5c651d3f9079b13ece
-
-// async function connectDB() {
-//     mongoose
+// // async function connectDB() {
+// //     mongoose
 //       .connect(process.env.MONGODB_URI)
 //       .then(() => console.log("DB Connected"))
 //       .catch((err) => console.log(err));
