@@ -10,4 +10,5 @@ router.post(
 router.get("/event-management/retrieve/:eventID", eventController.getEventById);
 router.delete("/event-management/delete/:eventID", eventController.deleteEvent);
 router.put("/event-management/update/:eventID", eventController.updateEvent);
+router.post("/event-management/upload-image/:eventID", eventController.uploadImage);
 module.exports = router; //exporting the module in order to use it in other files

@@ -1,0 +1,11 @@
+version: '3'
+services:
+  tessera-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/app/
+      - /usr/app/node_modules
+    ports:
+      - 3000:3000
