@@ -352,8 +352,11 @@ const eventSchema = new mongoose.Schema(
         type: Date,
         required: true,
       },
-      eventImage: String,
-
+      eventImage: {
+        type: String,
+        default:
+          "https://www.eventbrite.com/blog/wp-content/uploads/2022/04/2022_placeholder-151-768x445.png",
+      },
       categories: {
         type: String,
         enum: [
@@ -475,6 +478,10 @@ const eventSchema = new mongoose.Schema(
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "userModel",
+<<<<<<< HEAD
+=======
+      //required: true,
+>>>>>>> cc725f934939454a126b6fd0df17dd40082156e3
     },
 
     promocode: [
