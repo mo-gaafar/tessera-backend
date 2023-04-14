@@ -51,6 +51,10 @@ pipeline {
                     -e FACEBOOK_CLIENT_SECRET \
                     -e GOOGLE_CLIENT_ID \
                     -e GOOGLE_CLIENT_SECRET \
+                    -e AWS_S3_BUCKET \
+                    -e AWS_S3_ACCESS_KEY \
+                    -e AWS_S3_SECRET_KEY \
+                    -e AWS_S3_REGION \
                     $DOCKERHUB_USERNAME/tessera-backend-dev sh -c "CI=true npm run test:ci"'
             }
         }
