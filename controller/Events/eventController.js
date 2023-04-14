@@ -146,7 +146,6 @@ async function publishEvent(req, res) {
 }
 
 const AWS = require("aws-sdk");
-const { v4: uuidv4 } = require("uuid");
 
 // configure AWS SDK with your S3 bucket credentials
 AWS.config.update({
@@ -157,11 +156,16 @@ const s3 = new AWS.S3();
 const uploadImage = async (req, res) => {
   try {
     const eventId = req.params.eventID;
-    const base64data = Buffer.from(req.files.image.data, 'base64');
-    // generate a unique filename for the uploaded image
-    const filename = `S${uuidv4()}.png`;
+    // check if an event with this id exists
+    const event = await eventModel.findById(eventId);
+    if (!event) {
+      throw(new Error("Event not found"));
+    }
 
-    // upload the image to your S3 bucket
+    const base64data = Buffer.from(req.files.image.data, 'base64');
+    const filename = `event-images/${eventId}/${event.basicInfo.eventName}`;
+
+    // upload the image to S3 bucket
     const uploadParams = {
       Bucket: process.env.AWS_S3_BUCKET,
       Key: filename,
@@ -170,19 +174,21 @@ const uploadImage = async (req, res) => {
     };
     const s3data = await s3.upload(uploadParams).promise();
 
-    // updates eventModel in the database using findOneAndUpdate
-    const updatedEvent = await eventModel.findOneAndUpdate(
-      { _id: eventId },
-      { eventImage: s3data.Location },
-      { new: true, runValidators: true }
-    );
-    // await event.save();
+    // update event with the image url
+    event.basicInfo.eventImage = s3data.Location;
+    await event.save();
 
     // return the uploaded image URL
-    res.status(201).json({ imageUrl: s3data.Location });
+    res.status(201).json({ 
+      success: true,
+      imageUrl: s3data.Location 
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({      
+      success: false,
+      message: err.message
+    });
   }
 };
 
