@@ -478,10 +478,7 @@ const eventSchema = new mongoose.Schema(
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "userModel",
-<<<<<<< HEAD
-=======
-      //required: true,
->>>>>>> cc725f934939454a126b6fd0df17dd40082156e3
+      //required: true cc725f934939454a126b6fd0df17dd40082156e3
     },
 
     promocode: [
