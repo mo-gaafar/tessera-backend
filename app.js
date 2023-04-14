@@ -13,6 +13,7 @@ const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
 const promocodeRouter = require("./router/promocodeRouter");
+const seedingRouter = require("./router/seedingRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -33,6 +34,7 @@ app.get("/", (req, res) => {
 
 // Add middleware
 app.use(express.json());
+
 /**
  * This is an express session middleware
  * create and manage a session middleware
@@ -56,7 +58,13 @@ const corsOptions = {
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
+
 app.use(cors(corsOptions));
+
+const seedingRouter = require("./router/seedingRouter");
+
+// Enable CORS for all requests
+app.use(cors());
 
 //passport module initialization
 app.use(passport.initialize());
@@ -70,6 +78,8 @@ app.use("/api", eventRouter);
 app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
 app.use("/api", promocodeRouter);
+// app.use("/api", attendeeRouter);
+app.use("/api", seedingRouter);
 
 // Start the server on port 3000
 const PORT = 3000;

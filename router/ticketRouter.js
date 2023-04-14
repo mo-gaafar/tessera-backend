@@ -21,10 +21,10 @@ router.get(
 );
 
 
-// router.put(
-//     "/event-tickets/edit-ticket/:id",
-//     ticketTierController.editTicket
-// )
+router.put(
+    "/event-tickets/edit-ticket/:eventID",
+    ticketController.editTicketTier
+)
 
 // router.put(
 //     "/event-tickets/edit-ticket/:tickID",
