@@ -1,5 +1,6 @@
 // const securePassword = require("secure-password");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 /**
  * Encrypts a user's password using JWT
@@ -7,13 +8,17 @@ const jwt = require("jsonwebtoken");
  * @async
  * @function passwordEncryption
  * @param {string} userPassword - The user's plain-text password
- * @returns {Promise<string>} Returns the encrypted password (JSON Web Token.)
+ * @returns {encryptedPassword}  Returns the encrypted password (JSON Web Token.)
  * @throws {Error} Throws an error if encryption fails
  */
 async function passwordEncryption(userPassword) {
 	try {
 		// Generate verification token
-		const encryptedPassword = jwt.sign({ userPassword }, process.env.SECRETJWT);
+		//const encryptedPassword = jwt.sign({ userPassword }, process.env.SECRETJWT);
+		const salt = await bcrypt.genSalt(10);
+
+		// Hash the password with the salt
+		const encryptedPassword = await bcrypt.hash(userPassword, salt);
 
 		// Return encrypted password
 		return encryptedPassword;
