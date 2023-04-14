@@ -54,4 +54,33 @@ async function retrieveToken(req) {
 	return token;
 }
 
-module.exports = { GenerateToken, verifyToken, retrieveToken };
+/**
+ * Check if the request is authorized by verifying the token and checking if the user exists
+ * @async
+ * @function authorized
+ * @param {Object} req - Express request object
+ * @returns {boolean} - Returns true if the user is authorized, false otherwise
+ */
+async function authorized(req) {
+	const token = await retrieveToken(req);
+	if (!token) {
+		console.log("Token not found");
+		return false;
+	}
+	try {
+		const decoded = await verifyToken(token);
+		console.log("Token verified");
+		const user = await userModel.findById(decoded.user_id);
+		if (!user) {
+			console.log("User not found");
+			return false;
+		}
+		console.log("User authorized");
+		return true, user.user_id;
+	} catch (err) {
+		console.error(err);
+		return false;
+	}
+}
+
+module.exports = { GenerateToken, verifyToken, retrieveToken, authorized };

@@ -39,7 +39,6 @@ async function createEvent(req, res) {
 }
 
 /**
-
 Retrieves an event from the database by its ID.
 @async
 @function

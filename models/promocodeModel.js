@@ -5,7 +5,6 @@ const promocodeSchema = new mongoose.Schema(
     code: {
       type: String,
       required: true,
-      unique: true, // The code for each promocode must be unique
     },
     discount: {
       type: Number,
@@ -15,15 +14,15 @@ const promocodeSchema = new mongoose.Schema(
     },
     expires: {
       type: Date,
-      required: true, // The expiration date for the promocode
+      // required: true, // The expiration date for the promocode
     },
     limitOfUses: {
-      type: Number,
+      type: String, // because it could be unlimited
       required: true, // The limit of uses for the promocode
     },
     remainingUses: {
-      type: Number,
-      required: true, // The remaining uses for the promocode
+      type: String,
+      // required: true, // The remaining uses for the promocode
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,
@@ -40,6 +39,4 @@ const promocodeSchema = new mongoose.Schema(
   { timestamps: true } // Add timestamps to the schema
 );
 
-const Promocode = mongoose.model("Promocode", promocodeSchema);
-
-module.exports = Promocode;
+module.exports = mongoose.model("Promocode", promocodeSchema);

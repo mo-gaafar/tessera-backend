@@ -12,7 +12,8 @@ const verificationRoutes = require("./router/verificationRoutes");
 const userSocialRouter = require("./router/userSocialRouter");
 const ticketRouter = require("./router/ticketRouter");
 const eventRouter = require("./router/eventRouter");
-//const seedingRouter=require("./router/seedingRouter");
+const promocodeRouter = require("./router/promocodeRouter");
+// const seedingRouter = require("./router/seedingRouter");
 
 const attendeeRouter = require("./router/attendeeRouter");
 const app = express();
@@ -76,6 +77,7 @@ app.use("/api", userSocialRouter);
 app.use("/api", eventRouter);
 app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
+app.use("/api", promocodeRouter);
 // app.use("/api", attendeeRouter);
 //app.use("/api", seedingRouter);
 
