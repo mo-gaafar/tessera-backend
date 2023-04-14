@@ -1,4 +1,5 @@
 const userModel = require("../../models/userModel");
+const Promocode = require("../../models/promocodeModel");
 const eventModel = require("../../models/eventModel");
 const mongoose = require("mongoose");
 const { func } = require("joi");
@@ -417,25 +418,77 @@ async function listAllCategories(req, res) {
     throw err;
   }
 }
+/**
+ * This function shall return a public event information using eventId
+ *
+ * @async
+ * @function
+ * @param {Object} req -evetnId as as path parameter
+ * @param {Object} res -event information
+ * @returns -response with event information required
+ * @throws {Error} -internal server error
+ */
 async function getEventInfo(req, res) {
+  //!!! online url to be added
   try {
+    //get eventId from path parameter
     const eventId = req.params.eventID;
 
+    //create query object
     const query = {};
     //remove private events from array
     query["isPublic"] = true;
     query["_id"] = eventId;
-    //array of events filtered using the query object
-    const events = await eventModel.find(query);
+
+    //event filtered using the query object
+    const event = await eventModel
+      .find(query)
+      //get only these fields from creator
+      .populate("creatorId", "_id firstName lastName");
+
+    //create dictionary to store ticketCapacity information
+    const tierCapacity = {};
+    var isEventCapacityFull = true;
+    var isEventFree = true;
+    var counter1 = 0;
+    var counter2 = 0;
+
+    //loop over ticketTiers array
+    for (let i = 0; i < event[0].ticketTiers.length; i++) {
+      const tier = event[0].ticketTiers[i];
+      //checks if capacity full for each tier
+      const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
+
+      if (isTierCapacityFull === false) {
+        counter1 = counter1 + 1;
+      }
+      if (tier.price != "Free") {
+        counter2 = counter2 + 1;
+      }
+
+      // Store capacity full as a value in dictionary with tier name as key
+      tierCapacity[tier.tierName] = isTierCapacityFull;
+    }
+    //if counter greater than zero,then event overall capacity is not full
+    if (counter1 > 0) {
+      isEventCapacityFull = false;
+    } else {
+      isEventCapacityFull = true;
+    }
+    //if counter greater than zero,then event overall is not full
+    if (counter2 > 0) {
+      isEventFree = false;
+    } else {
+      isEventFree = true;
+    }
 
     //exclude unnecessary fields
-    const filteredEvents = events.map((eventModel) => {
+    const filteredEvents = event.map((eventModel) => {
       const {
         _id,
         createdAt,
         updatedAt,
         __v,
-        ticketTiers,
         eventStatus,
         published,
         isPublic,
@@ -446,14 +499,22 @@ async function getEventInfo(req, res) {
         publicDate,
         emailMessage,
         soldTickets,
-        eventUrl,
+        privatePassword,
 
         ...filtered
       } = eventModel._doc;
       return filtered;
     });
+
     console.log("getting event information");
-    res.status(200).json({ success: "true", filteredEvents });
+
+    res.status(200).json({
+      success: "true",
+      filteredEvents,
+      tierCapacity,
+      isEventCapacityFull,
+      isEventFree,
+    });
   } catch (err) {
     console.error(err);
     res
