@@ -17,7 +17,7 @@ const ticketSchema = new mongoose.Schema(
     },
 
     promocodeUsed: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.String,
       ref: "promocodeModel",
     },
     purchaseDate: {
