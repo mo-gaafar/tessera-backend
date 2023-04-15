@@ -1,14 +1,14 @@
-const express = require("express");
-const router = express.Router();
+// const express = require("express");
+// const router = express.Router();
 
-const seedingEvent=require("../controller/Auth/seedingController");
-
-
-router.post(
-	"/auth/seedingevent",
-	seedingEvent.seedDB
-);
+// const seedingEvent=require("../controller/Auth/seedingController");
 
 
-module.exports=router;
+// router.post(
+// 	"/auth/seedingevent",
+// 	seedingEvent.seedDB
+// );
+
+
+// module.exports=router;
 
