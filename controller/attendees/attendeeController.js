@@ -68,7 +68,7 @@ async function displayfilteredTabs(req, res) {
     }
     //remove private events from array //published or not to be added later
     query["isPublic"] = true;
-
+    query["published"] = true;
     //array of events filtered using the query object
     const events = await eventModel
       .find(query)
@@ -91,7 +91,7 @@ async function displayfilteredTabs(req, res) {
           __v,
           privatePassword,
           isVerified,
-          promocode,
+          promocodes,
           startSelling,
           endSelling,
           publicDate,
@@ -110,7 +110,7 @@ async function displayfilteredTabs(req, res) {
           __v,
           privatePassword,
           isVerified,
-          promocode,
+          promocodes,
           startSelling,
           endSelling,
           publicDate,
@@ -480,6 +480,7 @@ async function getEventInfo(req, res) {
     const query = {};
     //remove private events from array
     query["isPublic"] = true;
+    query["published"] = true;
     query["_id"] = eventId;
 
     //event filtered using the query object
@@ -494,7 +495,7 @@ async function getEventInfo(req, res) {
       });
     }
     //create dictionary to store ticketCapacity information
-    const tierCapacityFull = {};
+    const tierCapacityFull = [];
     var isEventCapacityFull = true;
     var isEventFree = true;
     var counter1 = 0;
@@ -519,9 +520,10 @@ async function getEventInfo(req, res) {
         if (tier.price != "Free") {
           counter2 = counter2 + 1;
         }
-
-        // Store capacity full as a value in dictionary with tier name as key
-        tierCapacityFull[tier.tierName] = isTierCapacityFull;
+        tierCapacityFull.push({
+          tierName: tier.tierName,
+          isCapacityFull: isTierCapacityFull,
+        });
       }
       //if counter greater than zero,then event overall capacity is not full
       if (counter1 > 0) {
@@ -554,7 +556,7 @@ async function getEventInfo(req, res) {
         published,
         isPublic,
         isVerified,
-        promocode,
+        promocodes,
         startSelling,
         endSelling,
         publicDate,

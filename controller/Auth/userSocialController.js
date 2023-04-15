@@ -27,7 +27,7 @@ exports.facebookLogin = async (req, res, next) => {
   try {
     //checks if user exist first and if so, user shall be directed to landing page
     let user = await User.findOne({
-      facebookId: userFacebook_Id,
+      // facebookId: userFacebook_Id,
       email: userEmail,
     });
     if (user) {
@@ -70,7 +70,7 @@ exports.googleLogin = async (req, res, next) => {
   try {
     //New user is created and user shall be redirected to the landing page
     let user = await User.findOne({
-      googleId: userGoogle_Id,
+      //googleId: userGoogle_Id,
       email: userEmail,
     });
     if (user) {
