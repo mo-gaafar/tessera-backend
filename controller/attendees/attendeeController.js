@@ -69,7 +69,7 @@ async function displayfilteredTabs(req, res) {
     }
     //remove private events from array //published or not to be added later
     query["isPublic"] = true;
-
+    query["published"] = true;
     //array of events filtered using the query object
     const events = await eventModel
       .find(query)
@@ -517,6 +517,7 @@ async function getEventInfo(req, res) {
     const query = {};
     //remove private events from array
     query["isPublic"] = true;
+    query["published"] = true;
     query["_id"] = eventId;
 
     //event filtered using the query object

@@ -28,7 +28,7 @@ module.exports = function (passport) {
         try {
           const socialMediaType = "facebook";
           //checks if user exist first and if so, user shall be directed to sign in
-          let user = await User.findOne({ facebookId: profile.id }); //find user by ID
+          let user = await User.findOne({ email: profile.emails[0].value }); //find user by ID
           if (user) {
             console.log("Signing in user using facebook");
             done(null, user); //everything is done & return user information
@@ -59,7 +59,7 @@ module.exports = function (passport) {
         try {
           const socialMediaType = "google";
           //checks if user exist first and if so, user shall be directed to sign in
-          let user = await User.findOne({ googleId: profile.id }); //find user by ID
+          let user = await User.findOne({ email: profile.emails[0].value }); //find user by ID
           if (user) {
             console.log("signing in user using google");
             done(null, user); //everything is done & return user information
