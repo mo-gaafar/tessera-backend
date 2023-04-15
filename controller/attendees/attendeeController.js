@@ -17,7 +17,7 @@ const { func } = require("joi");
 async function displayfilteredTabs(req, res) {
   console.log("Gonna display filtered tabs landing page");
   try {
-    //get query parameters
+    //get query parameters to filter by
     const category = req.query.category;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
@@ -43,6 +43,7 @@ async function displayfilteredTabs(req, res) {
     if (city) {
       queryWithCity(query, city);
     }
+    //get events by administrative area
     if (administrative_area_level_1) {
       queryWithAreaLevel(query, administrative_area_level_1);
     }
@@ -87,6 +88,8 @@ async function displayfilteredTabs(req, res) {
         message: "could not query on events",
       });
     }
+
+    //filter by free events that has only free ticketTier price
     if (freeEvent) {
       try {
         var freeEvents = events.filter((eventModel) => {
@@ -114,6 +117,7 @@ async function displayfilteredTabs(req, res) {
     }
 
     //exclude unnecessary fields
+    //in case filter by free events, use freeEvents array
     if (freeEvent) {
       var filteredEvents = freeEvents.map((eventModel) => {
         const {
@@ -154,6 +158,7 @@ async function displayfilteredTabs(req, res) {
       });
     }
 
+    //creates array that shows each event is free or not
     var counter3 = 0;
     const isEventFreeArray = [];
     for (let i = 0; i < filteredEvents.length; i++) {
@@ -179,18 +184,20 @@ async function displayfilteredTabs(req, res) {
       const isEventFree = counter3 > 0 ? false : true;
       isEventFreeArray.push(isEventFree);
     }
+
     //retreive categories
     const categoriesRetreived = [
       ...new Set(
         filteredEvents.map((eventModel) => eventModel.basicInfo.categories)
       ),
     ];
+
     console.log("displaying filtered tabs");
     res.status(200).json({
       success: "true",
-      filteredEvents,
-      isEventFreeArray,
-      categoriesRetreived,
+      filteredEvents, //array of filtered events
+      isEventFreeArray, //array of booleans to show whether event is free or not
+      categoriesRetreived, //list of categories involved
     });
   } catch (err) {
     console.error(err);
@@ -551,13 +558,6 @@ async function getEventInfo(req, res) {
         message: "Missing eventId parameter",
       });
     }
-    const { ObjectId } = require("mongoose").Types;
-    if (!ObjectId.isValid(eventId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid eventId",
-      });
-    }
 
     //create query object
     const query = {};
@@ -580,6 +580,7 @@ async function getEventInfo(req, res) {
         message: "Event is not found",
       });
     }
+
     //create dictionary to store ticketCapacity information
     const tierCapacityFull = [];
     var isEventCapacityFull = true;
@@ -594,6 +595,7 @@ async function getEventInfo(req, res) {
         message: "ticketTiers is not found",
       });
     }
+
     try {
       for (let i = 0; i < event[0].ticketTiers.length; i++) {
         const tier = event[0].ticketTiers[i];
@@ -611,6 +613,7 @@ async function getEventInfo(req, res) {
           isCapacityFull: isTierCapacityFull,
         });
       }
+
       //if counter greater than zero,then event overall capacity is not full
       if (counter1 > 0) {
         isEventCapacityFull = false;
@@ -658,10 +661,10 @@ async function getEventInfo(req, res) {
 
     res.status(200).json({
       success: "true",
-      filteredEvents,
-      tierCapacityFull,
-      isEventCapacityFull,
-      isEventFree,
+      filteredEvents, //event information
+      tierCapacityFull, //array of object Tiers with their capacity full or not
+      isEventCapacityFull, // overall event capacity
+      isEventFree, //event free or not
     });
   } catch (err) {
     console.error(err);
