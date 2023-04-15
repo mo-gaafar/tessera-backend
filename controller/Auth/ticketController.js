@@ -40,24 +40,27 @@ async function bookTicket(req, res) {
       email: email,
     });
 
+    // check the user if the user exists
     if (!user) {
       throw new Error("User not found");
     }
 
     // Find the event in the database.
     const event = await eventModel.findById(eventId);
+
+    // check the event if the event exists
     if (!event) {
       throw new Error("Event not found");
     }
 
-    // // Get the ticket tier object from the event object
-    // Find the ticket tier object matching the selected ticket tier in the request body
+    // Get the ticket tier object from the event object
     const ticketTier = event.ticketTiers.find(
       (tier) =>
         tier.tierName == ticketTierSelected[0].tierName &&
         tier.price == ticketTierSelected[0].price
     );
 
+    // check the ticket tier if the ticket tier exists
     if (!ticketTier) {
       throw new Error("Ticket tier not found");
     }
@@ -71,8 +74,10 @@ async function bookTicket(req, res) {
       }
     }
 
+    // Generate the tickets
     generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
 
+    // Return a success response if the ticket is created successfully.
     return res.status(200).json({
       success: true,
       message: "Ticket has been created successfully",
@@ -119,6 +124,7 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
         ticketPrice
       );
 
+      // Create a new ticket object
       const ticket = new ticketModel({
         eventId: eventId,
         userId: userId,
