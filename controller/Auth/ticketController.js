@@ -30,25 +30,16 @@ const {
 async function bookTicket(req, res) {
   try {
     const eventId = req.params.eventId;
-    console.log(
-      "🚀 ~ file: ticketController.js:32 ~ bookTicket ~ eventId:",
-      eventId
-    );
+
     const { contactInformation, promocode, ticketTierSelected } = req.body;
-    console.log(
-      "🚀 ~ file: ticketController.js:32 ~ bookTicket ~ contactInformation:",
-      contactInformation
-    );
+
     const email = contactInformation.email;
-    console.log(
-      "🚀 ~ file: ticketController.js:33 ~ bookTicket ~ email:",
-      email
-    );
+
     // Get the user object from the database
     const user = await userModel.findOne({
       email: email,
     });
-    console.log("🚀 ~ file: ticketController.js:37 ~ bookTicket ~ user:", user);
+
     if (!user) {
       throw new Error("User not found");
     }
@@ -59,11 +50,6 @@ async function bookTicket(req, res) {
       throw new Error("Event not found");
     }
 
-    console.log(
-      "🚀 ~ file: ticketController.js:50 ~ bookTicket ~ event:",
-      event
-    );
-
     // // Get the ticket tier object from the event object
     // Find the ticket tier object matching the selected ticket tier in the request body
     const ticketTier = event.ticketTiers.find(
@@ -71,10 +57,7 @@ async function bookTicket(req, res) {
         tier.tierName == ticketTierSelected[0].tierName &&
         tier.price == ticketTierSelected[0].price
     );
-    console.log(
-      "🚀 ~ file: ticketController.js:62 ~ bookTicket ~ ticketTier:",
-      ticketTier
-    );
+
     if (!ticketTier) {
       throw new Error("Ticket tier not found");
     }
@@ -83,64 +66,16 @@ async function bookTicket(req, res) {
     let promocodeObj = null;
     if (promocode) {
       promocodeObj = await promocodeModel.findOne({ code: promocode });
-
-      console.log(
-        "🚀 ~ file: ticketController.js:71 ~ bookTicket ~ promocodeObj:",
-        promocodeObj
-      );
-
       if (!promocodeObj) {
         throw new Error("Promocode not found");
       }
     }
 
-    // Calculate the total purchase price
-    let totalPrice = ticketTierSelected[0].quantity * ticketTier.price;
-    console.log(
-      "🚀 ~ file: ticketController.js:89 ~ bookTicket ~ totalPrice:",
-      totalPrice
-    );
-
-    let discount = 0;
-    if (promocodeObj) {
-      discount = (totalPrice * promocodeObj.discount) / 100;
-      console.log(
-        "🚀 ~ file: ticketController.js:94 ~ bookTicket ~ discount:",
-        discount
-      );
-
-      totalPrice = totalPrice - discount;
-      console.log(
-        "🚀 ~ file: ticketController.js:98 ~ bookTicket ~ totalPrice:",
-        totalPrice
-      );
-    }
-
-    // Create a new ticket object
-    const ticket = new ticketModel({
-      eventId: event._id,
-      userId: user._id,
-      promocodeUsed: promocodeObj ? promocodeObj.code : null,
-      purchaseDate: new Date(),
-      purchasePrice: totalPrice,
-      tierName: ticketTier.tierName,
-    });
-
-    console.log(
-      "🚀 ~ file: ticketController.js:123 ~ bookTicket ~ ticket:",
-      ticket
-    );
-    await ticket.save();
-    const soldTicket = {
-      ticketId: ticket._id,
-      userId: user._id,
-    };
-    await addSoldTicketToEvent(eventId, soldTicket);
+    generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
 
     return res.status(200).json({
       success: true,
       message: "Ticket has been created successfully",
-      ticket,
     });
   } catch (err) {
     console.error(err);
@@ -151,6 +86,81 @@ async function bookTicket(req, res) {
       message: err.message,
     });
   }
+}
+
+/**
+ * Generates an array of tickets based on the provided ticket tiers.
+ * Each ticket tier object must have a "tierName", "quantity", and "price" property.
+ * The function will create a ticket for each quantity of each ticket tier.
+ * @param {Array<Object>} ticketTiers - An array of ticket tier objects
+ * @returns {Array<Object>} An array of ticket objects with "tierName" and "price" properties
+ */
+async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
+  const tickets = [];
+
+  // Loop through each ticket tier object in the array
+  for (let i = 0; i < ticketTiers.length; i++) {
+    // Destructure the properties of the current ticket tier object
+    const { tierName, quantity } = ticketTiers[i];
+    console.log(
+      "🚀 ~ file: ticketController.js:153 ~ generateTickets ~ ticketTiers:",
+      ticketTiers[i]
+    );
+
+    // Loop through each quantity of the current ticket tier and create a ticket object for each one
+    for (let j = 0; j < quantity; j++) {
+      // Calculate the total price of the ticket
+      const ticketPrice = await calculateTotalPrice(
+        ticketTiers[i],
+        promocodeObj
+      );
+      console.log(
+        "🚀 ~ file: ticketController.js:159 ~ generateTickets ~ ticketPrice:",
+        ticketPrice
+      );
+
+      const ticket = new ticketModel({
+        eventId: eventId,
+        userId: userId,
+        promocodeUsed: promocodeObj ? promocodeObj.code : null,
+        purchaseDate: new Date(),
+        purchasePrice: ticketPrice,
+        tierName: tierName,
+      });
+      console.log(
+        "🚀 ~ file: ticketController.js:169 ~ generateTickets ~ ticket:",
+        ticket
+      );
+      // tickets.push(ticket);
+      await ticket.save();
+      const soldTicket = {
+        ticketId: ticket._id,
+        userId: userId,
+      };
+      await addSoldTicketToEvent(eventId, soldTicket);
+    }
+  }
+
+  return tickets;
+}
+
+/**
+ * Calculates the total purchase price for a selected ticket tier with an optional discount from a promocode.
+ * @param {object} ticketTierSelected - The selected ticket tier object containing properties of tier name, quantity, and price.
+ * @param {object} promocodeObj - The promocode object containing properties of code and discount percentage.
+ * @returns {number} - The total purchase price after applying any applicable discount.
+ */
+async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
+  let ticketPrice = ticketTierSelected.price; // Get the base ticket price
+
+  let discount = 0;
+  if (promocodeObj) {
+    // Check if a promocode was provided
+    discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
+    totalPrice = ticketPrice - discount; // Apply the discount to the base price
+  }
+
+  return totalPrice; // Return the total purchase price
 }
 
 /**
