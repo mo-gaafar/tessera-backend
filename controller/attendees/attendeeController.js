@@ -8,7 +8,7 @@ const { func } = require("joi");
  *
  * @async
  * @function
- * @param {Object} req -request
+ * @param {Object} req -request query paramters
  * @param {Object} res -response
  * @returns -events array , retreived categories &isEventFreeArray
  * @throws {Error} -internal server error
@@ -545,12 +545,28 @@ async function getEventInfo(req, res) {
   try {
     //get eventId from path parameter
     const eventId = req.params.eventID;
+    if (!eventId) {
+      return res.status(404).json({
+        success: false,
+        message: "Missing eventId parameter",
+      });
+    }
+    const { ObjectId } = require("mongoose").Types;
+    if (!ObjectId.isValid(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid eventId",
+      });
+    }
 
     //create query object
     const query = {};
+
     //remove private events from array
     query["isPublic"] = true;
+    //only retrieve published
     query["published"] = true;
+    //filter by event id
     query["_id"] = eventId;
 
     //event filtered using the query object
@@ -572,7 +588,7 @@ async function getEventInfo(req, res) {
     var counter2 = 0;
 
     //loop over ticketTiers array
-    if (!event[0].ticketTiers) {
+    if (!event[0].ticketTiers || event[0].ticketTiers.length === 0) {
       return res.status(404).json({
         success: false,
         message: "ticketTiers is not found",
