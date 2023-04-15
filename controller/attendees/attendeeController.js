@@ -115,7 +115,7 @@ async function displayfilteredTabs(req, res) {
           __v,
           privatePassword,
           isVerified,
-          promocode,
+          promocodes,
           startSelling,
           endSelling,
           publicDate,
@@ -134,7 +134,7 @@ async function displayfilteredTabs(req, res) {
           __v,
           privatePassword,
           isVerified,
-          promocode,
+          promocodes,
           startSelling,
           endSelling,
           publicDate,
@@ -448,7 +448,7 @@ async function queryWithOnline(query) {
  */
 async function queryWithCity(query, city) {
   try {
-    query["basicInfo.location.administrative_area_level_1"] = city;
+    query["basicInfo.location.administrativeAreaLevel1"] = city;
   } catch (err) {
     console.error(err);
     res
@@ -592,7 +592,7 @@ async function getEventInfo(req, res) {
         published,
         isPublic,
         isVerified,
-        promocode,
+        promocodes,
         startSelling,
         endSelling,
         publicDate,

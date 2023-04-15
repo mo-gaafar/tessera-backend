@@ -127,4 +127,33 @@ async function addPromocodeToEvent(eventId, promocode) {
   }
 }
 
-module.exports = { createPromocode };
+async function checkPromocode(req, res) {
+  const eventId = req.params.eventId;
+  console.log(
+    "🚀 ~ file: promocodeController.js:132 ~ checkPromocode ~ eventId:",
+    eventId
+  );
+  const { code } = req.body;
+  console.log(
+    "🚀 ~ file: promocodeController.js:133 ~ checkPromocode ~ code:",
+    code
+  );
+  try {
+    const isExists = await checkPromocodeExists(eventId, code);
+    console.log(
+      "🚀 ~ file: promocodeController.js:135 ~ checkPromocode ~ isExists:",
+      isExists
+    );
+
+    return res.status(isExists ? 200 : 404).json({
+      success: isExists ? true : false,
+      message: isExists ? "Promocode exists" : "Promocode does not exist",
+    });
+  } catch (err) {
+    // If an error occurs, log it and re-throw the error.
+    console.error(err);
+    throw err;
+  }
+}
+
+module.exports = { createPromocode, checkPromocode };
