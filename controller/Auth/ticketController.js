@@ -1,6 +1,7 @@
 const ticketModel = require("../../models/ticketModel");
 const eventModel = require("../../models/eventModel");
 const userModel = require("../../models/userModel");
+const promocodeModel = require("../../models/promocodeModel");
 
 const {
   retrieveToken,
@@ -26,41 +27,49 @@ const {
  *
  * @throws {Error} If the event or user do not exist in the database.
  */
-async function bookTicket(req) {
+async function bookTicket(req, res) {
   try {
+    const eventId = req.params.eventId;
+    console.log(
+      "🚀 ~ file: ticketController.js:32 ~ bookTicket ~ eventId:",
+      eventId
+    );
     const { contactInformation, promocode, ticketTierSelected } = req.body;
-
+    console.log(
+      "🚀 ~ file: ticketController.js:32 ~ bookTicket ~ contactInformation:",
+      contactInformation
+    );
+    const email = contactInformation.email;
+    console.log(
+      "🚀 ~ file: ticketController.js:33 ~ bookTicket ~ email:",
+      email
+    );
     // Get the user object from the database
     const user = await userModel.findOne({
-      email: contactInformation.email,
+      email: email,
     });
     console.log("🚀 ~ file: ticketController.js:37 ~ bookTicket ~ user:", user);
     if (!user) {
       throw new Error("User not found");
     }
 
-    // Get the event object from the database
-    const event = await eventModel.findOne({
-      ticketTiers: {
-        $elemMatch: {
-          name: ticketTierSelected[0].tierName,
-          price: ticketTierSelected[0].price,
-        },
-      },
-    });
-    console.log(
-      "🚀 ~ file: ticketController.js:50 ~ bookTicket ~ event:",
-      event
-    );
+    // Find the event in the database.
+    const event = await eventModel.findById(eventId);
     if (!event) {
       throw new Error("Event not found");
     }
 
+    console.log(
+      "🚀 ~ file: ticketController.js:50 ~ bookTicket ~ event:",
+      event
+    );
+
     // // Get the ticket tier object from the event object
+    // Find the ticket tier object matching the selected ticket tier in the request body
     const ticketTier = event.ticketTiers.find(
-      (ticketTier) =>
-        ticketTier.tierName === ticketTierSelected[0].tierName &&
-        ticketTier.price === ticketTierSelected[0].price
+      (tier) =>
+        tier.tierName == ticketTierSelected[0].tierName &&
+        tier.price == ticketTierSelected[0].price
     );
     console.log(
       "🚀 ~ file: ticketController.js:62 ~ bookTicket ~ ticketTier:",
@@ -94,7 +103,7 @@ async function bookTicket(req) {
 
     let discount = 0;
     if (promocodeObj) {
-      discount = totalPrice * promocodeObj.discount;
+      discount = (totalPrice * promocodeObj.discount) / 100;
       console.log(
         "🚀 ~ file: ticketController.js:94 ~ bookTicket ~ discount:",
         discount
@@ -111,13 +120,10 @@ async function bookTicket(req) {
     const ticket = new ticketModel({
       eventId: event._id,
       userId: user._id,
-      promocodeUsed: promocodeObj ? promocodeObj._id : null,
+      promocodeUsed: promocodeObj ? promocodeObj.code : null,
       purchaseDate: new Date(),
       purchasePrice: totalPrice,
-      tierName: ticketTier.name,
-      quantity: ticketTierSelected[0].quantity,
-      discount: discount,
-      contactInformation: contactInformation,
+      tierName: ticketTier.tierName,
     });
 
     console.log(
@@ -126,14 +132,19 @@ async function bookTicket(req) {
     );
     await ticket.save();
 
-    // Return the newly created ticket object
-    return {
+    return res.status(200).json({
       success: true,
-      data: ticket,
-    };
+      message: "Ticket has been created successfully",
+      ticket,
+    });
   } catch (err) {
     console.error(err);
-    throw new Error(err.message);
+
+    // Return an error response if an error occurs.
+    return res.status(401).json({
+      success: false,
+      message: err.message,
+    });
   }
 }
 
