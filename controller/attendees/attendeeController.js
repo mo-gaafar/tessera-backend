@@ -531,7 +531,7 @@ async function getEventInfo(req, res) {
       });
     }
     //create dictionary to store ticketCapacity information
-    const tierCapacityFull = {};
+    const tierCapacityFull = [];
     var isEventCapacityFull = true;
     var isEventFree = true;
     var counter1 = 0;
@@ -556,9 +556,10 @@ async function getEventInfo(req, res) {
         if (tier.price != "Free") {
           counter2 = counter2 + 1;
         }
-
-        // Store capacity full as a value in dictionary with tier name as key
-        tierCapacityFull[tier.tierName] = isTierCapacityFull;
+        tierCapacityFull.push({
+          tierName: tier.tierName,
+          isCapacityFull: isTierCapacityFull,
+        });
       }
       //if counter greater than zero,then event overall capacity is not full
       if (counter1 > 0) {
