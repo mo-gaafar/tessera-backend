@@ -21,7 +21,7 @@ router.get(
 );
 
 
-router.put(
+router.patch(
     "/event-tickets/edit-ticket/:eventID",
     ticketController.editTicketTier
 )

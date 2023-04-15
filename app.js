@@ -1,8 +1,9 @@
+const mongoose = require("mongoose");
 require("dotenv").config();
 require("./passport/passport");
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
 
@@ -61,10 +62,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-//const seedingRouter = require("./router/seedingRouter");
+// const seedingRouter = require("./router/seedingRouter");
 
 // Enable CORS for all requests
-app.use(cors());
+// app.use(cors());
 
 //passport module initialization
 app.use(passport.initialize());
@@ -78,8 +79,8 @@ app.use("/api", eventRouter);
 app.use("/api", ticketRouter);
 app.use("/api", attendeeRouter);
 app.use("/api", promocodeRouter);
-// app.use("/api", attendeeRouter);
-//app.use("/api", seedingRouter);
+app.use("/api", attendeeRouter);
+// app.use("/api", seedingRouter);
 
 // Start the server on port 3000
 const PORT = 3000;
