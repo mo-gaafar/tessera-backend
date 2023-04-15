@@ -24,13 +24,6 @@ async function displayfilteredTabs(req, res) {
     const city = req.query.administrative_area_level_1;
     const country = req.query.country;
     const freeEvent = req.query.freeEvent;
-
-    // No query parameters passed
-    if (Object.keys(req.query).length === 0) {
-      return res
-        .status(500)
-        .json({ success: "false", message: "No query paramters passed!" });
-    }
     //use query object to filter by
     const query = {};
 
@@ -80,38 +73,15 @@ async function displayfilteredTabs(req, res) {
     const events = await eventModel
       .find(query)
       .populate("creatorId", "_id firstName lastName");
-    if (!events) {
-      return res.status(404).json({
-        success: false,
-        message: "could not query on events",
+
+    if (freeEvent) {
+      var freeEvents = events.filter((eventModel) => {
+        const tiersWithFreePrice = eventModel.ticketTiers.filter(
+          (tier) => tier.price === "Free"
+        );
+        return tiersWithFreePrice.length === eventModel.ticketTiers.length;
       });
     }
-    if (freeEvent) {
-      try {
-        var freeEvents = events.filter((eventModel) => {
-          const tiersWithFreePrice = eventModel.ticketTiers.filter(
-            (tier) => tier.price === "Free"
-          );
-          return tiersWithFreePrice.length === eventModel.ticketTiers.length;
-        });
-      } catch (err) {
-        return res.status(404).json({
-          success: false,
-          message: "could not find ticketTiers field inside event Model",
-        });
-      }
-
-      //if no free events found return empty events array
-      if (freeEvents.length === 0) {
-        return res.status(200).json({
-          success: "true",
-          filteredEvents: freeEvents,
-          isEventFreeArray: freeEvents,
-          categoriesRetreived: freeEvents,
-        });
-      }
-    }
-
     //exclude unnecessary fields
     if (freeEvent) {
       var filteredEvents = freeEvents.map((eventModel) => {
@@ -152,25 +122,12 @@ async function displayfilteredTabs(req, res) {
         return filtered;
       });
     }
-
     var counter3 = 0;
     const isEventFreeArray = [];
     for (let i = 0; i < filteredEvents.length; i++) {
       const event = filteredEvents[i];
-      if (!event || !event.ticketTiers) {
-        return res.status(404).json({
-          success: false,
-          message: "Event or event ticketTier is not found",
-        });
-      }
       for (let j = 0; j < event.ticketTiers.length; j++) {
         const tier = event.ticketTiers[j];
-        if (!tier) {
-          return res.status(404).json({
-            success: false,
-            message: "event ticketTier is not found",
-          });
-        }
         if (tier.price != "Free") {
           counter3 = counter3 + 1;
         }
@@ -580,9 +537,10 @@ async function getEventInfo(req, res) {
       }
     } catch (err) {
       console.error(err);
-      return res
+      res
         .status(500)
         .json({ success: "false", message: "Internal server error" });
+      throw err;
     }
 
     //exclude unnecessary fields
