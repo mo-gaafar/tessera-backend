@@ -68,13 +68,64 @@ async function displayfilteredTabs(req, res) {
     }
     //remove private events from array //published or not to be added later
     query["isPublic"] = true;
+
     //array of events filtered using the query object
-    const events = await eventModel.find(query);
-    //
+    const events = await eventModel
+      .find(query)
+      .populate("creatorId", "_id firstName lastName");
+
+    if (freeEvent) {
+      var freeEvents = events.filter((eventModel) => {
+        const tiersWithFreePrice = eventModel.ticketTiers.filter(
+          (tier) => tier.price === "Free"
+        );
+        return tiersWithFreePrice.length === eventModel.ticketTiers.length;
+      });
+    }
+    //exclude unnecessary fields
+    if (freeEvent) {
+      var filteredEvents = freeEvents.map((eventModel) => {
+        const {
+          createdAt,
+          updatedAt,
+          __v,
+          privatePassword,
+          isVerified,
+          promocode,
+          startSelling,
+          endSelling,
+          publicDate,
+          emailMessage,
+          soldTickets,
+          eventUrl,
+          ...filtered
+        } = eventModel._doc;
+        return filtered;
+      });
+    } else {
+      var filteredEvents = events.map((eventModel) => {
+        const {
+          createdAt,
+          updatedAt,
+          __v,
+          privatePassword,
+          isVerified,
+          promocode,
+          startSelling,
+          endSelling,
+          publicDate,
+          emailMessage,
+          soldTickets,
+          eventUrl,
+          ...filtered
+        } = eventModel._doc;
+        return filtered;
+      });
+    }
     var counter3 = 0;
     const isEventFreeArray = [];
-    for (let i = 0; i < events.length; i++) {
-      const event = events[i];
+    for (let i = 0; i < filteredEvents.length; i++) {
+      const event = filteredEvents[i];
       for (let j = 0; j < event.ticketTiers.length; j++) {
         const tier = event.ticketTiers[j];
         if (tier.price != "Free") {
@@ -84,32 +135,12 @@ async function displayfilteredTabs(req, res) {
       const isEventFree = counter3 > 0 ? false : true;
       isEventFreeArray.push(isEventFree);
     }
-    //
     //retreive categories
     const categoriesRetreived = [
-      ...new Set(events.map((eventModel) => eventModel.basicInfo.categories)),
+      ...new Set(
+        filteredEvents.map((eventModel) => eventModel.basicInfo.categories)
+      ),
     ];
-    //exclude unnecessary fields
-    const filteredEvents = events.map((eventModel) => {
-      const {
-        createdAt,
-        updatedAt,
-        __v,
-        privatePassword,
-        isVerified,
-        promocode,
-        startSelling,
-        endSelling,
-        publicDate,
-        emailMessage,
-        ticketTiers,
-        creatorId,
-        soldTickets,
-        eventUrl,
-        ...filtered
-      } = eventModel._doc;
-      return filtered;
-    });
     console.log("displaying filtered tabs");
     res.status(200).json({
       success: "true",
@@ -458,12 +489,12 @@ async function getEventInfo(req, res) {
       .populate("creatorId", "_id firstName lastName");
 
     //create dictionary to store ticketCapacity information
-    const tierCapacity = {};
+    const tierCapacityFull = {};
     var isEventCapacityFull = true;
     var isEventFree = true;
     var counter1 = 0;
     var counter2 = 0;
-    console.log();
+    // console.log();
     //loop over ticketTiers array
     for (let i = 0; i < event[0].ticketTiers.length; i++) {
       const tier = event[0].ticketTiers[i];
@@ -478,7 +509,7 @@ async function getEventInfo(req, res) {
       }
 
       // Store capacity full as a value in dictionary with tier name as key
-      tierCapacity[tier.tierName] = isTierCapacityFull;
+      tierCapacityFull[tier.tierName] = isTierCapacityFull;
     }
     //if counter greater than zero,then event overall capacity is not full
     if (counter1 > 0) {
@@ -522,7 +553,7 @@ async function getEventInfo(req, res) {
     res.status(200).json({
       success: "true",
       filteredEvents,
-      tierCapacity,
+      tierCapacityFull,
       isEventCapacityFull,
       isEventFree,
     });
