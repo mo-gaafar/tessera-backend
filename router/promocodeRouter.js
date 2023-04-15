@@ -8,4 +8,9 @@ router.post(
   promocodeController.createPromocode
 );
 
+router.get(
+  "/attendee/ticket/:eventId/promocode/retrieve",
+  promocodeController.checkPromocode
+);
+
 module.exports = router;
