@@ -4,7 +4,7 @@ const router = express.Router();
 const ticketController = require("../controller/Auth/ticketController"); // importing methods from controller
 
 // creating a router
-router.post("/attendee/book-ticket", ticketController.bookTicket);
+router.post("/attendee/ticket/:eventId/book", ticketController.bookTicket);
 
 router.put(
   "/event-tickets/create-ticket/:eventID",
