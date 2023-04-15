@@ -8,12 +8,14 @@ const { func } = require("joi");
  *
  * @async
  * @function
- * @param {Object} req -request
+ * @param {Object} req -request query paramters
  * @param {Object} res -response
- * @returns -events array & retreived categories
+ * @returns -events array , retreived categories &isEventFreeArray
  * @throws {Error} -internal server error
  */
+
 async function displayfilteredTabs(req, res) {
+  console.log("Gonna display filtered tabs landing page");
   try {
     //get query parameters
     const category = req.query.category;
@@ -21,8 +23,9 @@ async function displayfilteredTabs(req, res) {
     const endDate = req.query.endDate;
     const futureDate = req.query.futureDate;
     const eventHosted = req.query.eventHosted;
-    const city = req.query.administrative_area_level_1;
+    const city = req.query.city;
     const country = req.query.country;
+    const administrative_area_level_1 = req.query.administrative_area_level_1;
     const freeEvent = req.query.freeEvent;
 
     //use query object to filter by
@@ -40,6 +43,10 @@ async function displayfilteredTabs(req, res) {
     if (city) {
       queryWithCity(query, city);
     }
+    if (administrative_area_level_1) {
+      queryWithAreaLevel(query, administrative_area_level_1);
+    }
+
     //get events by country location
     if (country) {
       queryWithCountry(query, country);
@@ -448,7 +455,7 @@ async function queryWithOnline(query) {
  */
 async function queryWithCity(query, city) {
   try {
-    query["basicInfo.location.administrativeAreaLevel1"] = city;
+    query["basicInfo.location.city"] = city;
   } catch (err) {
     console.error(err);
     res
@@ -478,12 +485,35 @@ async function queryWithCountry(query, country) {
   }
 }
 /**
+ * query with given country location inside events in DB
+ *
+ * @async
+ * @function queryWithAreaLevel
+ * @param {Object} query
+ * @param {String} administrative_area_level_1
+ * @throws {Error} -couldn't query with administrative_area_level_1
+ */
+async function queryWithAreaLevel(query, administrative_area_level_1) {
+  try {
+    query["basicInfo.location.administrativeAreaLevel1"] =
+      administrative_area_level_1;
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: "false",
+      message: "Error filtering by administrative_area_level_1",
+    });
+    throw err;
+  }
+}
+/**
  * retreive events categories inside event schema
  *
  * @param {Object} req
  * @param {object} res -enum of categories
  */
 async function listAllCategories(req, res) {
+  console.log("listing all categories");
   try {
     const CategoriesList = eventModel.schema.path(
       "basicInfo.categories"
@@ -504,20 +534,39 @@ async function listAllCategories(req, res) {
  * @function
  * @param {Object} req -evetnId as as path parameter
  * @param {Object} res -event information
- * @returns -response with event information required
+ * @returns -response is filteredEvents,
+      tierCapacityFull,
+      isEventCapacityFull,
+      isEventFree
  * @throws {Error} -internal server error
  */
 async function getEventInfo(req, res) {
-  //!!! online url to be added
+  console.log("Gonna get event information for event page");
   try {
     //get eventId from path parameter
     const eventId = req.params.eventID;
+    if (!eventId) {
+      return res.status(404).json({
+        success: false,
+        message: "Missing eventId parameter",
+      });
+    }
+    const { ObjectId } = require("mongoose").Types;
+    if (!ObjectId.isValid(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid eventId",
+      });
+    }
 
     //create query object
     const query = {};
+
     //remove private events from array
     query["isPublic"] = true;
+    //only retrieve published
     query["published"] = true;
+    //filter by event id
     query["_id"] = eventId;
 
     //event filtered using the query object
@@ -539,7 +588,7 @@ async function getEventInfo(req, res) {
     var counter2 = 0;
 
     //loop over ticketTiers array
-    if (!event[0].ticketTiers) {
+    if (!event[0].ticketTiers || event[0].ticketTiers.length === 0) {
       return res.status(404).json({
         success: false,
         message: "ticketTiers is not found",

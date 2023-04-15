@@ -147,6 +147,10 @@ async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
     // Check if a promocode was provided
     discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
     totalPrice = ticketPrice - discount; // Apply the discount to the base price
+
+    promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
+
+    await promocodeObj.save();
   }
 
   return totalPrice; // Return the total purchase price
