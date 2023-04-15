@@ -4,7 +4,7 @@ const router = express.Router();
 const ticketController = require("../controller/Auth/ticketController"); // importing methods from controller
 
 // creating a router
-router.post("/attendee/ticket/:eventId/book", ticketController.bookTicket);
+// router.post("/attendee/book-ticket", ticketController.bookTicket);
 
 router.put(
   "/event-tickets/create-ticket/:eventID",
@@ -16,7 +16,13 @@ router.get(
   ticketController.retrieveTicketTier
 );
 
-<<<<<<< HEAD
+
+router.post(
+  "/attendee/ticket/:eventId/book",
+  ticketController.bookTicket
+);
+
+
 
 
 // router.patch(
@@ -28,12 +34,6 @@ router.get(
 //   "/event-tickets/edit-ticket/:eventID",
 //   ticketController.editTicketTier
 // );
-=======
-router.patch(
-  "/event-tickets/edit-ticket/:eventID",
-  ticketController.editTicketTier
-);
->>>>>>> a853c3631492c0e721b8330acfd681cb62715d44
 
 // router.put(
 //     "/event-tickets/edit-ticket/:tickID",
