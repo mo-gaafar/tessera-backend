@@ -24,7 +24,6 @@ async function displayfilteredTabs(req, res) {
     const city = req.query.administrative_area_level_1;
     const country = req.query.country;
     const freeEvent = req.query.freeEvent;
-
     //use query object to filter by
     const query = {};
 
@@ -69,43 +68,20 @@ async function displayfilteredTabs(req, res) {
     }
     //remove private events from array //published or not to be added later
     query["isPublic"] = true;
-    query["published"] = true;
+
     //array of events filtered using the query object
     const events = await eventModel
       .find(query)
       .populate("creatorId", "_id firstName lastName");
-    if (!events) {
-      return res.status(404).json({
-        success: false,
-        message: "could not query on events",
+
+    if (freeEvent) {
+      var freeEvents = events.filter((eventModel) => {
+        const tiersWithFreePrice = eventModel.ticketTiers.filter(
+          (tier) => tier.price === "Free"
+        );
+        return tiersWithFreePrice.length === eventModel.ticketTiers.length;
       });
     }
-    if (freeEvent) {
-      try {
-        var freeEvents = events.filter((eventModel) => {
-          const tiersWithFreePrice = eventModel.ticketTiers.filter(
-            (tier) => tier.price === "Free"
-          );
-          return tiersWithFreePrice.length === eventModel.ticketTiers.length;
-        });
-      } catch (err) {
-        return res.status(404).json({
-          success: false,
-          message: "could not find ticketTiers field inside event Model",
-        });
-      }
-
-      //if no free events found return empty events array
-      if (freeEvents.length === 0) {
-        return res.status(200).json({
-          success: "true",
-          filteredEvents: freeEvents,
-          isEventFreeArray: freeEvents,
-          categoriesRetreived: freeEvents,
-        });
-      }
-    }
-
     //exclude unnecessary fields
     if (freeEvent) {
       var filteredEvents = freeEvents.map((eventModel) => {
@@ -115,7 +91,7 @@ async function displayfilteredTabs(req, res) {
           __v,
           privatePassword,
           isVerified,
-          promocodes,
+          promocode,
           startSelling,
           endSelling,
           publicDate,
@@ -134,7 +110,7 @@ async function displayfilteredTabs(req, res) {
           __v,
           privatePassword,
           isVerified,
-          promocodes,
+          promocode,
           startSelling,
           endSelling,
           publicDate,
@@ -146,25 +122,12 @@ async function displayfilteredTabs(req, res) {
         return filtered;
       });
     }
-
     var counter3 = 0;
     const isEventFreeArray = [];
     for (let i = 0; i < filteredEvents.length; i++) {
       const event = filteredEvents[i];
-      if (!event || !event.ticketTiers) {
-        return res.status(404).json({
-          success: false,
-          message: "Event or event ticketTier is not found",
-        });
-      }
       for (let j = 0; j < event.ticketTiers.length; j++) {
         const tier = event.ticketTiers[j];
-        if (!tier) {
-          return res.status(404).json({
-            success: false,
-            message: "event ticketTier is not found",
-          });
-        }
         if (tier.price != "Free") {
           counter3 = counter3 + 1;
         }
@@ -517,7 +480,6 @@ async function getEventInfo(req, res) {
     const query = {};
     //remove private events from array
     query["isPublic"] = true;
-    query["published"] = true;
     query["_id"] = eventId;
 
     //event filtered using the query object
@@ -532,7 +494,7 @@ async function getEventInfo(req, res) {
       });
     }
     //create dictionary to store ticketCapacity information
-    const tierCapacityFull = [];
+    const tierCapacityFull = {};
     var isEventCapacityFull = true;
     var isEventFree = true;
     var counter1 = 0;
@@ -557,10 +519,9 @@ async function getEventInfo(req, res) {
         if (tier.price != "Free") {
           counter2 = counter2 + 1;
         }
-        tierCapacityFull.push({
-          tierName: tier.tierName,
-          isCapacityFull: isTierCapacityFull,
-        });
+
+        // Store capacity full as a value in dictionary with tier name as key
+        tierCapacityFull[tier.tierName] = isTierCapacityFull;
       }
       //if counter greater than zero,then event overall capacity is not full
       if (counter1 > 0) {
@@ -576,9 +537,10 @@ async function getEventInfo(req, res) {
       }
     } catch (err) {
       console.error(err);
-      return res
+      res
         .status(500)
         .json({ success: "false", message: "Internal server error" });
+      throw err;
     }
 
     //exclude unnecessary fields
@@ -592,7 +554,7 @@ async function getEventInfo(req, res) {
         published,
         isPublic,
         isVerified,
-        promocodes,
+        promocode,
         startSelling,
         endSelling,
         publicDate,
