@@ -107,10 +107,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
   for (let i = 0; i < ticketTiers.length; i++) {
     // Destructure the properties of the current ticket tier object
     const { tierName, quantity } = ticketTiers[i];
-    console.log(
-      "🚀 ~ file: ticketController.js:153 ~ generateTickets ~ ticketTiers:",
-      ticketTiers[i]
-    );
 
     // Loop through each quantity of the current ticket tier and create a ticket object for each one
     for (let j = 0; j < quantity; j++) {
@@ -118,10 +114,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
       const ticketPrice = await calculateTotalPrice(
         ticketTiers[i],
         promocodeObj
-      );
-      console.log(
-        "🚀 ~ file: ticketController.js:159 ~ generateTickets ~ ticketPrice:",
-        ticketPrice
       );
 
       // Create a new ticket object
@@ -133,16 +125,15 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
         purchasePrice: ticketPrice,
         tierName: tierName,
       });
-      console.log(
-        "🚀 ~ file: ticketController.js:169 ~ generateTickets ~ ticket:",
-        ticket
-      );
+
       // tickets.push(ticket);
       await ticket.save();
       const soldTicket = {
         ticketId: ticket._id,
         userId: userId,
       };
+
+      // add the tickets to the event schema
       await addSoldTicketToEvent(eventId, soldTicket);
     }
   }
