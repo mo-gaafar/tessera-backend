@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
+    "prodStart": "nodemon server.js --exitcrash",
     "devStart": "nodemon server.js",
     "test": "jest --forceExit --detectOpenHandles  --watchAll",
     "test:ci": "jest --forceExit --detectOpenHandles --watchAll=false --ci",
