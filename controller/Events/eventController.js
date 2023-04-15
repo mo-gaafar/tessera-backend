@@ -174,6 +174,18 @@ async function publishEvent(req, res) {
 	console.log("event is:", event);
 }
 
+// function that checks if event is public given the event pubic date or bool
+async function checkPublicState(event) {
+	const currentDate = new Date();
+
+	const eventDate = new Date(event.publicDate);
+	if (currentDate > eventDate || event.isPublic) {
+		return true;
+	}
+	return false;
+}
+
+
 module.exports = {
 	createEvent,
 	getEventById,
@@ -181,3 +193,4 @@ module.exports = {
 	updateEvent,
 	publishEvent,
 };
+
