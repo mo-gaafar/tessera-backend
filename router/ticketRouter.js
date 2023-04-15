@@ -16,18 +16,11 @@ router.get(
   ticketController.retrieveTicketTier
 );
 
-<<<<<<< HEAD
 
 router.patch(
     "/event-tickets/edit-ticket/:eventID",
     ticketController.editTicketTier
 )
-=======
-router.put(
-  "/event-tickets/edit-ticket/:eventID",
-  ticketController.editTicketTier
-);
->>>>>>> ef0e32bfcaa9ef6e334c7a4b9740de9b858480a3
 
 // router.put(
 //     "/event-tickets/edit-ticket/:tickID",
