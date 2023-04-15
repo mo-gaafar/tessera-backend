@@ -487,41 +487,60 @@ async function getEventInfo(req, res) {
       .find(query)
       //get only these fields from creator
       .populate("creatorId", "_id firstName lastName");
-
+    if (!event[0]) {
+      return res.status(404).json({
+        success: false,
+        message: "Event is not found",
+      });
+    }
     //create dictionary to store ticketCapacity information
     const tierCapacityFull = {};
     var isEventCapacityFull = true;
     var isEventFree = true;
     var counter1 = 0;
     var counter2 = 0;
-    // console.log();
+
     //loop over ticketTiers array
-    for (let i = 0; i < event[0].ticketTiers.length; i++) {
-      const tier = event[0].ticketTiers[i];
-      //checks if capacity full for each tier
-      const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
-
-      if (isTierCapacityFull === false) {
-        counter1 = counter1 + 1;
-      }
-      if (tier.price != "Free") {
-        counter2 = counter2 + 1;
-      }
-
-      // Store capacity full as a value in dictionary with tier name as key
-      tierCapacityFull[tier.tierName] = isTierCapacityFull;
+    if (!event[0].ticketTiers) {
+      return res.status(404).json({
+        success: false,
+        message: "ticketTiers is not found",
+      });
     }
-    //if counter greater than zero,then event overall capacity is not full
-    if (counter1 > 0) {
-      isEventCapacityFull = false;
-    } else {
-      isEventCapacityFull = true;
-    }
-    //if counter greater than zero,then event overall is not full
-    if (counter2 > 0) {
-      isEventFree = false;
-    } else {
-      isEventFree = true;
+    try {
+      for (let i = 0; i < event[0].ticketTiers.length; i++) {
+        const tier = event[0].ticketTiers[i];
+        //checks if capacity full for each tier
+        const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
+
+        if (isTierCapacityFull === false) {
+          counter1 = counter1 + 1;
+        }
+        if (tier.price != "Free") {
+          counter2 = counter2 + 1;
+        }
+
+        // Store capacity full as a value in dictionary with tier name as key
+        tierCapacityFull[tier.tierName] = isTierCapacityFull;
+      }
+      //if counter greater than zero,then event overall capacity is not full
+      if (counter1 > 0) {
+        isEventCapacityFull = false;
+      } else {
+        isEventCapacityFull = true;
+      }
+      //if counter greater than zero,then event overall is not full
+      if (counter2 > 0) {
+        isEventFree = false;
+      } else {
+        isEventFree = true;
+      }
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ success: "false", message: "Internal server error" });
+      throw err;
     }
 
     //exclude unnecessary fields
