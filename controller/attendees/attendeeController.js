@@ -448,7 +448,7 @@ async function queryWithOnline(query) {
  */
 async function queryWithCity(query, city) {
   try {
-    query["basicInfo.location.administrative_area_level_1"] = city;
+    query["basicInfo.location.administrativeAreaLevel1"] = city;
   } catch (err) {
     console.error(err);
     res

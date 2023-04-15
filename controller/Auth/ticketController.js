@@ -131,6 +131,11 @@ async function bookTicket(req, res) {
       ticket
     );
     await ticket.save();
+    const soldTicket = {
+      ticketId: ticket._id,
+      userId: user._id,
+    };
+    await addSoldTicketToEvent(eventId, soldTicket);
 
     return res.status(200).json({
       success: true,
@@ -145,6 +150,36 @@ async function bookTicket(req, res) {
       success: false,
       message: err.message,
     });
+  }
+}
+
+/**
+ * Add a sold ticket to an event's soldTickets array
+ * @param {string} eventId - The ID of the event to add the sold ticket to
+ * @param {object} soldTicket - The sold ticket object to add to the event's soldTickets array
+ * @returns {Void} update the event object with the added sold ticket
+ * @throws {Error} If the event is not found or if the sold ticket is already associated with the event
+ */
+async function addSoldTicketToEvent(eventId, soldTicket) {
+  try {
+    // Find the event in the database using the event ID.
+    const event = await eventModel.findById(eventId);
+
+    // Throw an error if the event does not exist.
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    // Add the sold ticket to the event's soldTickets array.
+    event.soldTickets.push(soldTicket);
+
+    // Save the updated event to the database.
+    await event.save();
+  } catch (err) {
+    console.error(err);
+
+    // Throw an error if an error occurs.
+    throw new Error(err.message);
   }
 }
 
@@ -247,15 +282,29 @@ async function editTicketTier(req, res) {
   try {
     const eventId = req.params.eventID; // get the event ID from the request URL
     // const update = req.body; // get the update object from the request body
-    const { tierID,tierName, quantitySold, maxCapacity, price, startSelling,endSelling } = req.body;
-    console.log("tierID:",tierID)
-
+    const {
+      tierID,
+      tierName,
+      quantitySold,
+      maxCapacity,
+      price,
+      startSelling,
+      endSelling,
+    } = req.body;
+    console.log("tierID:", tierID);
 
     const updatedEvent = await eventModel.findOneAndUpdate(
-      { _id: eventId,'ticketTiers._id':tierID }, 
-      { $set: { 'details.$.tierName': tierName,'details.$.quantitySold':quantitySold,'details.$.maxCapacity':maxCapacity,
-      'details.$.price':price,'details.$.startSelling':startSelling,'details.$.endSelling':endSelling  }
-    },
+      { _id: eventId, "ticketTiers._id": tierID },
+      {
+        $set: {
+          "details.$.tierName": tierName,
+          "details.$.quantitySold": quantitySold,
+          "details.$.maxCapacity": maxCapacity,
+          "details.$.price": price,
+          "details.$.startSelling": startSelling,
+          "details.$.endSelling": endSelling,
+        },
+      },
       { new: true, runValidators: true }
     );
 
