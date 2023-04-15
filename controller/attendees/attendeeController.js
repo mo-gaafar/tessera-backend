@@ -25,12 +25,6 @@ async function displayfilteredTabs(req, res) {
     const country = req.query.country;
     const freeEvent = req.query.freeEvent;
 
-    // No query parameters passed
-    if (Object.keys(req.query).length === 0) {
-      return res
-        .status(500)
-        .json({ success: "false", message: "No query paramters passed!" });
-    }
     //use query object to filter by
     const query = {};
 
