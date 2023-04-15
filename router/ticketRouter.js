@@ -16,14 +16,4 @@ router.get(
   ticketController.retrieveTicketTier
 );
 
-router.patch(
-  "/event-tickets/edit-ticket/:eventID",
-  ticketController.editTicketTier
-);
-
-// router.put(
-//     "/event-tickets/edit-ticket/:tickID",
-//     ticketTierController.editTicket
-// )
-
 module.exports = router;
