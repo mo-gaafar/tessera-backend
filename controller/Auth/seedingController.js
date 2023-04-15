@@ -1,15 +1,15 @@
  
-// const mongoose = require("mongoose");
-// const eventModel = require("../../models/eventModel");
-// const userModel=require("../../models/userModel");
-// const {faker} = require('@faker-js/faker');
-// const shortid = require('shortid');
-// const { resendEmailVerification } = require("./verificationController");
-
+// // const mongoose = require("mongoose");
 // // const eventModel = require("../../models/eventModel");
+// // const userModel=require("../../models/userModel");
 // // const {faker} = require('@faker-js/faker');
 // // const shortid = require('shortid');
 // // const { resendEmailVerification } = require("./verificationController");
+
+// const eventModel = require("../../models/eventModel");
+// const {faker} = require('@faker-js/faker');
+// const shortid = require('shortid');
+// const { resendEmailVerification } = require("./verificationController");
 
 // async function connectDB() {
 //     mongoose
@@ -32,7 +32,7 @@
 // console.log("ana gowa el  sedding")
 // const events=[];
 
-//  for (let i = 0; i < 7; i++){
+//  for (let i = 0; i < 4; i++){
 //   console.log('ana gwa el for');
 //    const newEvent= new eventModel({
 //       basicInfo: {
@@ -85,15 +85,15 @@
 //         // country:faker.lorem.words(),
 //         // city:faker.lorem.words(),
 //         // administrativeAreaLevel1:faker.lorem.words(),
-//         longitude:-96,
-//         latitude:37,
-//         placeId:"ChIJCzYy5IS16lQRQrfeQ5K5Oxw",
-//         venueName:"United Center ",
-//         streetNumber:55,
-//         route:"Magnificent Mile",
-//         country:"United States",
-//         city:"Chicago",
-//         administrativeAreaLevel1:"Illinois"
+//         longitude:9,
+//         latitude:45,
+//         placeId:"ChIJ53USP0nBhkcRjQ50xhPN_zw",
+//         venueName:"Museo del Duomo ",
+//         streetNumber:14,
+//         route:"Duomo di Milano",
+//         country:"Italy",
+//         city:"Milan",
+//         administrativeAreaLevel1:"Lombard"
                 
 
 // },
@@ -125,21 +125,25 @@
 
 //      ticketTiers: [
 //       {
-//         tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+//         // tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+//         tierName:"Free",
 //         quantitySold: faker.datatype.number(0,2500),
 //         maxCapacity: faker.datatype.number(3000,6000),
-//         price: faker.finance.amount(),
+//         // price: faker.finance.amount(),
+//         price:"Free",
 //         startSelling: faker.date.future(),
 //         endSelling:faker.date.future()
 //       },
       
 
 //       {
-//         tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+//         // tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+//         tierName:"Free",
 //         quantitySold: faker.datatype.number(0,2500),
 //         maxCapacity: faker.datatype.number(3000,6000),
 //         // maxcapacity: faker.datatype.number(200),
-//         price: faker.finance.amount(),
+//         // price: faker.finance.amount(),
+//         price:"Free",
 //         startSelling: faker.date.future(),
 //         endSelling:faker.date.future()
 //       },
@@ -227,47 +231,47 @@
 // }
 
 
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////DONE
+// // ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////DONE
 
-// // events.push(newEvent);
-// // newEvent.save((err) => {
-// //     if (err) {
-// //       console.log(err);
-// //     }
-// //   });
+// // // events.push(newEvent);
+// // // newEvent.save((err) => {
+// // //     if (err) {
+// // //       console.log(err);
+// // //     }
+// // //   });
 
-// // newEvent.save()
+// // // newEvent.save()
  
+// // // // }
+
+// // // res.status(201).json(
+// // //   {
+// // //   success:true,
+// // //   message: "Database Seeded",
+// // //   }
+// // // )
+
 // // // }
 
-// // res.status(201).json(
-// //   {
-// //   success:true,
-// //   message: "Database Seeded",
-// //   }
-// // )
 
-// // }
-
-
-// //   });
+// // //   });
 
 
   
 
 
-// // // console.log('Database seeded!')
+// // // // console.log('Database seeded!')
 
 
 
 
 
-// //  }
+// // //  }
  
-// //  seedDB();
+// // //  seedDB();
 
 
 
 
-// module.exports = { seedDB };
+// // module.exports = { seedDB };
 
