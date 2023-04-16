@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-//const userModel = require("../../models/userModel");
+const userModel = require("../models/userModel");
 
 /**
  * Generates a JSON Web Token for the provided user ID using the SECRETJWT environment variable.
@@ -76,7 +76,7 @@ async function authorized(req) {
 			return false;
 		}
 		console.log("User authorized");
-		return true, user.user_id;
+		return true, user._id;
 	} catch (err) {
 		console.error(err);
 		return false;
