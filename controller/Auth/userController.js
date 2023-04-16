@@ -129,10 +129,9 @@ async function signIn(req, res) {
 
 		// Compare the given password with the encrypted password in the database
 		//const isMatched = await comparePassword(user.password, password);
-		const isMatched = await bcrypt.compare(password, user.password);
-		//const isMatched = comparePassword(user.password, password);
-		console.log(`im inside user contoller ${isMatched} `);
+		//const isMatched = await bcrypt.compare(password, user.password);
 
+		const isMatched = await comparePassword(user.password, password);
 		// Password not matched
 		if (!isMatched) {
 			return res.status(200).json({
