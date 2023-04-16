@@ -226,15 +226,11 @@ async function forgotPassword(req, res) {
 async function resetPassword(req, res) {
 	try {
 		// Get token from request params
-		//const token = req.params.token;
-		console.log("im inside the function");
-		//const token = await retrieveToken(req);
-		const userid = await authorized(req);
-		//const decoded = await verifyToken(token);
+		const token = req.params.token;
 		// Verify token
-		//const decoded = jwt.verify(token, process.env.SECRETJWT);
+		const decoded = jwt.verify(token, process.env.SECRETJWT);
 		// Find user by ID
-		const user = await userModel.findById(userid);
+		const user = await userModel.findById(decoded.user_id);
 
 		// If the user is found by ID
 		if (user) {
