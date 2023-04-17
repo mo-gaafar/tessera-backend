@@ -29,7 +29,7 @@ describe("deleteEvent", () => {
 		jest.clearAllMocks();
 	});
 
-	it("should return 404 if event is not found", async () => {
+	it("event not found", async () => {
 		eventModel.findById.mockResolvedValue(null);
 
 		await deleteEvent(req, res);
@@ -39,7 +39,7 @@ describe("deleteEvent", () => {
 		expect(res.json).toHaveBeenCalledWith({ message: "No event Found" });
 	});
 
-	it("should return 401 if user is not authorized to delete event", async () => {
+	it(" user not authorized to delete event", async () => {
 		eventModel.findById.mockResolvedValue(event);
 		event.creatorId = "1234";
 		userId = "44444";
@@ -58,7 +58,7 @@ describe("deleteEvent", () => {
 		});
 	});
 
-	it("should delete the event if user is authorized", async () => {
+	it("user is authorized", async () => {
 		eventModel.findById.mockResolvedValue(event);
 		authorized.mockResolvedValue({ authorized: true, user_id: "user1" });
 
@@ -74,8 +74,10 @@ describe("deleteEvent", () => {
 		});
 	});
 
-	it("should return 400 if an error occurs", async () => {
-		eventModel.findById.mockRejectedValue(new Error("Something went wrong"));
+	it(" error occurs", async () => {
+		eventModel.findById.mockRejectedValue(
+			new Error("Something wrong with the request")
+		);
 
 		await deleteEvent(req, res);
 
@@ -83,7 +85,7 @@ describe("deleteEvent", () => {
 		expect(res.status).toHaveBeenCalledWith(400);
 		expect(res.json).toHaveBeenCalledWith({
 			success: false,
-			message: "Something went wrong",
+			message: "Something wrong with the request",
 		});
 	});
 });

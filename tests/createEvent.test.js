@@ -2,15 +2,9 @@ const { createEvent } = require("../controller/Events/eventController");
 const eventModel = require("../models/eventModel");
 const userModel = require("../models/userModel");
 
-const {
-	GenerateToken,
-	retrieveToken,
-	verifyToken,
-	authorized,
-} = require("../utils/Tokens");
+const { authorized } = require("../utils/Tokens");
 
 jest.mock("../models/eventModel");
-//jest.mock("../Auth/userController");
 jest.mock("../models/userModel.js");
 jest.mock("../utils/Tokens.js");
 
@@ -49,7 +43,7 @@ describe("createEvent", () => {
 		});
 	});
 
-	it("should return an error if there was an error creating the event", async () => {
+	it(" error creating the event", async () => {
 		const req = {
 			body: {
 				title: "Test Event",
@@ -79,7 +73,7 @@ describe("createEvent", () => {
 		});
 	});
 
-	it("should return an error if user is not authorized", async () => {
+	it(" user is not authorized", async () => {
 		const req = {
 			body: {
 				title: "Test Event",
@@ -93,9 +87,7 @@ describe("createEvent", () => {
 			json: jest.fn(),
 		};
 
-		//authorized.mockReturnValueOnce(false);
 		authorized.mockResolvedValueOnce({ authorized: false });
-		//console.log(authorized);
 
 		await createEvent(req, res);
 
