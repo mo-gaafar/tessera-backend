@@ -21,21 +21,28 @@ Asynchronous function that creates a new event based on the request body and add
 */
 async function createEvent(req, res) {
 	try {
-		const useridid = "643bd6454bcebb6861183fa6";
-		const tok = GenerateToken(useridid);
-		console.log(tok);
+		//const useridid = "643c89200765c86f18483a0c";
+		//const tok = GenerateToken(useridid);
+		//console.log(tok);
 		//const token = await retrieveToken(req);
 		//const decoded = await verifyToken(token);
 		const userid = await authorized(req);
+
 		const event = await eventModel.create({
 			...req.body,
-			creatorId: userid,
+			creatorId: userid.user_id,
 		});
-
-		return res.status(200).json({
-			success: true,
-			message: "Event has been created successfully",
-		});
+		if (userid.authorized) {
+			return res.status(200).json({
+				success: true,
+				message: "Event has been created successfully",
+			});
+		} else {
+			return res.status(401).json({
+				success: false,
+				message: "the user doesnt have access",
+			});
+		}
 	} catch (error) {
 		res.status(400).json({
 			success: false,
@@ -60,21 +67,18 @@ async function getEventById(req, res) {
 		const event = await eventModel.findById(eventId); //search event by id
 		//const token = await retrieveToken(req);
 		//const decoded = await verifyToken(token);
-		const userid = await authorized(req);
-		//console.log(typeof userid);
-		//console.log(`im inside get events${userid}`);
-		//console.log(`creator inside event ${event.creatorId.toString()}`);
+		if (!event) {
+			return res.status(404).json({ message: "No event Found" });
+		}
 
-		if (event.creatorId.toString() !== userid.toString()) {
+		const userid = await authorized(req);
+
+		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to retrieve this event",
 			});
-		}
-		//const event = await eventModel.findById(eventId); //returns event of given id
-		if (!event) {
-			return res.status(404).json({ message: "Event is not found" });
 		}
 		return res.status(200).json({ event });
 	} catch (error) {
@@ -104,16 +108,23 @@ async function deleteEvent(req, res) {
 		//const token = await retrieveToken(req);
 		//const decoded = await verifyToken(token);
 
-		if (event.creatorId.toString() !== userid.toString()) {
+		if (!event) {
+			return res.status(404).json({ message: "No event Found" });
+		}
+
+		if (!userid.authorized) {
+			res.status(402).json({
+				success: false,
+				message: "the user is not found",
+			});
+		}
+
+		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to delete this event",
 			});
-		}
-
-		if (!event) {
-			return res.status(404).json({ message: "No event Found" });
 		}
 
 		await eventModel.findByIdAndDelete(eventIdd); // delete the found event
@@ -147,15 +158,7 @@ async function updateEvent(req, res) {
 		const update = req.body; // get the update object from the request body
 		const event = await eventModel.findById(eventId);
 		const userid = await authorized(req);
-		if (event.creatorId.toString() !== userid.toString()) {
-			// check if the creator of the event matches the user making the delete request
-			return res.status(401).json({
-				success: false,
-				message: "You are not authorized to update this event",
-			});
-		}
 
-		// update the document in the database using findOneAndUpdate
 		const updatedEvent = await eventModel.findOneAndUpdate(
 			{ _id: eventId },
 			update,
@@ -167,7 +170,13 @@ async function updateEvent(req, res) {
 			return res.status(404).json({ error: "Event not found" });
 		}
 
-		// return the updated document
+		if (event.creatorId.toString() !== userid.user_id.toString()) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to update this event",
+			});
+		}
 		return res
 			.status(200)
 			.json({ success: true, message: "the event is updated" });
