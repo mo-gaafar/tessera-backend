@@ -44,11 +44,6 @@ describe("deleteEvent", () => {
 		event.creatorId = "1234";
 		userId = "44444";
 
-		//const eventId = "123456";
-		//const userId = "abcdef";
-		//const event = { _id: eventId, creatorId: "xyz" };
-		//const token = "token123";
-
 		authorized.mockResolvedValue({ authorized: true, user_id: userId });
 		eventModel.findById.mockResolvedValue(event);
 

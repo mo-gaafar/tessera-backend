@@ -31,7 +31,6 @@ describe("getEventById function", () => {
 		const eventId = "123456";
 		const userId = "abcdef";
 		const event = { _id: eventId, creatorId: userId };
-		const token = "token123";
 
 		authorized.mockResolvedValue({ authorized: true, user_id: userId });
 		eventModel.findById.mockResolvedValue(event);
@@ -61,7 +60,6 @@ describe("getEventById function", () => {
 		const eventId = "123456";
 		const userId = "abcdef";
 		const event = { _id: eventId, creatorId: "xyz" };
-		const token = "token123";
 
 		authorized.mockResolvedValue({ authorized: true, user_id: userId });
 		eventModel.findById.mockResolvedValue(event);
