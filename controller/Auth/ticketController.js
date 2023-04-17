@@ -49,6 +49,10 @@ async function bookTicket(req, res) {
 
     // Find the event in the database.
     const event = await eventModel.findById(eventId);
+    console.log(
+      "🚀 ~ file: ticketController.js:52 ~ bookTicket ~ event:",
+      event
+    );
 
     // check the event if the event exists
     if (!event) {
@@ -67,12 +71,14 @@ async function bookTicket(req, res) {
       throw new Error("Ticket tier not found");
     }
 
-    // Get the promocode object from the database by the promocode code
     let promocodeObj = null;
-    if (promocode) {
-      promocodeObj = await promocodeModel.findOne({ code: promocode });
-      if (!promocodeObj) {
-        throw new Error("Promocode not found");
+    if (promocode != null) {
+      // Get the promocode object from the database by the promocode code
+      if (promocode) {
+        promocodeObj = await promocodeModel.findOne({ code: promocode });
+        if (!promocodeObj) {
+          throw new Error("Promocode not found");
+        }
       }
     }
 
@@ -137,8 +143,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
       await addSoldTicketToEvent(eventId, soldTicket);
     }
   }
-
-  return tickets;
 }
 
 /**
@@ -148,15 +152,20 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
  * @returns {number} - The total purchase price after applying any applicable discount.
  */
 async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
+  let totalPrice = 0;
   let ticketPrice = ticketTierSelected.price; // Get the base ticket price
-
+  if (promocodeObj == null) {
+    promocodeObj = 0;
+  }
   let discount = 0;
   if (promocodeObj) {
     // Check if a promocode was provided
-    discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
-    totalPrice = ticketPrice - discount; // Apply the discount to the base price
 
-    promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
+    if (promocodeObj != null) {
+      discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
+      promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
+    }
+    totalPrice = ticketPrice - discount; // Apply the discount to the base price
 
     await promocodeObj.save();
   }
