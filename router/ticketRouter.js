@@ -17,7 +17,6 @@ router.get(
   ticketController.retrieveTicketTier
 );
 
-<<<<<<< HEAD
 
 
 router.post(
@@ -43,6 +42,4 @@ router.post(
 //     ticketTierController.editTicket
 // )
 
-=======
->>>>>>> 5f1217226c02a103d99254ce1a4edfe6e5873e28
 module.exports = router;
