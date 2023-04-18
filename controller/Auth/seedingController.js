@@ -1,5 +1,5 @@
  
-// // const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 // // const eventModel = require("../../models/eventModel");
 // // const userModel=require("../../models/userModel");
 // // const {faker} = require('@faker-js/faker');
@@ -32,7 +32,7 @@
 // console.log("ana gowa el  sedding")
 // const events=[];
 
-//  for (let i = 0; i < 4; i++){
+//  for (let i = 0; i < 5; i++){
 //   console.log('ana gwa el for');
 //    const newEvent= new eventModel({
 //       basicInfo: {
@@ -75,28 +75,28 @@
 //       ]),
       
 
-//       location: {
-//         // longitude:faker.datatype.number(0,180), 
-//         // latitude: faker.datatype.number(0,90),
-//         // placeId:faker.random.alphaNumeric(),
-//         // venueName: faker.lorem.words(),
-//         // streetNumber:faker.datatype.number(1,999),   
-//         // route:faker.lorem.words(),
-//         // country:faker.lorem.words(),
-//         // city:faker.lorem.words(),
-//         // administrativeAreaLevel1:faker.lorem.words(),
-//         longitude:9,
-//         latitude:45,
-//         placeId:"ChIJ53USP0nBhkcRjQ50xhPN_zw",
-//         venueName:"Museo del Duomo ",
-//         streetNumber:14,
-//         route:"Duomo di Milano",
-//         country:"Italy",
-//         city:"Milan",
-//         administrativeAreaLevel1:"Lombard"
-                
+// //       location: {
+// //         // longitude:faker.datatype.number(0,180), 
+// //         // latitude: faker.datatype.number(0,90),
+// //         // placeId:faker.random.alphaNumeric(),
+// //         // venueName: faker.lorem.words(),
+// //         // streetNumber:faker.datatype.number(1,999),   
+// //         // route:faker.lorem.words(),
+// //         // country:faker.lorem.words(),
+// //         // city:faker.lorem.words(),
+// //         // administrativeAreaLevel1:faker.lorem.words(),
+// //         longitude:-40,
+// //         latitude:-4,
+// //         placeId:"ChIJgTwKgJcpQg0RaSKMYcHeNsQ",
+// //         venueName:"Prado Museum",
+// //         streetNumber:30,
+// //         route:"Paseo del Prado",
+// //         country:"Spain",
+// //         city:"Madrid",
+// //         administrativeAreaLevel1:"Community of Madrid"
 
-// },
+      
+// // },
 
 //       },
 
@@ -125,12 +125,15 @@
 
 //      ticketTiers: [
 //       {
-//         // tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
-//         tierName:"Free",
-//         quantitySold: faker.datatype.number(0,2500),
-//         maxCapacity: faker.datatype.number(3000,6000),
-//         // price: faker.finance.amount(),
-//         price:"Free",
+//         tierName: faker.helpers.arrayElement([ "Regular", "VIP"]),
+//         // tierName:"Free",
+//         // tierName:"Free",
+//         quantitySold: 2500,
+//         // maxCapacity: faker.datatype.number(3000,8000),
+//         maxCapacity:9000,
+//         price: faker.finance.amount(),
+//         // price:"Free",
+//         // price:"Free",
 //         startSelling: faker.date.future(),
 //         endSelling:faker.date.future()
 //       },
@@ -138,12 +141,17 @@
 
 //       {
 //         // tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+//         // tierName: faker.helpers.arrayElement([ "Regular", "VIP"]),
 //         tierName:"Free",
-//         quantitySold: faker.datatype.number(0,2500),
-//         maxCapacity: faker.datatype.number(3000,6000),
-//         // maxcapacity: faker.datatype.number(200),
+//         // tierName: faker.helpers.arrayElement([ "Regular", "VIP"]),
+//         // quantitySold: faker.datatype.number(0,2500),
+//         quantitySold:1500,
+//         // maxCapacity: faker.datatype.number(3000,6000),
+        
+//         maxCapacity: 4000,
 //         // price: faker.finance.amount(),
 //         price:"Free",
+//         // price:"Free",
 //         startSelling: faker.date.future(),
 //         endSelling:faker.date.future()
 //       },
@@ -162,9 +170,9 @@
 
 //     publicDate:faker.date.future(), 
 //     // isOnline: faker.datatype.boolean(),
-//     isOnline:false,
+//     isOnline:true,
 //     eventUrl:"https://www.tessera.social/",
-//     // onlineEventUrl:"https://www.tessera.social/",
+//     onlineEventUrl:"https://www.tessera.social/",
 //     privatePassword: faker.internet.password(), 
 
 //     soldTickets: [
@@ -268,10 +276,10 @@
 
 // // //  }
  
-// // //  seedDB();
+// //  seedDB();
 
 
 
 
-// // module.exports = { seedDB };
+// module.exports = { seedDB };
 
