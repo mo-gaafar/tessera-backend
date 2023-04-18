@@ -16,7 +16,7 @@ router.get(
   ticketController.retrieveTicketTier
 );
 
-<<<<<<< HEAD
+
 
 router.post(
   "/attendee/ticket/:eventId/book",
@@ -41,6 +41,4 @@ router.post(
 //     ticketTierController.editTicket
 // )
 
-=======
->>>>>>> 4e17202e4461f1628648a29a4967a25dfe067ddd
 module.exports = router;

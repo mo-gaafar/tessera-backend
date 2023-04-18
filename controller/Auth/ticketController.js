@@ -218,26 +218,26 @@ async function createTicketTier(req, res) {
     } = req.body;
 
     const token = await retrieveToken(req); //getting the token of the ticket tier creator
-    console.log("token is:", token);
+    // console.log("token is:", token);
 
     const decodedToken = verifyToken(token); //decoding the token
 
     decodedToken.then((resolvedValue) => {
       tierCreatorID = resolvedValue.user_id;
-      console.log("tier Creator ID:", tierCreatorID); // getting ID of ticket tier creator
+      // console.log("tier Creator ID:", tierCreatorID); // getting ID of ticket tier creator
     });
   
 
     const quantitySold=0
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
     // console.log("ticket tier is to be added in this event:", event);
-    console.log("creator ID:", event.creatorId);
+    // console.log("creator ID:", event.creatorId);
     // checking if creator of the event is the one who edits it
     if (event.creatorId == tierCreatorID) {
-      console.log(
-        "creator of the event is the one who edits:",
-        event.creatorId
-      );
+      // console.log(
+      //   "creator of the event is the one who edits:",
+      //   event.creatorId
+      // );
 
       const newTicketTier = {
         tierName,
@@ -259,7 +259,7 @@ async function createTicketTier(req, res) {
         newTicketTier,
       });
     } else {
-      console.log("Can't add new tier as creator and editor not same");
+      // console.log("Can't add new tier as creator and editor not same");
 
       res.status(201).json({
         success: false,
