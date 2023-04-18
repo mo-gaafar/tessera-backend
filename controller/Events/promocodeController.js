@@ -163,4 +163,4 @@ async function checkPromocode(req, res) {
   }
 }
 
-module.exports = { createPromocode, checkPromocode };
+module.exports = { createPromocode, checkPromocode, addPromocodeToEvent };
