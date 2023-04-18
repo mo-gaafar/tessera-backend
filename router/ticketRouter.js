@@ -6,6 +6,7 @@ const ticketController = require("../controller/Auth/ticketController"); // impo
 // creating a router
 // router.post("/attendee/book-ticket", ticketController.bookTicket);
 
+router.post("/attendee/ticket/:eventId/book", ticketController.bookTicket);
 router.put(
   "/event-tickets/create-ticket/:eventID",
   ticketController.createTicketTier
@@ -16,6 +17,7 @@ router.get(
   ticketController.retrieveTicketTier
 );
 
+<<<<<<< HEAD
 
 
 router.post(
@@ -41,4 +43,6 @@ router.post(
 //     ticketTierController.editTicket
 // )
 
+=======
+>>>>>>> 5f1217226c02a103d99254ce1a4edfe6e5873e28
 module.exports = router;

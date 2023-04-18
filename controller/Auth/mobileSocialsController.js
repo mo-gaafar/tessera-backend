@@ -24,6 +24,9 @@ async function mobileSignUp(userInfo, socialMediaType, res) {
     var newPassword = generator.generate({
       length: 10,
       numbers: true,
+      uppercase: true,
+      symbols: true,
+      excludeSimilarCharacters: true,
     });
 
     const newUser = {

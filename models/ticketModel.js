@@ -4,7 +4,7 @@ const ticketSchema = new mongoose.Schema(
   {
     // reference to the objectID of the event, to link ticket to a certain event
     eventId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.String,
       ref: "eventModel",
       required: true,
     },
@@ -25,7 +25,7 @@ const ticketSchema = new mongoose.Schema(
       required: true,
     },
     purchasePrice: {
-      type: Number,
+      type: String,
       required: true,
     },
     tierName: {

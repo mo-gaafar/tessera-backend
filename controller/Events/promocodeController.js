@@ -88,8 +88,8 @@ async function checkPromocodeExists(eventId, code) {
   try {
     // Find a promocode with the given event ID and code in the database.
     const promocode = await promocodeModel.findOne({ event: eventId, code });
-    // Return true if a promocode was found, false otherwise.
-    return promocode ? true : false;
+    // Return the discount if a promocode was found, false otherwise.
+    return promocode ? promocode.discount : false;
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
     console.error(err);
@@ -145,9 +145,16 @@ async function checkPromocode(req, res) {
       isExists
     );
 
-    return res.status(isExists ? 200 : 404).json({
-      success: isExists ? true : false,
-      message: isExists ? "Promocode exists" : "Promocode does not exist",
+    if (isExists == false)
+      return res.status(404).json({
+        success: false,
+        message: "Promocode does not exist",
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Promocode exists",
+      discout: isExists / 100,
     });
   } catch (err) {
     // If an error occurs, log it and re-throw the error.

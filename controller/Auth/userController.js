@@ -15,6 +15,7 @@ const {
 	GenerateToken,
 	verifyToken,
 	retrieveToken,
+	authorized,
 } = require("../../utils/Tokens");
 const { sendVerification, verifyEmail } = require("./verificationController");
 
@@ -37,7 +38,7 @@ async function signUp(req, res) {
 
 	// Check if a user with the same email already exists
 	const userExist = await userModel.findOne({ email });
-	if (userExist) { 
+	if (userExist) {
 		return res.status(200).json({
 			success: false,
 			message: "Email already exists",
@@ -128,8 +129,9 @@ async function signIn(req, res) {
 
 		// Compare the given password with the encrypted password in the database
 		//const isMatched = await comparePassword(user.password, password);
-		const isMatched = await bcrypt.compare(password, user.password);
+		//const isMatched = await bcrypt.compare(password, user.password);
 
+		const isMatched = await comparePassword(user.password, password);
 		// Password not matched
 		if (!isMatched) {
 			return res.status(200).json({
@@ -140,6 +142,10 @@ async function signIn(req, res) {
 
 		// Generate access token for the user
 		const accessToken = await GenerateToken(user._id);
+		console.log(
+			"🚀 ~ file: userController.js:143 ~ signIn ~ accessToken:",
+			accessToken
+		);
 
 		// Return success response with access token and user information
 		res.status(200).json({
@@ -220,14 +226,14 @@ async function forgotPassword(req, res) {
 async function resetPassword(req, res) {
 	try {
 		// Get token from request params
-		//const token = req.params.token;
-		const token = await retrieveToken(req);
-		const decoded = await verifyToken(token);
+		const token = req.params.token;
 		// Verify token
+		//console.log(decoded);
 		//const decoded = jwt.verify(token, process.env.SECRETJWT);
+		const decoded = await verifyToken(token);
+		console.log(decoded);
 		// Find user by ID
 		const user = await userModel.findById(decoded.user_id);
-
 		// If the user is found by ID
 		if (user) {
 			const password = req.body.password;
