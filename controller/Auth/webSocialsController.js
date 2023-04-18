@@ -22,6 +22,9 @@ async function webSignUp(userInfo, socialMediaType) {
     var newPassword = generator.generate({
       length: 10,
       numbers: true,
+      uppercase: true,
+      symbols: true,
+      excludeSimilarCharacters: true,
     });
     // create user
     const newUser = {
