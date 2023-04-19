@@ -108,7 +108,6 @@ async function displayfilteredTabs(req, res) {
       //if no free events found return empty events array
       if (freeEvents.length === 0) {
         return res.status(200).json({
-          success: "true",
           filteredEvents: freeEvents,
           isEventFreeArray: freeEvents,
           categoriesRetreived: freeEvents,
@@ -674,4 +673,18 @@ async function getEventInfo(req, res) {
     throw err;
   }
 }
-module.exports = { displayfilteredTabs, listAllCategories, getEventInfo };
+module.exports = {
+  displayfilteredTabs,
+  listAllCategories,
+  getEventInfo,
+  queryWithCategory,
+  queryWithCountry,
+  queryWithCity,
+  queryWithAreaLevel,
+  queryWithOnline,
+  queryWithDate,
+  getToday,
+  getTomorrow,
+  getWeekend,
+  getCalender,
+};
