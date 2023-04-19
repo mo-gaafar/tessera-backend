@@ -1,11 +1,6 @@
 const eventModel = require("../../models/eventModel");
 const promocodeModel = require("../../models/promocodeModel");
-const {
-  GenerateToken,
-  retrieveToken,
-  verifyToken,
-  authorized,
-} = require("../../utils/Tokens");
+const { authorized } = require("../../utils/Tokens");
 
 /**
  * Creates a new promocode for an event.
@@ -138,21 +133,11 @@ async function addPromocodeToEvent(eventId, promocode) {
 
 async function checkPromocode(req, res) {
   const eventId = req.params.eventId;
-  console.log(
-    "🚀 ~ file: promocodeController.js:132 ~ checkPromocode ~ eventId:",
-    eventId
-  );
+
   const { code } = req.body;
-  console.log(
-    "🚀 ~ file: promocodeController.js:133 ~ checkPromocode ~ code:",
-    code
-  );
+
   try {
     const isExists = await checkPromocodeExists(eventId, code);
-    console.log(
-      "🚀 ~ file: promocodeController.js:135 ~ checkPromocode ~ isExists:",
-      isExists
-    );
 
     if (isExists == false)
       return res.status(404).json({
@@ -172,4 +157,9 @@ async function checkPromocode(req, res) {
   }
 }
 
-module.exports = { createPromocode, checkPromocode, addPromocodeToEvent };
+module.exports = {
+  createPromocode,
+  checkPromocode,
+  addPromocodeToEvent,
+  checkPromocodeExists,
+};
