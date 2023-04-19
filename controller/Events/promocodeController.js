@@ -19,7 +19,7 @@ async function createPromocode(req, res) {
   const { code, discount, limitOfUses } = req.body;
 
   // Retrieve the JWT token from the request headers.
-  const token = await retrieveToken(req);
+  // const token = await retrieveToken(req);
 
   try {
     // Find the event in the database.
@@ -28,9 +28,18 @@ async function createPromocode(req, res) {
       throw new Error("Event not found");
     }
 
-    // Verify the JWT token and get the decoded user ID.
-    const decoded = await verifyToken(token);
-    const decodedId = decoded.user_id;
+    // Verify the JWT token and get an object contains the status of authorization and user id if authorized
+    const userStatus = await authorized(req);
+
+    // decodedId equals the user Id got from the bearer token
+    let decodedId = null;
+    if (userStatus.authorized) {
+      decodedId = userStatus.user_id.toString();
+    } else {
+      throw new Error(
+        "You are not authorized to create a promocode for this event"
+      );
+    }
 
     // Get the event creator ID.
     const creatorId = event.creatorId;
