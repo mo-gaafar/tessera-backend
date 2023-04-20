@@ -199,7 +199,7 @@ async function addSoldTicketToEvent(eventId, soldTicket) {
  */
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
-  console.log("ana gowa el create ticket tier ");
+  console.log("inside create ticket tier ");
   try {
     const { tierName, maxCapacity, price, startSelling, endSelling } = req.body;
     const quantitySold = 0;
@@ -213,7 +213,7 @@ async function createTicketTier(req, res) {
       // check if the creator of the event matches the user making the delete request
       return res.status(401).json({
         success: false,
-        message: "You are not authorized to retrieve this event",
+        message: "You are not authorized to create ticket tier for this event",
       });
     }
 
@@ -275,6 +275,7 @@ async function createTicketTier(req, res) {
  * @throws {Error} - If the event is not found
  *
  */
+
 
 async function retrieveTicketTier(req, res) {
   console.log("inside retrieveTicketTier");
