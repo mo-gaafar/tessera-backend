@@ -1,4 +1,4 @@
-const eventModel = require('../models/eventModel'); // assuming this is the file where the eventModel is defined
+const eventModel = require('../models/eventModel');
 const { retrieveTicketTier,createTicketTier } = require('../controller/Auth/ticketController');
 
 
