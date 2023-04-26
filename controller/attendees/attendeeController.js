@@ -75,8 +75,9 @@ async function displayfilteredTabs(req, res) {
 
       queryWithDate(query, eventStartDate, eventEndDate, 2);
     }
-    //remove private events from array //published or not to be added later
+    //remove private events from array
     query["isPublic"] = true;
+    //events that appear should be already published
     query["published"] = true;
     //array of events filtered using the query object
     const events = await eventModel
@@ -118,50 +119,35 @@ async function displayfilteredTabs(req, res) {
     //exclude unnecessary fields
     //in case filter by free events, use freeEvents array
     if (freeEvent) {
-      var filteredEvents = freeEvents.map((eventModel) => {
-        const {
-          createdAt,
-          updatedAt,
-          __v,
-          privatePassword,
-          isVerified,
-          promocodes,
-          startSelling,
-          endSelling,
-          publicDate,
-          emailMessage,
-          soldTickets,
-          eventUrl,
-          ...filtered
-        } = eventModel._doc;
-        return filtered;
-      });
+      var allFieldsEvents = freeEvents;
     } else {
-      var filteredEvents = events.map((eventModel) => {
-        const {
-          createdAt,
-          updatedAt,
-          __v,
-          privatePassword,
-          isVerified,
-          promocodes,
-          startSelling,
-          endSelling,
-          publicDate,
-          emailMessage,
-          soldTickets,
-          eventUrl,
-          ...filtered
-        } = eventModel._doc;
-        return filtered;
-      });
+      var allFieldsEvents = events;
     }
+    var filteredEvents = allFieldsEvents.map((eventModel) => {
+      const {
+        createdAt,
+        updatedAt,
+        __v,
+        privatePassword,
+        isVerified,
+        promocodes,
+        startSelling,
+        endSelling,
+        publicDate,
+        emailMessage,
+        soldTickets,
+        eventUrl,
+        ...filtered
+      } = eventModel._doc;
+      return filtered;
+    });
 
     //creates array that shows each event is free or not
     var counter3 = 0;
     const isEventFreeArray = [];
     for (let i = 0; i < filteredEvents.length; i++) {
       const event = filteredEvents[i];
+      //if ticketTiers field object is not found returns error message
       if (!event || !event.ticketTiers) {
         return res.status(404).json({
           success: false,
@@ -170,21 +156,24 @@ async function displayfilteredTabs(req, res) {
       }
       for (let j = 0; j < event.ticketTiers.length; j++) {
         const tier = event.ticketTiers[j];
+        //if any of the tiers is not found returns error message
         if (!tier) {
           return res.status(404).json({
             success: false,
             message: "event ticketTier is not found",
           });
         }
+        //count if free
         if (tier.price != "Free") {
           counter3 = counter3 + 1;
         }
       }
       const isEventFree = counter3 > 0 ? false : true;
+      //push boolean state into isEventFreeArray
       isEventFreeArray.push(isEventFree);
     }
 
-    //retreive categories
+    //retreive categories involved with the events above
     const categoriesRetreived = [
       ...new Set(
         filteredEvents.map((eventModel) => eventModel.basicInfo.categories)
@@ -491,7 +480,7 @@ async function queryWithCountry(query, country) {
   }
 }
 /**
- * query with given country location inside events in DB
+ * query with given administrative area level location inside events in DB
  *
  * @async
  * @function queryWithAreaLevel
@@ -600,13 +589,15 @@ async function getEventInfo(req, res) {
         const tier = event[0].ticketTiers[i];
         //checks if capacity full for each tier
         const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
-
+        //count if capacity is not full
         if (isTierCapacityFull === false) {
           counter1 = counter1 + 1;
         }
+        //count if event is not free
         if (tier.price != "Free") {
           counter2 = counter2 + 1;
         }
+        //push tier name and boolean state as an object inside tierCapacityFull array
         tierCapacityFull.push({
           tierName: tier.tierName,
           isCapacityFull: isTierCapacityFull,
