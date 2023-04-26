@@ -13,8 +13,7 @@ const {
   getTomorrow,
   getWeekend,
   getCalender,
-} = require("../controller/attendees/attendeeController"); // replace with your actual module name and path
-
+} = require("../controller/attendees/attendeeController");
 // initialize queryWithCategory
 // const queryWithCategory = jest.fn();
 describe("displayfilteredTabs function", () => {
@@ -2977,7 +2976,7 @@ describe("displayfilteredTabs function", () => {
   }
   if (req.query.futureDate === "tomorrow" && req.query.startDate) {
     test("should return the correct event start and end date for tomorrow's event", async () => {
-      // Set the test start date to April 19th, 2023 at 12:00 pm
+      // Set the test start date to April 30, 2023 at 14:30 pm
       const testStartDate = new Date("2023-04-30T14:30:00.000Z");
 
       // Call the getToday function with the test start date
