@@ -9,9 +9,26 @@ const {
   retrieveToken,
   verifyToken,
   GenerateToken,
-  authorized,
 } = require("../../utils/Tokens");
 
+/**
+ * Creates a new ticket for an event and user.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} req.body.contactInformation - The contact information of the user creating the ticket.
+ * @param {string} req.body.contactInformation.first_name - The first name of the user creating the ticket.
+ * @param {string} req.body.contactInformation.last_name - The last name of the user creating the ticket.
+ * @param {string} req.body.contactInformation.email - The email of the user creating the ticket.
+ * @param {string} req.body.promocode - The promocode used (optional).
+ * @param {Array} req.body.ticketTierSelected - An array of objects representing the selected ticket tiers.
+ * @param {string} req.body.ticketTierSelected[i].tierName - The name of the i-th ticket tier.
+ * @param {number} req.body.ticketTierSelected[i].quantity - The number of tickets to be booked for the i-th ticket tier.
+ * @param {number} req.body.ticketTierSelected[i].price - The price per ticket of the i-th ticket tier.
+ *
+ * @returns {Object} The newly created ticket object.
+ *
+ * @throws {Error} If the event or user do not exist in the database.
+ */
 async function bookTicket(req, res) {
   try {
     const eventId = req.params.eventId;
@@ -86,8 +103,6 @@ async function bookTicket(req, res) {
  * @returns {Array<Object>} An array of ticket objects with "tierName" and "price" properties
  */
 async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
-  const tickets = [];
-
   // Loop through each ticket tier object in the array
   for (let i = 0; i < ticketTiers.length; i++) {
     // Destructure the properties of the current ticket tier object
@@ -95,11 +110,11 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
 
     // Loop through each quantity of the current ticket tier and create a ticket object for each one
     for (let j = 0; j < quantity; j++) {
-      // Calculate the total price of the ticket if there is a discount
-      let ticketPrice = ticketTiers[i].price;
-      if (promocodeObj) {
-        ticketPrice = await calculateTotalPrice(ticketTiers[i], promocodeObj);
-      }
+      // Calculate the total price of the ticket
+      const ticketPrice = await calculateTotalPrice(
+        ticketTiers[i],
+        promocodeObj
+      );
 
       // Create a new ticket object
       const ticket = new ticketModel({
@@ -110,10 +125,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
         purchasePrice: ticketPrice,
         tierName: tierName,
       });
-      console.log(
-        "🚀 ~ file: ticketController.js:113 ~ generateTickets ~ ticket:",
-        ticket
-      );
 
       // tickets.push(ticket);
       await ticket.save();
@@ -140,14 +151,15 @@ async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
   let ticketPrice = ticketTierSelected.price; // Get the base ticket price
 
   let discount = 0;
+  if (promocodeObj) {
+    // Check if a promocode was provided
+    discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
+    totalPrice = ticketPrice - discount; // Apply the discount to the base price
 
-  // Check if a promocode was provided
-  discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
-  totalPrice = ticketPrice - discount; // Apply the discount to the base price
+    promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
 
-  promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
-
-  await promocodeObj.save();
+    await promocodeObj.save();
+  }
 
   return totalPrice; // Return the total purchase price
 }
@@ -186,74 +198,74 @@ async function addSoldTicketToEvent(eventId, soldTicket) {
  * Creates a new ticket tier for an event.
  * @async
  * @function createTicketTier
- * @param {Array<Object>} ticketTiers - An array of ticket tier objects
+ * @param {Array} req - The request array of objects containing the ticket Tier(s) info
+ * @param {Object} req - The request object containing the ticket Tier info
  * @param {string} req.body.tierName - The name of the tier
  * @param {Number} req.body.maxCapacity - The capacity of the tier
  * @param {String} req.body.price - The price of the tier
  * @param {Date} req.body.startSelling - The start selling date of the ticket tier
  * @param {Date} req.body.endSelling - The end selling date of the ticket tier
- * @param {Array<Object>} res - An array of ticket tier objects that are created for the event
+ * @param {Object} res - The response object that will be sent back to the creator for each tier.
+ * @param {Array} res - The response array that will be sent back to the creator for the ticket tiers.
  * @returns {Object} - A response object with whether the ticket tier has been created successfully or not.
  * @throws {Error} If there is an internal server error.
  * @throws {Error} If the ticket tier creator is not the one who created the event.
  */
+
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
-  console.log("inside create ticket tier ");
+  // console.log("inside ticket tier ");
   try {
     const { tierName, maxCapacity, price, startSelling, endSelling } = req.body;
-    const quantitySold = 0;
-    const event = await eventModel.findById(req.params.eventID); //getting event by its ID
-    if (!event) {
-      return res.status(404).json({ message: "No event Found" });
-    }
-    const userid = await authorized(req);
 
-    if (event.creatorId.toString() !== userid.user_id.toString()) {
-      // check if the creator of the event matches the user making the delete request
-      return res.status(401).json({
-        success: false,
-        message: "You are not authorized to create ticket tier for this event",
-      });
-    }
+    const token = await retrieveToken(req); //getting the token of the ticket tier creator
+    console.log("token is:", token);
 
-    console.log("ticket tier is to be added in this event:", event);
+    const decodedToken = verifyToken(token); //decoding the token
 
-    //   if (event.creatorId==tierCreatorID){
-    //   console.log("creator of the event is the one who edits:",event.creatorId)
-
-    const newTicketTier = {
-      tierName,
-      quantitySold,
-      maxCapacity,
-      price,
-      startSelling,
-      endSelling,
-    };
-    console.log("new tier is:", newTicketTier);
-    event.ticketTiers.push(newTicketTier); // adding new tier to the array of tiers
-
-    const eventWithNewTier = await event.save();
-
-    // console.log("new event with the tier is:", eventWithNewTier);
-
-    res.status(200).json({
-      success: true,
-      message: "Ticket Tier Created",
-      newTicketTier,
+    decodedToken.then((resolvedValue) => {
+      tierCreatorID = resolvedValue.user_id;
+      console.log("tier Creator ID:", tierCreatorID); // getting ID of ticket tier creator
     });
 
-    //   }
-    // else{
-    //   console.log("Can't add new tier as creator and editor not same");
+    const quantitySold = 0;
+    const event = await eventModel.findById(req.params.eventID); //getting event by its ID
+    // console.log("ticket tier is to be added in this event:", event);
+    console.log("creator ID:", event.creatorId);
+    // checking if creator of the event is the one who edits it
+    if (event.creatorId == tierCreatorID) {
+      console.log(
+        "creator of the event is the one who edits:",
+        event.creatorId
+      );
 
-    //   res.status(201).json({
-    //     success: false,
-    //     message: "Can't add new tier as event creator and editor are not the same",
+      const newTicketTier = {
+        tierName,
+        quantitySold,
+        maxCapacity,
+        price,
+        startSelling,
+        endSelling,
+      };
 
-    //   });
+      event.ticketTiers.push(newTicketTier); // adding new tier to the array of tiers
 
-    // }
+      const eventWithNewTier = await event.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Ticket Tier Created",
+        newTicketTier,
+      });
+    } else {
+      console.log("Can't add new tier as creator and editor not same");
+
+      res.status(201).json({
+        success: false,
+        message:
+          "Can't add new tier as event creator and editor are not the same",
+      });
+    }
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -261,21 +273,6 @@ async function createTicketTier(req, res) {
     });
   }
 }
-
-// }
-
-/**
- * Retrieves the ticket tier(s) for a certain event
- * @async
- * @function retrieveTicketTier
- * @param {string} req.params.eventID - The ID of the event to retrieve ticket tiers in it
- * @param {Array<Object>} res - An array of ticket tier objects that are retrieved for the event
- * @returns {Object} - A response object whether the ticket tiers are retrieved successfully for the event or there is an error message
- * @throws {Error} - If there is an internal server error
- * @throws {Error} - If the event is not found
- *
- */
-
 
 async function retrieveTicketTier(req, res) {
   console.log("inside retrieveTicketTier");
@@ -306,5 +303,4 @@ module.exports = {
   bookTicket,
   createTicketTier,
   retrieveTicketTier,
-  // editTicketTier,
-}; //,editTicket };
+};
