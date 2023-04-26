@@ -1,8 +1,7 @@
 const userModel = require("../../models/userModel");
 const Promocode = require("../../models/promocodeModel");
 const eventModel = require("../../models/eventModel");
-const mongoose = require("mongoose");
-const { func } = require("joi");
+
 /**
  * This function filter events by selected tabs and get categories involved
  *
@@ -13,7 +12,6 @@ const { func } = require("joi");
  * @returns -events array , retreived categories &isEventFreeArray
  * @throws {Error} -internal server error
  */
-
 async function displayfilteredTabs(req, res) {
   console.log("Gonna display filtered tabs landing page");
   try {
@@ -233,6 +231,7 @@ async function getTomorrow(startDate) {
     throw err;
   }
 }
+
 /**
  * compute today's date
  *
@@ -274,6 +273,7 @@ async function getToday(startDate) {
     throw err;
   }
 }
+
 /**
  * compute weekend's date
  *
@@ -283,7 +283,6 @@ async function getToday(startDate) {
  * @returns -fridays's date and sunday's date
  * @throws {Error} -couldn't get weekend
  */
-
 async function getWeekend(startDate) {
   //weekend is from Friday all day to Sunday all day
   try {
@@ -316,6 +315,7 @@ async function getWeekend(startDate) {
     throw err;
   }
 }
+
 /**
  * compute UTC dates for the start and end of the highlighted period on calender
  *
@@ -400,6 +400,7 @@ async function queryWithDate(query, eventStartDate, eventEndDate, key) {
     throw err;
   }
 }
+
 /**
  * query with given category inside events in DB
  *
@@ -420,6 +421,7 @@ async function queryWithCategory(query, category) {
     throw err;
   }
 }
+
 /**
  * query with given category inside events in DB
  *
@@ -439,6 +441,7 @@ async function queryWithOnline(query) {
     throw err;
   }
 }
+
 /**
  * query with given city location inside events in DB
  *
@@ -459,6 +462,7 @@ async function queryWithCity(query, city) {
     throw err;
   }
 }
+
 /**
  * query with given country location inside events in DB
  *
@@ -479,6 +483,7 @@ async function queryWithCountry(query, country) {
     throw err;
   }
 }
+
 /**
  * query with given administrative area level location inside events in DB
  *
@@ -501,6 +506,7 @@ async function queryWithAreaLevel(query, administrative_area_level_1) {
     throw err;
   }
 }
+
 /**
  * retreive events categories inside event schema
  *
@@ -522,6 +528,7 @@ async function listAllCategories(req, res) {
     throw err;
   }
 }
+
 /**
  * This function shall return a public event information using eventId
  *
