@@ -187,9 +187,78 @@ async function updateEvent(req, res) {
 }
 
 async function publishEvent(req, res) {
-	const event = await eventModel.findById(req.params.eventID);
+
+	const event = await eventModel.findById(req.params.eventID); // finding a certain event by its ID
 	console.log("event is:", event);
+	isPublished=event.published // getiing whether the event is already published
+	url=event.eventUrl // getiing event URL
+	password=event.privatePassword // getting password for event
+	console.log("published:", isPublished);
+
+	// if event is not published
+	if (!isPublished){
+	// update the published attribute to be true to publish the event
+    const update = { published:true };
+	const updatedEvent= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update , {
+		new: true,
+		runValidators: true,
+	});
+    console.log('Updated event:', updatedEvent);
+	}
+	// if event is already published
+    else{
+    console.log("event is already published")
+	}
+
+	public=event.isPublic // getiing whether the event is public or private
+	console.log("public:", public);
+
+	// if event is private
+	if (!public){
+	const accessMethod=req.query.AccessMethod 	// getting access method for the event
+    console.log('Access Method:', accessMethod);
+
+	// if event is accessed by password
+    if (accessMethod === 'password') {
+			res.status(200).json({
+			success: true,
+			message: "Event is accessed by this password",
+			password
+	       });		  
+	} 
+    
+	// if event is accessed by link
+	else if (accessMethod === 'link') {
+		res.status(200).json({
+			success: true,
+			message: "Event is accessed by this Private Link",
+			url
+	       });	
+	} 
+	else {
+        res.status(400).json({
+			success: false,
+			message: "Invalid Access Method",
+	       });	
+	}
+	}
+
+	// event is public
+    else{
+    
+		res.status(200).json({
+			success: true,
+			message: "Event is publicly accessed by this Link",
+			url
+	       });	
+
+	}
+
 }
+
+
+
+
 
 module.exports = {
 	createEvent,
