@@ -1,11 +1,6 @@
 const eventModel = require("../../models/eventModel");
 const promocodeModel = require("../../models/promocodeModel");
-const {
-  GenerateToken,
-  retrieveToken,
-  verifyToken,
-  authorized,
-} = require("../../utils/Tokens");
+const { authorized } = require("../../utils/Tokens");
 
 /**
  * Creates a new promocode for an event.
@@ -19,7 +14,7 @@ async function createPromocode(req, res) {
   const { code, discount, limitOfUses } = req.body;
 
   // Retrieve the JWT token from the request headers.
-  const token = await retrieveToken(req);
+  // const token = await retrieveToken(req);
 
   try {
     // Find the event in the database.
@@ -28,9 +23,18 @@ async function createPromocode(req, res) {
       throw new Error("Event not found");
     }
 
-    // Verify the JWT token and get the decoded user ID.
-    const decoded = await verifyToken(token);
-    const decodedId = decoded.user_id;
+    // Verify the JWT token and get an object contains the status of authorization and user id if authorized
+    const userStatus = await authorized(req);
+
+    // decodedId equals the user Id got from the bearer token
+    let decodedId = null;
+    if (userStatus.authorized) {
+      decodedId = userStatus.user_id.toString();
+    } else {
+      throw new Error(
+        "You are not authorized to create a promocode for this event"
+      );
+    }
 
     // Get the event creator ID.
     const creatorId = event.creatorId;
@@ -88,8 +92,8 @@ async function checkPromocodeExists(eventId, code) {
   try {
     // Find a promocode with the given event ID and code in the database.
     const promocode = await promocodeModel.findOne({ event: eventId, code });
-    // Return true if a promocode was found, false otherwise.
-    return promocode ? true : false;
+    // Return the discount if a promocode was found, false otherwise.
+    return promocode ? promocode.discount : false;
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
     console.error(err);
@@ -129,25 +133,22 @@ async function addPromocodeToEvent(eventId, promocode) {
 
 async function checkPromocode(req, res) {
   const eventId = req.params.eventId;
-  console.log(
-    "🚀 ~ file: promocodeController.js:132 ~ checkPromocode ~ eventId:",
-    eventId
-  );
+
   const { code } = req.body;
-  console.log(
-    "🚀 ~ file: promocodeController.js:133 ~ checkPromocode ~ code:",
-    code
-  );
+
   try {
     const isExists = await checkPromocodeExists(eventId, code);
-    console.log(
-      "🚀 ~ file: promocodeController.js:135 ~ checkPromocode ~ isExists:",
-      isExists
-    );
 
-    return res.status(isExists ? 200 : 404).json({
-      success: isExists ? true : false,
-      message: isExists ? "Promocode exists" : "Promocode does not exist",
+    if (isExists == false)
+      return res.status(404).json({
+        success: false,
+        message: "Promocode does not exist",
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Promocode exists",
+      discout: isExists / 100,
     });
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
@@ -156,4 +157,9 @@ async function checkPromocode(req, res) {
   }
 }
 
-module.exports = { createPromocode, checkPromocode };
+module.exports = {
+  createPromocode,
+  checkPromocode,
+  addPromocodeToEvent,
+  checkPromocodeExists,
+};

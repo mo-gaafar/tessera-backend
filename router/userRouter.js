@@ -22,6 +22,6 @@ router.post("/auth/login", userController.signIn);
 router.post("/auth/forgetPassword", userController.forgotPassword);
 
 //router.get("/auth/reset-password/:token", resetPassword); get request to redirect to a frontend link
-router.post("/auth/reset-password", userController.resetPassword);
+router.post("/auth/reset-password/:token", userController.resetPassword);
 
 module.exports = router; //exporting the module in order to use it in other files

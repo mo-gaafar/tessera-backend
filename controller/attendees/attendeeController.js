@@ -1,8 +1,7 @@
 const userModel = require("../../models/userModel");
 const Promocode = require("../../models/promocodeModel");
 const eventModel = require("../../models/eventModel");
-const mongoose = require("mongoose");
-const { func } = require("joi");
+
 /**
  * This function filter events by selected tabs and get categories involved
  *
@@ -13,7 +12,6 @@ const { func } = require("joi");
  * @returns -events array , retreived categories &isEventFreeArray
  * @throws {Error} -internal server error
  */
-
 async function displayfilteredTabs(req, res) {
   console.log("Gonna display filtered tabs landing page");
   try {
@@ -75,8 +73,9 @@ async function displayfilteredTabs(req, res) {
 
       queryWithDate(query, eventStartDate, eventEndDate, 2);
     }
-    //remove private events from array //published or not to be added later
+    //remove private events from array
     query["isPublic"] = true;
+    //events that appear should be already published
     query["published"] = true;
     //array of events filtered using the query object
     const events = await eventModel
@@ -108,7 +107,6 @@ async function displayfilteredTabs(req, res) {
       //if no free events found return empty events array
       if (freeEvents.length === 0) {
         return res.status(200).json({
-          success: "true",
           filteredEvents: freeEvents,
           isEventFreeArray: freeEvents,
           categoriesRetreived: freeEvents,
@@ -119,50 +117,35 @@ async function displayfilteredTabs(req, res) {
     //exclude unnecessary fields
     //in case filter by free events, use freeEvents array
     if (freeEvent) {
-      var filteredEvents = freeEvents.map((eventModel) => {
-        const {
-          createdAt,
-          updatedAt,
-          __v,
-          privatePassword,
-          isVerified,
-          promocodes,
-          startSelling,
-          endSelling,
-          publicDate,
-          emailMessage,
-          soldTickets,
-          eventUrl,
-          ...filtered
-        } = eventModel._doc;
-        return filtered;
-      });
+      var allFieldsEvents = freeEvents;
     } else {
-      var filteredEvents = events.map((eventModel) => {
-        const {
-          createdAt,
-          updatedAt,
-          __v,
-          privatePassword,
-          isVerified,
-          promocodes,
-          startSelling,
-          endSelling,
-          publicDate,
-          emailMessage,
-          soldTickets,
-          eventUrl,
-          ...filtered
-        } = eventModel._doc;
-        return filtered;
-      });
+      var allFieldsEvents = events;
     }
+    var filteredEvents = allFieldsEvents.map((eventModel) => {
+      const {
+        createdAt,
+        updatedAt,
+        __v,
+        privatePassword,
+        isVerified,
+        promocodes,
+        startSelling,
+        endSelling,
+        publicDate,
+        emailMessage,
+        soldTickets,
+        eventUrl,
+        ...filtered
+      } = eventModel._doc;
+      return filtered;
+    });
 
     //creates array that shows each event is free or not
     var counter3 = 0;
     const isEventFreeArray = [];
     for (let i = 0; i < filteredEvents.length; i++) {
       const event = filteredEvents[i];
+      //if ticketTiers field object is not found returns error message
       if (!event || !event.ticketTiers) {
         return res.status(404).json({
           success: false,
@@ -171,21 +154,24 @@ async function displayfilteredTabs(req, res) {
       }
       for (let j = 0; j < event.ticketTiers.length; j++) {
         const tier = event.ticketTiers[j];
+        //if any of the tiers is not found returns error message
         if (!tier) {
           return res.status(404).json({
             success: false,
             message: "event ticketTier is not found",
           });
         }
+        //count if free
         if (tier.price != "Free") {
           counter3 = counter3 + 1;
         }
       }
       const isEventFree = counter3 > 0 ? false : true;
+      //push boolean state into isEventFreeArray
       isEventFreeArray.push(isEventFree);
     }
 
-    //retreive categories
+    //retreive categories involved with the events above
     const categoriesRetreived = [
       ...new Set(
         filteredEvents.map((eventModel) => eventModel.basicInfo.categories)
@@ -245,6 +231,7 @@ async function getTomorrow(startDate) {
     throw err;
   }
 }
+
 /**
  * compute today's date
  *
@@ -286,6 +273,7 @@ async function getToday(startDate) {
     throw err;
   }
 }
+
 /**
  * compute weekend's date
  *
@@ -295,7 +283,6 @@ async function getToday(startDate) {
  * @returns -fridays's date and sunday's date
  * @throws {Error} -couldn't get weekend
  */
-
 async function getWeekend(startDate) {
   //weekend is from Friday all day to Sunday all day
   try {
@@ -328,6 +315,7 @@ async function getWeekend(startDate) {
     throw err;
   }
 }
+
 /**
  * compute UTC dates for the start and end of the highlighted period on calender
  *
@@ -412,6 +400,7 @@ async function queryWithDate(query, eventStartDate, eventEndDate, key) {
     throw err;
   }
 }
+
 /**
  * query with given category inside events in DB
  *
@@ -432,6 +421,7 @@ async function queryWithCategory(query, category) {
     throw err;
   }
 }
+
 /**
  * query with given category inside events in DB
  *
@@ -451,6 +441,7 @@ async function queryWithOnline(query) {
     throw err;
   }
 }
+
 /**
  * query with given city location inside events in DB
  *
@@ -471,6 +462,7 @@ async function queryWithCity(query, city) {
     throw err;
   }
 }
+
 /**
  * query with given country location inside events in DB
  *
@@ -491,8 +483,9 @@ async function queryWithCountry(query, country) {
     throw err;
   }
 }
+
 /**
- * query with given country location inside events in DB
+ * query with given administrative area level location inside events in DB
  *
  * @async
  * @function queryWithAreaLevel
@@ -513,6 +506,7 @@ async function queryWithAreaLevel(query, administrative_area_level_1) {
     throw err;
   }
 }
+
 /**
  * retreive events categories inside event schema
  *
@@ -534,6 +528,7 @@ async function listAllCategories(req, res) {
     throw err;
   }
 }
+
 /**
  * This function shall return a public event information using eventId
  *
@@ -601,13 +596,15 @@ async function getEventInfo(req, res) {
         const tier = event[0].ticketTiers[i];
         //checks if capacity full for each tier
         const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
-
+        //count if capacity is not full
         if (isTierCapacityFull === false) {
           counter1 = counter1 + 1;
         }
+        //count if event is not free
         if (tier.price != "Free") {
           counter2 = counter2 + 1;
         }
+        //push tier name and boolean state as an object inside tierCapacityFull array
         tierCapacityFull.push({
           tierName: tier.tierName,
           isCapacityFull: isTierCapacityFull,
@@ -674,4 +671,18 @@ async function getEventInfo(req, res) {
     throw err;
   }
 }
-module.exports = { displayfilteredTabs, listAllCategories, getEventInfo };
+module.exports = {
+  displayfilteredTabs,
+  listAllCategories,
+  getEventInfo,
+  queryWithCategory,
+  queryWithCountry,
+  queryWithCity,
+  queryWithAreaLevel,
+  queryWithOnline,
+  queryWithDate,
+  getToday,
+  getTomorrow,
+  getWeekend,
+  getCalender,
+};

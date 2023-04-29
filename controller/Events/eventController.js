@@ -21,21 +21,28 @@ Asynchronous function that creates a new event based on the request body and add
 */
 async function createEvent(req, res) {
 	try {
-		const useridid = "643bd6454bcebb6861183fa6";
-		const tok = GenerateToken(useridid);
-		console.log(tok);
+		//const useridid = "643c89200765c86f18483a0c";
+		//const tok = GenerateToken(useridid);
+		//console.log(tok);
 		//const token = await retrieveToken(req);
 		//const decoded = await verifyToken(token);
 		const userid = await authorized(req);
+
 		const event = await eventModel.create({
 			...req.body,
-			creatorId: userid,
+			creatorId: userid.user_id,
 		});
-
-		return res.status(200).json({
-			success: true,
-			message: "Event has been created successfully",
-		});
+		if (userid.authorized) {
+			return res.status(200).json({
+				success: true,
+				message: "Event has been created successfully",
+			});
+		} else {
+			return res.status(401).json({
+				success: false,
+				message: "the user doesnt have access",
+			});
+		}
 	} catch (error) {
 		res.status(400).json({
 			success: false,
@@ -60,21 +67,18 @@ async function getEventById(req, res) {
 		const event = await eventModel.findById(eventId); //search event by id
 		//const token = await retrieveToken(req);
 		//const decoded = await verifyToken(token);
-		const userid = await authorized(req);
-		//console.log(typeof userid);
-		//console.log(`im inside get events${userid}`);
-		//console.log(`creator inside event ${event.creatorId.toString()}`);
+		if (!event) {
+			return res.status(404).json({ message: "No event Found" });
+		}
 
-		if (event.creatorId.toString() !== userid.toString()) {
+		const userid = await authorized(req);
+
+		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to retrieve this event",
 			});
-		}
-		//const event = await eventModel.findById(eventId); //returns event of given id
-		if (!event) {
-			return res.status(404).json({ message: "Event is not found" });
 		}
 		return res.status(200).json({ event });
 	} catch (error) {
@@ -104,16 +108,23 @@ async function deleteEvent(req, res) {
 		//const token = await retrieveToken(req);
 		//const decoded = await verifyToken(token);
 
-		if (event.creatorId.toString() !== userid.toString()) {
+		if (!event) {
+			return res.status(404).json({ message: "No event Found" });
+		}
+
+		if (!userid.authorized) {
+			res.status(402).json({
+				success: false,
+				message: "the user is not found",
+			});
+		}
+
+		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to delete this event",
 			});
-		}
-
-		if (!event) {
-			return res.status(404).json({ message: "No event Found" });
 		}
 
 		await eventModel.findByIdAndDelete(eventIdd); // delete the found event
@@ -147,7 +158,12 @@ async function updateEvent(req, res) {
 		const update = req.body; // get the update object from the request body
 		const event = await eventModel.findById(eventId);
 		const userid = await authorized(req);
-		if (event.creatorId.toString() !== userid.toString()) {
+
+		if (!event) {
+			return res.status(404).json({ error: "Event not found" });
+		}
+		// check if the updatedEvent exists
+		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
@@ -155,19 +171,10 @@ async function updateEvent(req, res) {
 			});
 		}
 
-		// update the document in the database using findOneAndUpdate
-		const updatedEvent = await eventModel.findOneAndUpdate(
-			{ _id: eventId },
-			update,
-			{ new: true, runValidators: true }
-		);
-
-		// check if the updatedEvent exists
-		if (!updatedEvent) {
-			return res.status(404).json({ error: "Event not found" });
-		}
-
-		// return the updated document
+		await eventModel.findOneAndUpdate({ _id: eventId }, update, {
+			new: true,
+			runValidators: true,
+		});
 		return res
 			.status(200)
 			.json({ success: true, message: "the event is updated" });
@@ -180,9 +187,78 @@ async function updateEvent(req, res) {
 }
 
 async function publishEvent(req, res) {
-	const event = await eventModel.findById(req.params.eventID);
+
+	const event = await eventModel.findById(req.params.eventID); // finding a certain event by its ID
 	console.log("event is:", event);
+	isPublished=event.published // getiing whether the event is already published
+	url=event.eventUrl // getiing event URL
+	password=event.privatePassword // getting password for event
+	console.log("published:", isPublished);
+
+	// if event is not published
+	if (!isPublished){
+	// update the published attribute to be true to publish the event
+    const update = { published:true };
+	const updatedEvent= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update , {
+		new: true,
+		runValidators: true,
+	});
+    console.log('Updated event:', updatedEvent);
+	}
+	// if event is already published
+    else{
+    console.log("event is already published")
+	}
+
+	public=event.isPublic // getiing whether the event is public or private
+	console.log("public:", public);
+
+	// if event is private
+	if (!public){
+	const accessMethod=req.query.AccessMethod 	// getting access method for the event
+    console.log('Access Method:', accessMethod);
+
+	// if event is accessed by password
+    if (accessMethod === 'password') {
+			res.status(200).json({
+			success: true,
+			message: "Event is accessed by this password",
+			password
+	       });		  
+	} 
+    
+	// if event is accessed by link
+	else if (accessMethod === 'link') {
+		res.status(200).json({
+			success: true,
+			message: "Event is accessed by this Private Link",
+			url
+	       });	
+	} 
+	else {
+        res.status(400).json({
+			success: false,
+			message: "Invalid Access Method",
+	       });	
+	}
+	}
+
+	// event is public
+    else{
+    
+		res.status(200).json({
+			success: true,
+			message: "Event is publicly accessed by this Link",
+			url
+	       });	
+
+	}
+
 }
+
+
+
+
 
 module.exports = {
 	createEvent,

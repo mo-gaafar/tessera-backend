@@ -10,15 +10,25 @@ const {
   verifyToken,
   GenerateToken,
 } = require("../../utils/Tokens");
-const { authenticate } = require("passport");
-const { boolean } = require("joi");
-const { generate } = require("generate-password");
 
-//generating token:
-// const generatedtoken=  GenerateToken("641eddf055c9b5c70ae4ecdf")
-// console.log("generated token is:",generatedtoken)
-
-
+/**
+ * Creates a new ticket for an event and user.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} req.body.contactInformation - The contact information of the user creating the ticket.
+ * @param {string} req.body.contactInformation.first_name - The first name of the user creating the ticket.
+ * @param {string} req.body.contactInformation.last_name - The last name of the user creating the ticket.
+ * @param {string} req.body.contactInformation.email - The email of the user creating the ticket.
+ * @param {string} req.body.promocode - The promocode used (optional).
+ * @param {Array} req.body.ticketTierSelected - An array of objects representing the selected ticket tiers.
+ * @param {string} req.body.ticketTierSelected[i].tierName - The name of the i-th ticket tier.
+ * @param {number} req.body.ticketTierSelected[i].quantity - The number of tickets to be booked for the i-th ticket tier.
+ * @param {number} req.body.ticketTierSelected[i].price - The price per ticket of the i-th ticket tier.
+ *
+ * @returns {Object} The newly created ticket object.
+ *
+ * @throws {Error} If the event or user do not exist in the database.
+ */
 async function bookTicket(req, res) {
   try {
     const eventId = req.params.eventId;
@@ -93,11 +103,10 @@ async function bookTicket(req, res) {
  * @returns {Array<Object>} An array of ticket objects with "tierName" and "price" properties
  */
 async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
-  const tickets = [];
-
   // Loop through each ticket tier object in the array
   for (let i = 0; i < ticketTiers.length; i++) {
     // Destructure the properties of the current ticket tier object
+    tickets = [];
     const { tierName, quantity } = ticketTiers[i];
 
     // Loop through each quantity of the current ticket tier and create a ticket object for each one
@@ -118,7 +127,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
         tierName: tierName,
       });
 
-      // tickets.push(ticket);
       await ticket.save();
       const soldTicket = {
         ticketId: ticket._id,
@@ -129,8 +137,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
       await addSoldTicketToEvent(eventId, soldTicket);
     }
   }
-
-  return tickets;
 }
 
 /**
@@ -146,14 +152,14 @@ async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
   if (promocodeObj) {
     // Check if a promocode was provided
     discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
-    totalPrice = ticketPrice - discount; // Apply the discount to the base price
+    ticketPrice = ticketPrice - discount; // Apply the discount to the base price
 
     promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
 
     await promocodeObj.save();
   }
 
-  return totalPrice; // Return the total purchase price
+  return ticketPrice; // Return the total purchase price
 }
 
 /**
@@ -186,7 +192,6 @@ async function addSoldTicketToEvent(eventId, soldTicket) {
   }
 }
 
-
 /**
  * Creates a new ticket tier for an event.
  * @async
@@ -197,7 +202,7 @@ async function addSoldTicketToEvent(eventId, soldTicket) {
  * @param {Number} req.body.maxCapacity - The capacity of the tier
  * @param {String} req.body.price - The price of the tier
  * @param {Date} req.body.startSelling - The start selling date of the ticket tier
- * @param {Date} req.body.endSelling - The end selling date of the ticket tier 
+ * @param {Date} req.body.endSelling - The end selling date of the ticket tier
  * @param {Object} res - The response object that will be sent back to the creator for each tier.
  * @param {Array} res - The response array that will be sent back to the creator for the ticket tiers.
  * @returns {Object} - A response object with whether the ticket tier has been created successfully or not.
@@ -209,13 +214,7 @@ async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
   // console.log("inside ticket tier ");
   try {
-    const {
-      tierName,
-      maxCapacity,
-      price,
-      startSelling,
-      endSelling,
-    } = req.body;
+    const { tierName, maxCapacity, price, startSelling, endSelling } = req.body;
 
     const token = await retrieveToken(req); //getting the token of the ticket tier creator
     console.log("token is:", token);
@@ -226,9 +225,8 @@ async function createTicketTier(req, res) {
       tierCreatorID = resolvedValue.user_id;
       console.log("tier Creator ID:", tierCreatorID); // getting ID of ticket tier creator
     });
-  
 
-    const quantitySold=0
+    const quantitySold = 0;
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
     // console.log("ticket tier is to be added in this event:", event);
     console.log("creator ID:", event.creatorId);
@@ -251,7 +249,6 @@ async function createTicketTier(req, res) {
       event.ticketTiers.push(newTicketTier); // adding new tier to the array of tiers
 
       const eventWithNewTier = await event.save();
-
 
       res.status(200).json({
         success: true,
@@ -300,49 +297,8 @@ async function retrieveTicketTier(req, res) {
   }
 }
 
-
-// async function editTicketTier(req, res) {
-//   try {
-//     const eventId = req.params.eventID; // get the event ID from the request URL
-//     // const update = req.body; // get the update object from the request body
-//     const {
-//       tierID,
-//       tierName,
-//       quantitySold,
-//       maxCapacity,
-//       price,
-//       startSelling,
-//       endSelling,
-//     } = req.body;
-//     console.log("tierID:", tierID);
-
-//     const updatedEvent = await eventModel.findOneAndUpdate(
-//       { _id: eventId, "ticketTiers._id": tierID },
-//       {
-//         $set: {
-//           "details.$.tierName": tierName,
-//           "details.$.quantitySold": quantitySold,
-//           "details.$.maxCapacity": maxCapacity,
-//           "details.$.price": price,
-//           "details.$.startSelling": startSelling,
-//           "details.$.endSelling": endSelling,
-//         },
-//       },
-//       { new: true, runValidators: true }
-//     );
-
-//     console.log("updated event:", updatedEvent.ticketTiers);
-//   } catch (error) {
-//     res.status(400).json({
-//       success: false,
-//       message: "invalid details",
-//     });
-//   }
-// }
-
 module.exports = {
   bookTicket,
   createTicketTier,
   retrieveTicketTier,
-  // editTicketTier,
-}; //,editTicket };
+};

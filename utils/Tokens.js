@@ -65,7 +65,7 @@ async function authorized(req) {
 	const token = await retrieveToken(req);
 	if (!token) {
 		console.log("Token not found");
-		return false;
+		return { authorized: false };
 	}
 	try {
 		const decoded = await verifyToken(token);
@@ -73,13 +73,13 @@ async function authorized(req) {
 		const user = await userModel.findById(decoded.user_id);
 		if (!user) {
 			console.log("User not found");
-			return false;
+			return { authorized: false };
 		}
-		console.log("User authorized");
-		return true, user._id;
+		console.log(`User authorized ${user._id}`);
+		return { authorized: true, user_id: user._id };
 	} catch (err) {
 		console.error(err);
-		return false;
+		return { authorized: false };
 	}
 }
 
