@@ -106,6 +106,7 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
   // Loop through each ticket tier object in the array
   for (let i = 0; i < ticketTiers.length; i++) {
     // Destructure the properties of the current ticket tier object
+    tickets = [];
     const { tierName, quantity } = ticketTiers[i];
 
     // Loop through each quantity of the current ticket tier and create a ticket object for each one
@@ -126,7 +127,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
         tierName: tierName,
       });
 
-      // tickets.push(ticket);
       await ticket.save();
       const soldTicket = {
         ticketId: ticket._id,
@@ -137,8 +137,6 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
       await addSoldTicketToEvent(eventId, soldTicket);
     }
   }
-
-  return tickets;
 }
 
 /**
@@ -154,14 +152,14 @@ async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
   if (promocodeObj) {
     // Check if a promocode was provided
     discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
-    totalPrice = ticketPrice - discount; // Apply the discount to the base price
+    ticketPrice = ticketPrice - discount; // Apply the discount to the base price
 
     promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
 
     await promocodeObj.save();
   }
 
-  return totalPrice; // Return the total purchase price
+  return ticketPrice; // Return the total purchase price
 }
 
 /**

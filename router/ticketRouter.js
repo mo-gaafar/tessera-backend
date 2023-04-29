@@ -5,7 +5,7 @@ const ticketController = require("../controller/Events/ticketController"); // im
 
 // creating a router
 
-router.post("/attendee/ticket/:eventId/book", ticketController.bookTicket);
+// router.post("/attendee/ticket/:eventId/book", ticketController.bookTicket);
 router.put(
   "/event-tickets/create-ticket/:eventID",
   ticketController.createTicketTier
