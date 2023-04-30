@@ -231,9 +231,9 @@ async function resetPassword(req, res) {
 		//console.log(decoded);
 		//const decoded = jwt.verify(token, process.env.SECRETJWT);
 		const decoded = await verifyToken(token);
-		console.log(decoded);
+		//console.log(decoded.userId);
 		// Find user by ID
-		const user = await userModel.findById(decoded.user_id);
+		const user = await userModel.findById(decoded.userId);
 		// If the user is found by ID
 		if (user) {
 			const password = req.body.password;
