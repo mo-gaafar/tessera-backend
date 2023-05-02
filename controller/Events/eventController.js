@@ -389,10 +389,62 @@ async function publishEvent(req, res) {
 
 }
 
+// to be modified
+
+async function eventSalesByTicketType(req, res) {
+
+	const event=await eventModel.findById(req.params.eventID);
+	console.log("Event to be used is:",event)
+	const desiredTierName=req.query.tierName
+    eventSales=0
+    
+	if (desiredTierName=="Free"){
+      
+
+		res.status(404).json({
+			success: false,
+			message: "There are no event sales for free ticket tiers ",
+			
+		   });	
+	  
+
+	}
+
+
+	else{
 
 
 
+	for (let i = 0; i < event.ticketTiers.length; i++) {
+		const tierObject = event.ticketTiers[i];
+		const tierName=tierObject.tierName
+		console.log(`Tier ${i + 1}: ${tierName}`);
+		if (tierName==desiredTierName){
+			const tierQuantitySold=tierObject.quantitySold
+			const tierPrice=tierObject.price
+			console.log(" tier qs:",tierQuantitySold)
+			console.log(" tier price:",tierPrice)
+            eventSales=eventSales + tierQuantitySold*tierPrice
+			console.log(" event quantity sold:",eventSales)
 
+		}
+
+
+
+	}
+	eventSales=Math.round(eventSales)
+	console.log("event quantity sold:",eventSales)
+
+	res.status(200).json({
+		success: true,
+		message: "Event sales by the specified ticket type is: ",
+		eventSales
+	   });	
+  
+
+  }
+
+}
 
 
 
@@ -412,4 +464,5 @@ module.exports = {
 	deleteEvent,
 	updateEvent,
 	publishEvent,
+	eventSalesByTicketType
 };
