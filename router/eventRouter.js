@@ -8,5 +8,8 @@ router.get("/event-management/retrieve/:eventID", eventController.getEventById);
 router.delete("/event-management/delete/:eventID", eventController.deleteEvent);
 router.put("/event-management/update/:eventID", eventController.updateEvent);
 router.put("/event-management/publish/:eventID", eventController.publishEvent);
-
+router.get(
+  "/event-management/listEvents/:creatorID",
+  eventController.listEvents
+);
 module.exports = router; //exporting the module in order to use it in other files
