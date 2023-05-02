@@ -13,16 +13,46 @@ const jwt = require("jsonwebtoken");
 async function listEvents(req, res) {
   try {
     const creatorId = req.params.creatorID;
+    const sortBy = req.query.sortBy;
     if (!creatorId) {
       return res.status(404).json({ message: "No parameter was provided" });
     }
     //search event by id
     const query = {};
-    //only retrieve published
-    query["published"] = true;
-    //filter events by creator id
-    query["creatorId"] = "6439f95a3d607d6c49e56a1e";
 
+    //get date now
+    const currentDate = new Date();
+
+    // Get the time zone offset in minutes
+    const timezoneOffset = currentDate.getTimezoneOffset();
+
+    //convert date to UTC
+    const utcDate = new Date(
+      currentDate.getTime() - timezoneOffset * 60 * 1000
+    );
+
+    //filter events by creator id
+    query["creatorId"] = creatorId;
+    if (sortBy) {
+      if (sortBy === "upcomingevents") {
+        //only retrieve published
+        query["published"] = true;
+
+        query["basicInfo.startDateTime"] = {
+          $gte: currentDate,
+        };
+      } else if (sortBy === "pastevents") {
+        //only retrieve published
+        query["published"] = true;
+
+        query["basicInfo.startDateTime"] = {
+          $lte: currentDate,
+        };
+      } else if (sortBy === "draft") {
+        //only retrieve Unpublished
+        query["published"] = false;
+      }
+    }
     //filter events by query object
     const events = await eventModel.find(query);
     if (!events) {
@@ -33,32 +63,22 @@ async function listEvents(req, res) {
         createdAt,
         updatedAt,
         __v,
-        privatePassword,
+        //privatePassword,
         isVerified,
-        promocodes,
+        //promocodes,
         // startSelling,
         // endSelling,
-        publicDate,
-        emailMessage,
-        // soldTickets,
-        eventUrl,
+        //publicDate,
+        //emailMessage,
+        soldTickets,
+        // eventUrl,
         ...filtered
       } = eventModel._doc;
       return filtered;
     });
+
     const eventsoldtickets = [];
     const isEventOnSale = [];
-
-    //get date as user time zone
-    const currentDate = new Date();
-
-    // Get the time zone offset in minutes
-    const timezoneOffset = currentDate.getTimezoneOffset();
-
-    //convert date to UTC
-    const utcDate = new Date(
-      currentDate.getTime() - timezoneOffset * 60 * 1000
-    );
 
     //compute total sold tickets for each event
     events.map((event) => {
