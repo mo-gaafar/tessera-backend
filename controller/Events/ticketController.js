@@ -226,7 +226,7 @@ async function createTicketTier(req, res) {
       console.log("tier Creator ID:", tierCreatorID); // getting ID of ticket tier creator
     });
 
-    const quantitySold = 0;
+    const quantitySold = 1000;
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
     // console.log("ticket tier is to be added in this event:", event);
     console.log("creator ID:", event.creatorId);
@@ -297,8 +297,68 @@ async function retrieveTicketTier(req, res) {
   }
 }
 
+
+async function editTicketTier(req, res) {
+  // try {
+    const eventId = req.params.eventID; // get the event ID from the request URL
+    // const update = req.body; // get the update object from the request body
+
+
+
+    // const tierID=req.body.ticketTiers.tierID
+    // // const { tierName, quantitySold, maxCapacity, price, startSelling,endSelling } = req.body;
+    // console.log("tierID:",tierID)
+
+
+  //   const updatedEvent = await eventModel.findOneAndUpdate(
+  //     { _id: eventId,'ticketTiers._id':tierID }, 
+  //     { $set: { 'details.$.tierName': tierName,'details.$.quantitySold':quantitySold,'details.$.maxCapacity':maxCapacity,
+  //     'details.$.price':price,'details.$.startSelling':startSelling,'details.$.endSelling':endSelling  }
+  //   },
+  //     { new: true, runValidators: true }
+  //   );
+
+  //   console.log("updated event:", updatedEvent.ticketTiers);
+  // // } catch (error) {
+  //   res.status(400).json({
+  //     success: false,
+  //     message: "invalid details",
+  //   });
+
+
+  }
+
+
+
+  
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
   bookTicket,
   createTicketTier,
   retrieveTicketTier,
+  editTicketTier,
 };

@@ -18,4 +18,13 @@ router.get(
 
 router.post("/attendee/ticket/:eventId/book", ticketController.bookTicket);
 
+
+router.put(
+  "/event-tickets/edit-ticket/:eventID",
+  ticketController.editTicketTier
+);
+
+
+
+
 module.exports = router;

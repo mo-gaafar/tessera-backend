@@ -12,4 +12,17 @@ router.get(
   "/event-management/listEvents/:creatorID",
   eventController.listEvents
 );
+
+// to be modified
+router.get(
+  "/event-management/eventsales/events/:eventID",
+  eventController.eventSalesByTicketType
+);
+router.get(
+  "/event-management/eventsoldtickets/events/:eventID",
+  eventController.eventSoldTickets
+);
+
+//
+
 module.exports = router; //exporting the module in order to use it in other files
