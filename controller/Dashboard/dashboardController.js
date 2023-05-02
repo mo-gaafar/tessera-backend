@@ -1,6 +1,7 @@
 const eventModel = require("../../models/eventModel");
 const userModel = require("../Auth/userController");
 
+const jwt = require("jsonwebtoken");
 
 
 // to be modified
