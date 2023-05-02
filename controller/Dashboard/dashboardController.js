@@ -6,41 +6,97 @@ const jwt = require("jsonwebtoken");
 
 // to be modified
 
-async function eventSalesByTicketType(req, res) {
+async function eventSales(req, res) {
+
     const event = await eventModel.findById(req.params.eventID);
     console.log("Event to be used is:", event);
+    const allTiers=req.query.allTiers;
+    console.log("all tiers:",allTiers)
     const desiredTierName = req.query.tierName;
+    console.log("desired tier name:",desiredTierName)
     eventSales = 0;
+    salesByTierType=0;
   
-    if (desiredTierName == "Free") {
-      res.status(404).json({
-        success: false,
-        message: "There are no event sales for free ticket tiers ",
-      });
-    } else {
+
+
       for (let i = 0; i < event.ticketTiers.length; i++) {
-        const tierObject = event.ticketTiers[i];
+        const tierObject = event.ticketTiers[i];   
         const tierName = tierObject.tierName;
         console.log(`Tier ${i + 1}: ${tierName}`);
-        if (tierName == desiredTierName) {
-          const tierQuantitySold = tierObject.quantitySold;
-          const tierPrice = tierObject.price;
-          console.log(" tier qs:", tierQuantitySold);
-          console.log(" tier price:", tierPrice);
-          eventSales = eventSales + tierQuantitySold * tierPrice;
-          console.log(" event quantity sold:", eventSales);
+        const tierQuantitySold = tierObject.quantitySold;
+        tierPrice = tierObject.price;
+        if (tierPrice=='Free'){
+           tierPrice=0
+
         }
+        console.log(" tier qs:", tierQuantitySold);
+        console.log(" tier price:", tierPrice);
+
+        if (allTiers ==='true'){        
+            
+          if (tierName==='free'){
+            eventSales = eventSales + 0;    
+          }
+         
+          else{
+
+        eventSales = eventSales + tierQuantitySold * tierPrice;
+        eventSales=Math.round(eventSales)
+        console.log(" event sales:", eventSales);
+
+          }
+
+        } 
+
+        else if (allTiers==='false'){
+           
+          console.log("inside false")
+          if (desiredTierName === 'Free') {
+            res.status(404).json({
+           success: false,
+            message: "There are no event sales for free ticket tiers ",
+         });
+
+        }
+
+         else if (tierName === desiredTierName) {
+          console.log("inside desired")
+          
+          salesByTierType=salesByTierType+tierQuantitySold * tierPrice;
+          salesByTierType = Math.round(salesByTierType);
+          console.log("event quantity sold:", salesByTierType);
+
+        }        
+
+
       }
-      eventSales = Math.round(eventSales);
-      console.log("event quantity sold:", eventSales);
+
+        }
+
+   
+
+        if (eventSales>0){
+          res.status(200).json({
+            success: true,
+            message: "Total Event Sales:  ",
+            eventSales,
+          });
+
+        }
+
+      else{
+        console.log("inside last salesByType")
+
+        res.status(200).json({
+          success: true,
+          message: "Event Sales by the specified tier type:  ",
+          salesByTierType,
+   });
+
+ }
   
-      res.status(200).json({
-        success: true,
-        message: "Event sales by the specified ticket type is: ",
-        eventSales,
-      });
-    }
-  }
+}   
+
 
 
 // to be modified
@@ -52,6 +108,7 @@ async function eventSoldTickets(req, res) {
     eventSales = 0;
     totalMaxCapacity = 0;
     soldTickets = 0;
+
   
     for (let i = 0; i < event.ticketTiers.length; i++) {
       const tierObject = event.ticketTiers[i];
@@ -100,6 +157,6 @@ async function eventSoldTickets(req, res) {
 
 
   module.exports = {
-    eventSalesByTicketType,
+    eventSales,
     eventSoldTickets,
   };
