@@ -13,10 +13,21 @@ const jwt = require("jsonwebtoken");
 async function listEvents(req, res) {
   try {
     const creatorId = req.params.creatorID;
-    const sortBy = req.query.sortBy;
+    const filterBy = req.query.filterBy;
     if (!creatorId) {
-      return res.status(404).json({ message: "No parameter was provided" });
+      return res
+        .status(404)
+        .json({ success: false, message: "No parameter was provided" });
     }
+
+    const user = await authorized(req);
+
+    if (user.authorized === false) {
+      return res
+        .status(404)
+        .json({ success: false, message: "user not Autherized" });
+    }
+
     //search event by id
     const query = {};
 
@@ -26,29 +37,30 @@ async function listEvents(req, res) {
     // Get the time zone offset in minutes
     const timezoneOffset = currentDate.getTimezoneOffset();
 
-    //convert date to UTC
+    //convert date to UTC to compare with DB
     const utcDate = new Date(
       currentDate.getTime() - timezoneOffset * 60 * 1000
     );
 
     //filter events by creator id
     query["creatorId"] = creatorId;
-    if (sortBy) {
-      if (sortBy === "upcomingevents") {
+
+    if (filterBy) {
+      if (filterBy === "upcomingevents") {
         //only retrieve published
         query["published"] = true;
 
         query["basicInfo.startDateTime"] = {
           $gte: currentDate,
         };
-      } else if (sortBy === "pastevents") {
+      } else if (filterBy === "pastevents") {
         //only retrieve published
         query["published"] = true;
 
         query["basicInfo.startDateTime"] = {
           $lte: currentDate,
         };
-      } else if (sortBy === "draft") {
+      } else if (filterBy === "draft") {
         //only retrieve Unpublished
         query["published"] = false;
       }
@@ -56,22 +68,31 @@ async function listEvents(req, res) {
     //filter events by query object
     const events = await eventModel.find(query);
     if (!events) {
-      return res.status(404).json({ message: "No events Found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "No events Found" });
+    }
+    if (events.length === 0) {
+      return res.status(200).json({
+        filteredEvents: [],
+        eventsoldtickets: [],
+        isEventOnSale: [],
+        gross: [],
+      });
     }
     var filteredEvents = events.map((eventModel) => {
       const {
         createdAt,
         updatedAt,
         __v,
-        //privatePassword,
+        privatePassword,
         isVerified,
         //promocodes,
         // startSelling,
         // endSelling,
         //publicDate,
-        //emailMessage,
+        emailMessage,
         soldTickets,
-        // eventUrl,
         ...filtered
       } = eventModel._doc;
       return filtered;
@@ -79,42 +100,62 @@ async function listEvents(req, res) {
 
     const eventsoldtickets = [];
     const isEventOnSale = [];
+    const gross = [];
 
-    //compute total sold tickets for each event
+    //loop over to compute total sold tickets for each event
     events.map((event) => {
-      // get the array of sold tickets for the current event
+      // get the number of sold tickets for the current event
       const soldTicketsCounts = event.soldTickets.length;
+      //push into eventsoldtickets array
       eventsoldtickets.push(soldTicketsCounts);
 
-      var totalCapacity = 0;
-      var isSellingValid = true;
+      var totalEventCapacity = 0;
+      var isSellingValidCounter = 0;
+      var eventGross = 0;
+      //loop over event ticket tiers
       for (let i = 0; i < event.ticketTiers.length; i++) {
         //could we reduce complexity??
         const tier = event.ticketTiers[i];
+
         //compute total event capacity
-        totalCapacity = totalCapacity + tier.maxCapacity;
+        totalEventCapacity = totalEventCapacity + tier.maxCapacity;
 
         if (
-          utcDate.getTime() < tier.startSelling.getTime() ||
-          utcDate.getTime() > tier.endSelling.getTime()
+          utcDate.getTime() >= tier.startSelling.getTime() &&
+          utcDate.getTime() <= tier.endSelling.getTime()
         ) {
-          isSellingValid = false;
-        } else {
-          isSellingValid = true;
+          isSellingValidCounter = isSellingValidCounter + 1;
+        }
+        if (tier.price !== "Free") {
+          tierPrice = tier.price;
+          // Remove non-numeric characters from price string
+          tierPrice = tierPrice.replace(/[^0-9.-]+/g, "");
+          // Convert string to number
+          tierPrice = parseFloat(tierPrice);
+
+          eventGross = eventGross + tier.quantitySold * tierPrice;
         }
       }
 
-      if (totalCapacity === soldTicketsCounts && isSellingValid === false) {
+      //if all tickets are sold or outside the selling period time.
+      if (
+        totalEventCapacity === soldTicketsCounts ||
+        isSellingValidCounter === 0
+      ) {
         isEventOnSale.push(false);
       } else {
         isEventOnSale.push(true);
       }
+
+      //push total events gross into gross array
+      gross.push(eventGross);
     });
 
     return res.status(200).json({
       filteredEvents,
       eventsoldtickets,
       isEventOnSale,
+      gross,
     });
   } catch (error) {
     res.status(400).json({
