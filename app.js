@@ -17,6 +17,7 @@ const promocodeRouter = require("./router/promocodeRouter");
 const attendeeRouter = require("./router/attendeeRouter");
 const manageAttendeeRouter = require("./router/manageAttendeeRouter");
 const eventsRetrievalRouter = require("./router/eventsRetrievalRouter");
+const dashboardRouter=require("./router/dashboardRouter");
 // const seedingRouter = require("./router/seedingRouter");
 
 const app = express();
@@ -84,6 +85,8 @@ app.use("/api", promocodeRouter);
 app.use("/api", attendeeRouter);
 app.use("/api", manageAttendeeRouter);
 app.use("/api", eventsRetrievalRouter);
+app.use("/api", dashboardRouter);
+
 // app.use("/api", seedingRouter);
 
 // Start the server on port 3000
