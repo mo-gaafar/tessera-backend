@@ -57,7 +57,6 @@ async function addAttendee(req, res) {
       if (eventTier) {
         // Check if the sum of quantitySold and soldout exceeds the capacity
         const totalSold = eventTier.quantitySold + tier.soldout;
-
         if (totalSold <= eventTier.maxCapacity) {
           // Update the quantitySold field with the soldout value from the request body
           eventTier.quantitySold += tier.soldout;
