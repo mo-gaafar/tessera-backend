@@ -450,4 +450,5 @@ module.exports = {
   createTicketTier,
   retrieveTicketTier,
   editTicketTier,
+  generateTickets,
 };

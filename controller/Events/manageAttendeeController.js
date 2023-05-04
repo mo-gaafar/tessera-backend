@@ -29,6 +29,12 @@ async function addAttendee(req, res) {
   try {
     //get request body
     const { contactInformation, promocode, ticketTierSelected } = req.body;
+    if (!ticketTierSelected || ticketTierSelected.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No attendees information was provided",
+      });
+    }
     //get path parameter
     const eventId = req.params.eventID;
 
@@ -78,24 +84,20 @@ async function addAttendee(req, res) {
       throw new Error("User not found");
     }
 
-    // Get the ticket tier object from the event object for each selected ticket tier
-    const ticketTiers = ticketTierSelected.map((selected, i) => {
+    // check all the ticket tiers in the ticketTierSelected array if they all exist with the correct price in the ticket tiers of the event model
+    for (let i = 0; i < ticketTierSelected.length; i++) {
       const ticketTier = event.ticketTiers.find(
-        (tier) =>
-          tier.tierName === selected.tierName[i] &&
-          tier.price === selected.price[i]
+        (ticketTier) =>
+          ticketTier.tierName == ticketTierSelected[i].tierName &&
+          ticketTier.price == ticketTierSelected[i].price
       );
-      return ticketTier;
-    });
 
-    // Check if any value in the ticketTiers array is undefined
-    const isTicketTiersValid = ticketTiers.every(
-      (ticketTier) => ticketTier !== undefined
-    );
-
-    // If any value is undefined, set isTicketTiersValid to false
-    if (!isTicketTiersValid) {
-      throw new Error("Ticket tier not found");
+      // check the ticket tier if the ticket tier exists
+      if (!ticketTier) {
+        throw new Error(
+          "Ticket tier not found or the price doesn't match the ticket tier"
+        );
+      }
     }
 
     // Get the promocode object from the database by the promocode code
@@ -109,49 +111,27 @@ async function addAttendee(req, res) {
 
     //book ticket for each attendee invited to the event
     //loop over the tickettier array to acess ticket info of each attendee
-    for (const tier of tickettier) {
+    for (const tier of ticketTierSelected) {
       const ticketname = tier.ticketname;
-      const soldout = tier.soldout;
-      for (const attendee of tier.tickets) {
-        const firstname = attendee.firstname;
-        const lastname = attendee.lastname;
-        const email = attendee.email;
-        //book the ticket
-        //Ggnerate the tickets
-        generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
-        console.log("Ticket has been created successfully");
-        //send email
+      const quantity = tier.quantity;
+      if (tier.tickets) {
+        for (const attendee of tier.tickets) {
+          const firstname = attendee.firstname;
+          const lastname = attendee.lastname;
+          const email = attendee.email;
+
+          //book the ticket
+          //Generate the tickets
+          generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
+          console.log("Ticket has been created successfully");
+          //send email
+        }
+      } else {
+        throw new Error("Some tickets information is missing");
       }
     }
 
-    // // update quantity sold for each ticket tier
-    // // Loop through the tickettier array
-    // for (const tier of tickettier) {
-    //   // Find the corresponding ticket tier in the event document
-    //   const eventTier = event.ticketTiers.find(
-    //     (t) => t.tierName === tier.ticketname
-    //   );
-
-    //   if (eventTier) {
-    //     // Check if the sum of quantitySold and soldout exceeds the capacity
-    //     const totalSold = eventTier.quantitySold + tier.soldout;
-
-    //     if (totalSold <= eventTier.maxCapacity) {
-    //       // Update the quantitySold field with the soldout value from the request body
-    //       eventTier.quantitySold += tier.soldout;
-    //     } else {
-    //       console.log(
-    //         `Sold out tickets for ${tier.ticketname} exceeds the capacity`
-    //       );
-    //     }
-    //   } else {
-    //     console.log(`No matching ticket tier found for ${tier.ticketname}`);
-    //   }
-    // }
-    // //Save the updated document
-    // await event.save();
-    ////////
-    return res.status(404).json({
+    return res.status(200).json({
       eventImage: event.basicInfo.eventImage,
       ticketTiers: event.ticketTiers,
     });
@@ -162,8 +142,6 @@ async function addAttendee(req, res) {
     });
   }
 }
-//book ticket manage attendee version
-async function bookTicketForAddAttendee(eventId, email, ticketname) {}
 module.exports = {
   addAttendee,
 };

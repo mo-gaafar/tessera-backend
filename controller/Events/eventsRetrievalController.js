@@ -9,29 +9,39 @@ const {
 } = require("../../utils/Tokens");
 const jwt = require("jsonwebtoken");
 
-//list events
+/**
+ * List events filtered by creator id and optionally by status (upcoming, past, or draft)
+ *
+ * @async
+ * @function listEvents
+ * @param {Object} req - The HTTP request object
+ * @param {Object} res - The HTTP response object
+ * @returns {Object} - The HTTP response with an array of events, as well as additional data for each event
+ * @throws {Object} - The HTTP response with an error message if an error occurs
+ *
+ *
+ */
 async function listEvents(req, res) {
   try {
-    const creatorId = req.params.creatorID;
+    // get filterBy parameter from query string
     const filterBy = req.query.filterBy;
-    if (!creatorId) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No parameter was provided" });
-    }
 
+    // verify user authorization with a helper function
     const user = await authorized(req);
-
+    // if user is not authorized, return an error response
     if (user.authorized === false) {
       return res
         .status(404)
         .json({ success: false, message: "user not Autherized" });
     }
 
-    //search event by id
+    //get the ID of the authorized user
+    const creatorId = user.user_id.toString();
+
+    //create an empty query object
     const query = {};
 
-    //get date now
+    // Get the current date/time
     const currentDate = new Date();
 
     // Get the time zone offset in minutes
@@ -45,33 +55,38 @@ async function listEvents(req, res) {
     //filter events by creator id
     query["creatorId"] = creatorId;
 
+    // Apply additional filters based on the 'filterBy' parameter in the query string
     if (filterBy) {
       if (filterBy === "upcomingevents") {
-        //only retrieve published
+        // Retrieve only published events that have a start date/time after the current date/time
         query["published"] = true;
 
         query["basicInfo.startDateTime"] = {
           $gte: currentDate,
         };
       } else if (filterBy === "pastevents") {
-        //only retrieve published
+        // Retrieve only published events that have a start date/time before the current date/time
         query["published"] = true;
 
         query["basicInfo.startDateTime"] = {
           $lte: currentDate,
         };
       } else if (filterBy === "draft") {
-        //only retrieve Unpublished
+        // Retrieve only unpublished events
         query["published"] = false;
       }
     }
+
     //filter events by query object
     const events = await eventModel.find(query);
+    // If no events were found, return an error response
     if (!events) {
       return res
         .status(404)
         .json({ success: false, message: "No events Found" });
     }
+
+    // If there are no events, return an empty response with only the keys defined below
     if (events.length === 0) {
       return res.status(200).json({
         filteredEvents: [],
@@ -81,6 +96,8 @@ async function listEvents(req, res) {
         maxCapacity: [],
       });
     }
+
+    // Extract only the desired properties from each event and return them in a new array
     var filteredEvents = events.map((eventModel) => {
       const {
         _id,
@@ -101,14 +118,13 @@ async function listEvents(req, res) {
         eventStatus,
         isPublic,
         published,
-        //isOnline,
-        //onlineEventUrl,
         creatorId,
         ...filtered
       } = eventModel._doc;
       return filtered;
     });
 
+    // Create empty arrays to hold data for each event
     const eventsoldtickets = [];
     const isEventOnSale = [];
     const gross = [];
@@ -178,6 +194,7 @@ async function listEvents(req, res) {
       maxCapacity.push(totalEventCapacity);
     });
 
+    //return filtered events and corresponding arrays
     return res.status(200).json({
       filteredEvents,
       eventsoldtickets,
