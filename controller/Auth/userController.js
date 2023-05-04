@@ -19,6 +19,7 @@ const {
 } = require("../../utils/Tokens");
 const { sendVerification, verifyEmail } = require("./verificationController");
 
+
 /**
  * Creates a new user with the provided email and sends a verification email to the user's email address.
  * @async
@@ -96,6 +97,9 @@ async function signUp(req, res) {
  * @returns {Object} - A response object with information about whether the sign in was successful and an access token if it was.
  *
  * @throws {Object} - An error object if there was an error while signing in the user.
+ * @throws {Object} Returns an error response if email or password are left blank.
+ * @throws {Object} Returns an error response if user email is not found or the password is incorrect.
+ * @throws {Object} Returns an error response if user email is not verified.
  */
 async function signIn(req, res) {
 	try {
