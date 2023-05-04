@@ -22,13 +22,13 @@ const {
   generateTickets,
 } = require("../Events/ticketController");
 async function addAttendee(req, res) {
-  console.log("Gonna add attendee in creators view");
+  console.log("Gonna add attendee manually");
   // const useridid = "6439f95a3d607d6c49e56a1e";
   // const tok = GenerateToken(useridid);
   // console.log(tok);
   try {
     //get request body
-    const { contactInfo, SendEmail, tickettier } = req.body;
+    const { contactInformation, promocode, ticketTierSelected } = req.body;
     //get path parameter
     const eventId = req.params.eventID;
 
@@ -65,6 +65,48 @@ async function addAttendee(req, res) {
       });
     }
 
+    //check if inviter is a user
+    const email = contactInformation.email;
+
+    // Get the user object from the database
+    const user = await userModel.findOne({
+      email: email,
+    });
+
+    // check the user if the user exists
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get the ticket tier object from the event object for each selected ticket tier
+    const ticketTiers = ticketTierSelected.map((selected, i) => {
+      const ticketTier = event.ticketTiers.find(
+        (tier) =>
+          tier.tierName === selected.tierName[i] &&
+          tier.price === selected.price[i]
+      );
+      return ticketTier;
+    });
+
+    // Check if any value in the ticketTiers array is undefined
+    const isTicketTiersValid = ticketTiers.every(
+      (ticketTier) => ticketTier !== undefined
+    );
+
+    // If any value is undefined, set isTicketTiersValid to false
+    if (!isTicketTiersValid) {
+      throw new Error("Ticket tier not found");
+    }
+
+    // Get the promocode object from the database by the promocode code
+    let promocodeObj = null;
+    if (promocode) {
+      promocodeObj = await promocodeModel.findOne({ code: promocode });
+      if (!promocodeObj) {
+        throw new Error("Promocode not found");
+      }
+    }
+
     //book ticket for each attendee invited to the event
     //loop over the tickettier array to acess ticket info of each attendee
     for (const tier of tickettier) {
@@ -74,8 +116,10 @@ async function addAttendee(req, res) {
         const firstname = attendee.firstname;
         const lastname = attendee.lastname;
         const email = attendee.email;
-        //call book ticket for attendee
-        bookTicketForAddAttendee(eventId, email, ticketname);
+        //book the ticket
+        //Ggnerate the tickets
+        generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
+        console.log("Ticket has been created successfully");
         //send email
       }
     }
@@ -119,72 +163,7 @@ async function addAttendee(req, res) {
   }
 }
 //book ticket manage attendee version
-async function bookTicketForAddAttendee(eventId, email, ticketname) {
-  try {
-    // const eventId = req.params.eventId;
-
-    // const { contactInformation, promocode, ticketTierSelected } = req.body;
-
-    // const email = contactInformation.email;
-
-    // Get the user object from the database
-    const user = await userModel.findOne({
-      email: email,
-    });
-
-    //check the user if the user exists
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    // Find the event in the database.
-    const event = await eventModel.findById(eventId);
-
-    // check the event if the event exists
-    if (!event) {
-      throw new Error("Event not found");
-    }
-
-    // Get the ticket tier object from the event object
-    const ticketTier = event.ticketTiers.find(
-      (tier) => tier.tierName == ticketname // &&
-      //tier.price == ticketTierSelected[0].price
-    );
-
-    // check the ticket tier if the ticket tier exists
-    if (!ticketTier) {
-      throw new Error("Ticket tier not found");
-    }
-
-    // Get the promocode object from the database by the promocode code
-    let promocodeObj = null;
-    ////newly commented
-    // if (promocode) {
-    //   promocodeObj = await promocodeModel.findOne({ code: promocode });
-    //   if (!promocodeObj) {
-    //     throw new Error("Promocode not found");
-    //   }
-    // }
-
-    // Generate the tickets
-    generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
-
-    console.log("Booked ticket successfully for attendee");
-    // Return a success response if the ticket is created successfully.
-    // return res.status(200).json({
-    //   success: true,
-    //   message: "Ticket has been created successfully",
-    // });
-  } catch (err) {
-    console.error(err);
-
-    // Return an error response if an error occurs.
-    // return res.status(401).json({
-    //   success: false,
-    //   message: err.message,
-    // });
-  }
-}
+async function bookTicketForAddAttendee(eventId, email, ticketname) {}
 module.exports = {
   addAttendee,
 };
