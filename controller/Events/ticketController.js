@@ -11,6 +11,8 @@ const {
   GenerateToken,
 } = require("../../utils/Tokens");
 
+const { sendUserEmail, orderBookedOption } = require("../../utils/sendEmail");
+
 /**
  * Creates a new ticket for an event and user.
  *
@@ -78,7 +80,7 @@ async function bookTicket(req, res) {
 
     // Generate the tickets
     generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
-
+    // sendOrderEmail(eventId, promocodeObj, ticketTierSelected, email);
     // Return a success response if the ticket is created successfully.
     return res.status(200).json({
       success: true,
@@ -93,6 +95,34 @@ async function bookTicket(req, res) {
       message: err.message,
     });
   }
+}
+
+async function sendOrderEmail(
+  eventID,
+  promocodeObj,
+  ticketTierSelectedArray,
+  email
+) {
+  // add new atribute in ticketTierSelected equal to the new price multiplied with the quantity using the implemented functions
+  for (let i = 0; i < ticketTierSelectedArray.length; i++) {
+    totalPrice = await calculateTotalPrice(
+      ticketTierSelectedArray[i],
+      promocodeObj
+    );
+    ticketTierSelectedArray[i].totalPrice =
+      totalPrice * ticketTierSelectedArray[i].quantity;
+  }
+
+  // get the event basic info from events
+  let event = await eventModel.findOne({ _id: eventID });
+  let eventBasicInfo = [event.basicInfo];
+
+  eventBasicInfo.eventOnlineUrl = event.onlineEventUrl;
+
+  const order = { ticketTierSelectedArray, eventBasicInfo };
+  console.log("🚀 ~ file: ticketController.js:123 ~ order:", order);
+
+  await sendUserEmail(email, order, orderBookedOption);
 }
 
 /**
@@ -158,6 +188,9 @@ async function calculateTotalPrice(ticketTierSelected, promocodeObj) {
 
     await promocodeObj.save();
   }
+
+  // add new atribute in ticketTierSelected equal to the new price multiplied with the quantity
+  ticketTierSelected.totalPrice = ticketPrice * ticketTierSelected.quantity;
 
   return ticketPrice; // Return the total purchase price
 }
@@ -297,21 +330,17 @@ async function retrieveTicketTier(req, res) {
   }
 }
 
-
 async function editTicketTier(req, res) {
   // try {
-    const eventId = req.params.eventID; // get the event ID from the request URL
-    // const update = req.body; // get the update object from the request body
+  const eventId = req.params.eventID; // get the event ID from the request URL
+  // const update = req.body; // get the update object from the request body
 
-
-
-    // const tierID=req.body.ticketTiers.tierID
-    // // const { tierName, quantitySold, maxCapacity, price, startSelling,endSelling } = req.body;
-    // console.log("tierID:",tierID)
-
+  // const tierID=req.body.ticketTiers.tierID
+  // // const { tierName, quantitySold, maxCapacity, price, startSelling,endSelling } = req.body;
+  // console.log("tierID:",tierID)
 
   //   const updatedEvent = await eventModel.findOneAndUpdate(
-  //     { _id: eventId,'ticketTiers._id':tierID }, 
+  //     { _id: eventId,'ticketTiers._id':tierID },
   //     { $set: { 'details.$.tierName': tierName,'details.$.quantitySold':quantitySold,'details.$.maxCapacity':maxCapacity,
   //     'details.$.price':price,'details.$.startSelling':startSelling,'details.$.endSelling':endSelling  }
   //   },
@@ -324,37 +353,9 @@ async function editTicketTier(req, res) {
   //     success: false,
   //     message: "invalid details",
   //   });
+}
 
-
-  }
-
-
-
-  
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports = {
   bookTicket,

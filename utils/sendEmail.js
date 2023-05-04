@@ -81,9 +81,39 @@ function sendSocialPassword(email, newPassword) {
   return mailOptions;
 }
 
+// make a function to return the order booked by attendee
+function orderBookedOption(email, order) {
+  console.log("🚀 ~ file: sendEmail.js:86 ~ orderBookedOption ~ order:", order);
+  console.log(
+    "🚀 ~ file: sendEmail.js:86 ~ orderBookedOption ~ order.ticketTierSelectedArray.totalPrice:",
+    order.ticketTierSelectedArray[1].totalPrice
+  );
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER, //sender
+    to: email, //receiver
+    subject: "Your order has been booked",
+    // calcalute the price after promocode from order
+    html: `
+    <p style="font-size: 20px;">Hello! </p>
+    <p style="font-size: 20px;">Your order has been booked</p>
+    <p style="font-size: 20px;">Your order details : </p>
+    <p style="font-size: 20px;">Event Name : ${order.eventBasicInfo[1].eventName}</p>
+    <p style="font-size: 20px;">Event Date & Time : ${order.eventBasicInfo[1].eventStartTime}</p>
+    <p style="font-size: 20px;">Event Location : ${order.eventBasicInfo[1].location}</p>
+    <p style="font-size: 20px;">Ticket Type : ${order.ticketTierSelectedArray.quantity} x ${order.ticketTierSelectedArray.tierName}</p>
+    <p style="font-size: 20px;">Total Price : ${order.ticketTierSelectedArray.totalPrice}</p>
+    <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera">
+
+    `,
+  };
+  return mailOptions;
+}
+
 module.exports = {
   sendUserEmail,
   verficationOption,
   forgetPasswordOption,
   sendSocialPassword,
+  orderBookedOption,
 };
