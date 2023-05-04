@@ -298,10 +298,37 @@ async function retrieveTicketTier(req, res) {
 }
 
 
+/**
+ * Edits a ticket tier for an event.
+ * @param {Object} req - The  request object that has the tier ID and the the tier array of objects 
+ * @param {Object} req.params - The parameters of the request.
+ * @param {string} req.params.eventID - The ID of the desired event to edit.
+ * @param {Object} req.body - The body of the request.
+ * @param {string} req.body.tierID - The ID of the ticket tier to edit.
+ * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
+ * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
+ * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
+ * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
+ * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
+ * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
+ * @param {Object} res - The response object.
+ * @returns {Object} An object containing the success status and a message is sent 
+ */
+
+
+
 async function editTicketTier(req, res) {
-  // try {
+  try {
     const eventID = req.params.eventID; // get the event ID from the request URL
+
+    // getting the parameters from the request body
     const enteredTierID=req.body.tierID
+    if (!enteredTierID){
+      return res.status(404).json({
+        success: false,
+        message: "Please enter the ID of the desired tier",
+        });
+    }
     const newTierName=req.body.ticketTiers[0].tierName
     const newMaxCapacity=req.body.ticketTiers[0].maxCapacity
     const newPrice=req.body.ticketTiers[0].price
@@ -309,7 +336,6 @@ async function editTicketTier(req, res) {
     const newEndSelling=req.body.ticketTiers[0].endSelling
     console.log("new Tier Name:",newTierName)
     console.log("desired tierID:",enteredTierID)
-
 
 
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
@@ -320,7 +346,8 @@ async function editTicketTier(req, res) {
       message: "No event Found",
       });
     } 
-
+ 
+   // update the ticket tier attributes with the body parameters using the tier ID 
    const updatedEvent = await eventModel.findOneAndUpdate(
       { _id: eventID,'ticketTiers._id':enteredTierID }, 
       { $set: { 'ticketTiers.$.tierName': newTierName, 'ticketTiers.$.maxCapacity': newMaxCapacity,'ticketTiers.$.price': newPrice,'ticketTiers.$.startSelling': newStartSelling,   
@@ -336,30 +363,19 @@ async function editTicketTier(req, res) {
       success: true,
       message: "Ticket tier has been successfully edited",
     });
-
+  }
+   
+  // error
+  catch{
+    res.status(400).json({
+      success: false,
+      message: "internal server error",
+    });
+  }
   }
 
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
