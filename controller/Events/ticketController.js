@@ -300,39 +300,47 @@ async function retrieveTicketTier(req, res) {
 
 async function editTicketTier(req, res) {
   // try {
-    const eventId = req.params.eventID; // get the event ID from the request URL
-    // const update = req.body; // get the update object from the request body
+    const eventID = req.params.eventID; // get the event ID from the request URL
+    const enteredTierID=req.body.tierID
+    const newTierName=req.body.ticketTiers[0].tierName
+    const newMaxCapacity=req.body.ticketTiers[0].maxCapacity
+    const newPrice=req.body.ticketTiers[0].price
+    const newStartSelling=req.body.ticketTiers[0].startSelling
+    const newEndSelling=req.body.ticketTiers[0].endSelling
+    console.log("new Tier Name:",newTierName)
+    console.log("desired tierID:",enteredTierID)
 
 
 
-    // const tierID=req.body.ticketTiers.tierID
-    // // const { tierName, quantitySold, maxCapacity, price, startSelling,endSelling } = req.body;
-    // console.log("tierID:",tierID)
+    const event = await eventModel.findById(req.params.eventID); //getting event by its ID
+  // event not found
+    if (!event) {
+     return res.status(404).json({
+      success: false,
+      message: "No event Found",
+      });
+    } 
 
+   const updatedEvent = await eventModel.findOneAndUpdate(
+      { _id: eventID,'ticketTiers._id':enteredTierID }, 
+      { $set: { 'ticketTiers.$.tierName': newTierName, 'ticketTiers.$.maxCapacity': newMaxCapacity,'ticketTiers.$.price': newPrice,'ticketTiers.$.startSelling': newStartSelling,   
+      'ticketTiers.$.endSelling': newEndSelling
+    }
+    },
+      { new: true, runValidators: true }
+    );
 
-  //   const updatedEvent = await eventModel.findOneAndUpdate(
-  //     { _id: eventId,'ticketTiers._id':tierID }, 
-  //     { $set: { 'details.$.tierName': tierName,'details.$.quantitySold':quantitySold,'details.$.maxCapacity':maxCapacity,
-  //     'details.$.price':price,'details.$.startSelling':startSelling,'details.$.endSelling':endSelling  }
-  //   },
-  //     { new: true, runValidators: true }
-  //   );
+    console.log("updated event:",updatedEvent) 
 
-  //   console.log("updated event:", updatedEvent.ticketTiers);
-  // // } catch (error) {
-  //   res.status(400).json({
-  //     success: false,
-  //     message: "invalid details",
-  //   });
-
+    return res.status(200).json({
+      success: true,
+      message: "Ticket tier has been successfully edited",
+    });
 
   }
 
 
-
-  
-// }
-
+    
 
 
 

@@ -8,7 +8,8 @@ const dashboardController = require("../controller/Dashboard/dashboardController
 // to be modified
 router.get(
     "/dashboard/eventsales/events/:eventID",
-    dashboardController.eventSales
+    dashboardController.eventSales,
+
   );
   router.get(
     "/dashboard/eventsoldtickets/events/:eventID",
