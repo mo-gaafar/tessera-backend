@@ -78,21 +78,32 @@ async function listEvents(req, res) {
         eventsoldtickets: [],
         isEventOnSale: [],
         gross: [],
+        maxCapacity: [],
       });
     }
     var filteredEvents = events.map((eventModel) => {
       const {
+        _id,
         createdAt,
         updatedAt,
         __v,
         privatePassword,
         isVerified,
-        //promocodes,
-        // startSelling,
-        // endSelling,
-        //publicDate,
+        promocodes,
+        startSelling,
+        endSelling,
+        publicDate,
         emailMessage,
         soldTickets,
+        ticketTiers,
+        summary,
+        description,
+        eventStatus,
+        isPublic,
+        published,
+        //isOnline,
+        //onlineEventUrl,
+        creatorId,
         ...filtered
       } = eventModel._doc;
       return filtered;
@@ -101,9 +112,17 @@ async function listEvents(req, res) {
     const eventsoldtickets = [];
     const isEventOnSale = [];
     const gross = [];
+    const maxCapacity = [];
 
     //loop over to compute total sold tickets for each event
     events.map((event) => {
+      //loop over ticketTiers array
+      if (!event.ticketTiers || event.ticketTiers.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "ticketTiers is not found",
+        });
+      }
       // get the number of sold tickets for the current event
       const soldTicketsCounts = event.soldTickets.length;
       //push into eventsoldtickets array
@@ -112,28 +131,33 @@ async function listEvents(req, res) {
       var totalEventCapacity = 0;
       var isSellingValidCounter = 0;
       var eventGross = 0;
+
       //loop over event ticket tiers
       for (let i = 0; i < event.ticketTiers.length; i++) {
         //could we reduce complexity??
         const tier = event.ticketTiers[i];
-
-        //compute total event capacity
-        totalEventCapacity = totalEventCapacity + tier.maxCapacity;
-
-        if (
-          utcDate.getTime() >= tier.startSelling.getTime() &&
-          utcDate.getTime() <= tier.endSelling.getTime()
-        ) {
-          isSellingValidCounter = isSellingValidCounter + 1;
+        if (tier.maxCapacity) {
+          //compute total event capacity
+          totalEventCapacity = totalEventCapacity + tier.maxCapacity;
         }
-        if (tier.price !== "Free") {
-          tierPrice = tier.price;
-          // Remove non-numeric characters from price string
-          tierPrice = tierPrice.replace(/[^0-9.-]+/g, "");
-          // Convert string to number
-          tierPrice = parseFloat(tierPrice);
+        if (tier.startSelling && tier.endSelling) {
+          if (
+            utcDate.getTime() >= tier.startSelling.getTime() &&
+            utcDate.getTime() <= tier.endSelling.getTime()
+          ) {
+            isSellingValidCounter = isSellingValidCounter + 1;
+          }
+        }
+        if (tier.quantitySold && tier.price) {
+          if (tier.price !== "Free") {
+            tierPrice = tier.price;
+            // Remove non-numeric characters from price string
+            tierPrice = tierPrice.replace(/[^0-9.-]+/g, "");
+            // Convert string to number
+            tierPrice = parseFloat(tierPrice);
 
-          eventGross = eventGross + tier.quantitySold * tierPrice;
+            eventGross = eventGross + tier.quantitySold * tierPrice;
+          }
         }
       }
 
@@ -149,6 +173,9 @@ async function listEvents(req, res) {
 
       //push total events gross into gross array
       gross.push(eventGross);
+
+      //push max event capcity into maxCapacity array
+      maxCapacity.push(totalEventCapacity);
     });
 
     return res.status(200).json({
@@ -156,6 +183,7 @@ async function listEvents(req, res) {
       eventsoldtickets,
       isEventOnSale,
       gross,
+      maxCapacity,
     });
   } catch (error) {
     res.status(400).json({
