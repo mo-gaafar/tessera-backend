@@ -10,6 +10,7 @@ const {
   retrieveToken,
   verifyToken,
   GenerateToken,
+  generateUniqueId,
 } = require("../../utils/Tokens");
 
 const { sendUserEmail, orderBookedOption } = require("../../utils/sendEmail");
@@ -82,9 +83,17 @@ async function bookTicket(req, res) {
         throw new Error("Promocode not found");
       }
     }
+    // generate order id
+    const orderId = await generateUniqueId();
 
     // Generate the tickets
-    generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
+    generateTickets(
+      ticketTierSelected,
+      eventId,
+      promocodeObj,
+      user._id,
+      orderId
+    );
 
     // send email with order and Qr-Code
     sendOrderEmail(eventId, promocodeObj, ticketTierSelected, email);
@@ -158,7 +167,13 @@ async function sendOrderEmail(
  * @param {Array<Object>} ticketTiers - An array of ticket tier objects
  * @returns {Array<Object>} An array of ticket objects with "tierName" and "price" properties
  */
-async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
+async function generateTickets(
+  ticketTiers,
+  eventId,
+  promocodeObj,
+  userId,
+  orderId
+) {
   // Loop through each ticket tier object in the array
   for (let i = 0; i < ticketTiers.length; i++) {
     // Destructure the properties of the current ticket tier object
@@ -184,9 +199,12 @@ async function generateTickets(ticketTiers, eventId, promocodeObj, userId) {
       });
 
       await ticket.save();
+
+      // Add the ticket to the tickets array
       const soldTicket = {
         ticketId: ticket._id,
         userId: userId,
+        orderId: orderId,
       };
 
       // add the tickets to the event schema
@@ -253,9 +271,17 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
 
     // Add the sold ticket to the event's soldTickets array.
     event.soldTickets.push(soldTicket);
+    console.log(
+      "🚀 ~ file: ticketController.js:274 ~ addSoldTicketToEvent ~ soldTicket:",
+      soldTicket
+    );
 
     // Save the updated event to the database.
     await event.save();
+    console.log(
+      "🚀 ~ file: ticketController.js:281 ~ addSoldTicketToEvent ~ event:",
+      event
+    );
   } catch (err) {
     console.error(err);
 

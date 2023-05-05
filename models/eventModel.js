@@ -83,7 +83,11 @@ const eventSchema = new mongoose.Schema(
 
     ticketTiers: [
       {
-        tierName: String,
+        // need the tierName to be unique
+        tierName: {
+          type: String,
+          unique: true,
+        },
 
         quantitySold: Number,
 
@@ -132,6 +136,10 @@ const eventSchema = new mongoose.Schema(
         userId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "userModel",
+        },
+        // it takes a uuid id
+        orderId: {
+          type: String,
         },
       },
     ],
