@@ -14,13 +14,19 @@ const ticketModel = require("../../models/ticketModel");
 const eventModel = require("../../models/eventModel");
 const userModel = require("../../models/userModel");
 const promocodeModel = require("../../models/promocodeModel");
-const { authorized, GenerateToken } = require("../../utils/Tokens");
+const {
+  authorized,
+  GenerateToken,
+  generateUniqueId,
+} = require("../../utils/Tokens");
 const {
   bookTicket,
   createTicketTier,
   retrieveTicketTier,
   generateTickets,
 } = require("../Events/ticketController");
+const generateQRCodeWithLogo = require("../../utils/qrCodeGenerator");
+
 async function addAttendee(req, res) {
   console.log("Gonna add attendee manually");
   // const useridid = "6439f95a3d607d6c49e56a1e";
@@ -65,6 +71,9 @@ async function addAttendee(req, res) {
         .status(404)
         .json({ success: false, message: "No event Found" });
     }
+
+    // generate QrCode and connects it to the evenURL
+    const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
     //check if user is authorized
     const userid = await authorized(req);
@@ -111,34 +120,34 @@ async function addAttendee(req, res) {
         throw new Error("Promocode not found");
       }
     }
+    generateTickets(
+      ticketTierSelected,
+      eventId,
+      promocodeObj,
+      user._id,
+      orderId
+    );
+    console.log("Ticket has been created successfully");
 
     //book ticket for each attendee invited to the event
-    //loop over the tickettier array to acess ticket info of each attendee
-    for (const tier of ticketTierSelected) {
-      const ticketname = tier.ticketname;
-      const quantity = tier.quantity;
-      if (tier.tickets) {
-        for (const attendee of tier.tickets) {
-          const firstname = attendee.firstname;
-          const lastname = attendee.lastname;
-          const email = attendee.email;
+    // //loop over the tickettier array to acess ticket info of each attendee
+    // for (const tier of ticketTierSelected) {
+    //   const ticketname = tier.ticketname;
+    //   const quantity = tier.quantity;
+    //   if (tier.tickets) {
+    //     for (const attendee of tier.tickets) {
+    //       const firstname = attendee.firstname;
+    //       const lastname = attendee.lastname;
+    //       const email = attendee.email;
 
-          //book the ticket
-          //Generate the tickets
-          generateTickets(
-            ticketTierSelected,
-            eventId,
-            promocodeObj,
-            user._id,
-            orderId
-          );
-          console.log("Ticket has been created successfully");
-          //send email
-        }
-      } else {
-        throw new Error("Some tickets information is missing");
-      }
-    }
+    //       //book the ticket
+    //       //Generate the tickets
+    //       //send email
+    //     }
+    //   } else {
+    //     throw new Error("Some tickets information is missing");
+    //   }
+    // }
 
     return res.status(200).json({
       eventImage: event.basicInfo.eventImage,
