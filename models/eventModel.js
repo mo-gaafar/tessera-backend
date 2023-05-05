@@ -152,8 +152,11 @@ const eventSchema = new mongoose.Schema(
 
     promocodes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "promocodeModel",
+        promocodeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "promocodeModel",
+        },
+        code: String,
       },
     ],
   },
