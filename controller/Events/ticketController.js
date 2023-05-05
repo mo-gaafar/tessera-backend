@@ -344,9 +344,23 @@ async function createTicketTier(req, res) {
   }
 }
 
+
+
+
+/**
+Retrieves the ticket tiers details for the event by its ID
+@async
+@function
+@param {Object} res - The response object that has the ticket tiers details
+@param {Object} req.params - The parameters of the request.
+@param {string} req.params.eventID - The ID of the event to retrieve its ticket tiers.
+@returns {Object} - The retrieved ticket tier details object or an error message
+@throws {Error} - If an error occurs while retrieving the ticket tiers details
+@throws {Error} - If event is not found
+*/
+
+
 async function retrieveTicketTier(req, res) {
-  console.log("inside retrieveTicketTier");
-  // const event=await eventModel.findById(req.params.eventID);
   try {
     const event = await eventModel.findById(req.params.eventID); //returns event of given id
     if (!event) {
@@ -355,6 +369,8 @@ async function retrieveTicketTier(req, res) {
         message: "Event is not found",
       });
     }
+
+    // returning ticket tier details for the event
     const { ticketTiers } = event;
     return res.status(200).json({
       success: true,

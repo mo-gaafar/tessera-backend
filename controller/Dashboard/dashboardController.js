@@ -19,7 +19,7 @@ async function eventSales(req, res) {
 
 
 
-  for (let i = 0; i < event.ticketTiers.length; i++) {
+for (let i = 0; i < event.ticketTiers.length; i++) {
     const tierObject = event.ticketTiers[i];
     const tierName = tierObject.tierName;
     console.log(`Tier ${i + 1}: ${tierName}`);
@@ -73,8 +73,7 @@ async function eventSales(req, res) {
 
   }
 
-
-
+  
   if (totalSales > 0) {
     res.status(200).json({
       success: true,
