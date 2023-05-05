@@ -297,7 +297,12 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
     // Throw an error if an error occurs.
     throw new Error(err.message);
   }
-}
+
+} 
+
+
+// const token= GenerateToken("643bd6454bcebb6861183fa6")
+// console.log("token is:",token)
 
 /**
  * Creates a new ticket tier for an event.
