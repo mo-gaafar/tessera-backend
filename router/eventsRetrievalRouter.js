@@ -4,7 +4,7 @@ const router = express.Router();
 const eventsRetrievalController = require("../controller/Events/eventsRetrievalController");
 
 router.get(
-  "/event-management/listEvents/:creatorID",
+  "/event-management/listEvents",
   eventsRetrievalController.listEvents
 );
 
