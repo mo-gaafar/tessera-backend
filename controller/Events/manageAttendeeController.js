@@ -29,14 +29,20 @@ async function addAttendee(req, res) {
   try {
     //get request body
     const { contactInformation, promocode, ticketTierSelected } = req.body;
+    //get path parameter
+    const eventId = req.params.eventID;
+    //check if inviter is a user
+    const email = contactInformation.email;
+
+    // generate order id
+    const orderId = await generateUniqueId();
+
     if (!ticketTierSelected || ticketTierSelected.length === 0) {
       return res.status(404).json({
         success: false,
         message: "No attendees information was provided",
       });
     }
-    //get path parameter
-    const eventId = req.params.eventID;
 
     if (!eventId) {
       return res
@@ -70,9 +76,6 @@ async function addAttendee(req, res) {
         message: "You are not authorized to add attendee to this event",
       });
     }
-
-    //check if inviter is a user
-    const email = contactInformation.email;
 
     // Get the user object from the database
     const user = await userModel.findOne({
@@ -122,7 +125,13 @@ async function addAttendee(req, res) {
 
           //book the ticket
           //Generate the tickets
-          generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
+          generateTickets(
+            ticketTierSelected,
+            eventId,
+            promocodeObj,
+            user._id,
+            orderId
+          );
           console.log("Ticket has been created successfully");
           //send email
         }
