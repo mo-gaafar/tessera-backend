@@ -14,15 +14,26 @@ const {
   generateTickets,
 } = require("../Events/ticketController");
 const generateQRCodeWithLogo = require("../../utils/qrCodeGenerator");
+/**
+ * Add attendee to an event
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ * @param {Object} req.body.contactInformation - Contact information of the ticket buyer
+ * @param {string} req.body.promocode - Promocode for the attendee
+ * @param {Array} req.body.ticketTierSelected - Selected ticket tiers and contact information for the attendee
+ * @param {boolean} req.body.SendEmail - Whether to send an email confirmation to the attendee
+ * @returns {Object} -Array of event ticket tiers and event image
+ */
 
 async function addAttendee(req, res) {
   console.log("Gonna add attendee manually");
-  // const useridid = "6439f95a3d607d6c49e56a1e";
+  // const useridid = "643a56706f55e9085d193f48";
   // const tok = GenerateToken(useridid);
   // console.log(tok);
   try {
     //get request body
-    const { contactInformation, promocode, ticketTierSelected } = req.body;
+    const { contactInformation, promocode, ticketTierSelected, SendEmail } =
+      req.body;
     //get path parameter
     const eventId = req.params.eventID;
     //check if inviter is a user
@@ -85,6 +96,8 @@ async function addAttendee(req, res) {
       console.log("User not found");
       throw new Error("User not found");
     }
+    //get buyer id for booking tickets
+    const buyerId = user._id;
 
     // check all the ticket tiers in the ticketTierSelected array if they all exist with the correct price in the ticket tiers of the event model
     for (let i = 0; i < ticketTierSelected.length; i++) {
@@ -127,8 +140,9 @@ async function addAttendee(req, res) {
     console.log("Ticket has been created successfully");
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
-
-    sendEmailsToattendees(event, user, ticketTierSelected);
+    if (SendEmail) {
+      sendEmailsToattendees(event, user, ticketTierSelected);
+    }
 
     return res.status(200).json({
       success: true,
@@ -142,7 +156,22 @@ async function addAttendee(req, res) {
     });
   }
 }
-async function sendEmailsToattendees(event, user, ticketTierSelected) {
+
+/**
+Sends emails to event attendees and the ticket buyer
+@param {Object} event - Event object
+@param {Object} user - User object for ticket buyer 
+@param {Array} ticketTierSelected - Array of ticket tiers selected and attendees information
+@param {Boolean} SendEmail - Flag indicating whether to send emails to attendees
+@returns {void} -Sends emails to event attendees and the ticket buyer
+*/
+
+async function sendEmailsToattendees(
+  event,
+  user,
+  ticketTierSelected,
+  SendEmail
+) {
   //get some inviter information
   const email = user.email;
   const inviterName = user.firstName + " " + user.lastName;
@@ -191,24 +220,42 @@ async function sendEmailsToattendees(event, user, ticketTierSelected) {
       ", " +
       event.basicInfo.location.country;
   }
-  console.log(email, inviterName, eventName, eventDate, eventLocation);
-  //book ticket for each attendee invited to the event
-  //loop over the tickettier array to acess ticket info of each attendee
-  for (const tier of ticketTierSelected) {
-    //some tickets information for email
-    const ticketname = tier.ticketname;
-    const quantity = tier.quantity;
-    const price = tier.price;
-    if (tier.tickets) {
-      for (const attendee of tier.tickets) {
-        //some attendees information
-        const firstname = attendee.firstname;
-        const lastname = attendee.lastname;
-        const email = attendee.email;
+  //send email to the ticket buyer
 
-        //send email
+  //check if no attendees invited
+  var invitationsExist = true;
+  for (let i = 0; i < ticketTierSelected.length; i++) {
+    if (
+      !ticketTierSelected[i].tickets ||
+      ticketTierSelected[i].tickets.length === 0
+    ) {
+      invitationsExist = false;
+    }
+  }
+
+  //if there are invitations then get attendees info and send email
+  if (invitationsExist) {
+    for (const tier of ticketTierSelected) {
+      //some tickets information for email
+      const ticketname = tier.ticketname;
+      const quantity = tier.quantity;
+      const price = tier.price;
+      //loop over the tickettier array to acess ticket info of each attendee
+      if (tier.tickets) {
+        for (const attendee of tier.tickets) {
+          //some attendees information
+          const firstname = attendee.firstname;
+          const lastname = attendee.lastname;
+          const email = attendee.email;
+
+          //send email with order info for each attendee invited to the event
+          console.log(`Sending email to ${firstname} to add attendees`);
+        }
       }
     }
+  } else {
+    //send email with order info for ticket buyer
+    console.log(`Sending email to ${inviterName} to add attendees`);
   }
 }
 
