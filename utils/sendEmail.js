@@ -11,7 +11,7 @@ require("dotenv").config();
  * @returns {object}  - return the user's email if the email sent
  * @throws {Error} If an error occurs while sending the email
  */
-async function sendUserEmail(email, token, option) {
+async function sendUserEmail(email, token, option, qrcode = null) {
   try {
     // Send verification email
     const transporter = nodemailer.createTransport({
@@ -21,9 +21,12 @@ async function sendUserEmail(email, token, option) {
         pass: process.env.EMAIL_PASS,
       },
     });
-
-    let mailOptions = option(email, token);
-
+    let mailOptions;
+    if (qrcode) {
+      mailOptions = option(email, token, qrcode);
+    } else {
+      mailOptions = option(email, token);
+    }
     // Send email message
     await transporter.sendMail(mailOptions);
 
@@ -81,9 +84,31 @@ function sendSocialPassword(email, newPassword) {
   return mailOptions;
 }
 
+// make a function to return the order booked by attendee
+function orderBookedOption(email, order, qrCode) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER, //sender
+    to: email, //receiver
+    subject: "Your order has been booked",
+    attachments: [
+      {
+        content: Buffer.from(qrCode, "base64"),
+        contentType: "image/png",
+      },
+    ],
+    html: ` 
+
+    <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera">
+
+    `,
+  };
+  return mailOptions;
+}
+
 module.exports = {
   sendUserEmail,
   verficationOption,
   forgetPasswordOption,
   sendSocialPassword,
+  orderBookedOption,
 };
