@@ -1,26 +1,20 @@
-////add attendee (momken teb3aty l tickets kteera l nafs l shakhs msln for his familly ya3ny! bas i guess only one contact information)
-//event id as a query parattmer and validate that the event exists
-//authorize the creator id to be received (query param??)
-//khody l ticket type 3lshan te3rafy etzwed l attendee 3la anhy ticket
-//khody l quantity 3lshan tzwedeeh 3la "this" ticket type
-//what is face value??? note that: faceValue * quantity=totalValue pass
-//should I take order type?? pass
-//I should recieve attendees (kolohm) contact information (firstName,lastName,email) ok
-// & send confirmation email and tell them that for example "Malak registered you for Aklatna! " then"Claim your order""
-//also return some event info like "startdate " and "eventName" and "inviter name (not creator sah?)"
-//also should I receive creator information to send email with?
-//drop down for event ticket tiers ?? (need request) //habtha ana
 const ticketModel = require("../../models/ticketModel");
 const eventModel = require("../../models/eventModel");
 const userModel = require("../../models/userModel");
 const promocodeModel = require("../../models/promocodeModel");
-const { authorized, GenerateToken } = require("../../utils/Tokens");
+const {
+  authorized,
+  GenerateToken,
+  generateUniqueId,
+} = require("../../utils/Tokens");
 const {
   bookTicket,
   createTicketTier,
   retrieveTicketTier,
   generateTickets,
 } = require("../Events/ticketController");
+const generateQRCodeWithLogo = require("../../utils/qrCodeGenerator");
+
 async function addAttendee(req, res) {
   console.log("Gonna add attendee manually");
   // const useridid = "6439f95a3d607d6c49e56a1e";
@@ -29,16 +23,24 @@ async function addAttendee(req, res) {
   try {
     //get request body
     const { contactInformation, promocode, ticketTierSelected } = req.body;
+    //get path parameter
+    const eventId = req.params.eventID;
+    //check if inviter is a user
+    const email = contactInformation.email;
+
+    // generate order id
+    const orderId = await generateUniqueId();
+
     if (!ticketTierSelected || ticketTierSelected.length === 0) {
+      console.log("No attendees information was provided");
       return res.status(404).json({
         success: false,
         message: "No attendees information was provided",
       });
     }
-    //get path parameter
-    const eventId = req.params.eventID;
 
     if (!eventId) {
+      console.log("No parameter was provided");
       return res
         .status(404)
         .json({ success: false, message: "No parameter was provided" });
@@ -55,6 +57,7 @@ async function addAttendee(req, res) {
     const event = await eventModel.findOne(query);
 
     if (!event) {
+      console.log("No event Found");
       return res
         .status(404)
         .json({ success: false, message: "No event Found" });
@@ -63,16 +66,14 @@ async function addAttendee(req, res) {
     //check if user is authorized
     const userid = await authorized(req);
 
+    // check if the creator of the event matches the user making the add attendee request
     if (event.creatorId.toString() !== userid.user_id.toString()) {
-      // check if the creator of the event matches the user making the add attendee request
+      console.log("You are not authorized to add attendee to this event");
       return res.status(401).json({
         success: false,
         message: "You are not authorized to add attendee to this event",
       });
     }
-
-    //check if inviter is a user
-    const email = contactInformation.email;
 
     // Get the user object from the database
     const user = await userModel.findOne({
@@ -81,6 +82,7 @@ async function addAttendee(req, res) {
 
     // check the user if the user exists
     if (!user) {
+      console.log("User not found");
       throw new Error("User not found");
     }
 
@@ -94,6 +96,9 @@ async function addAttendee(req, res) {
 
       // check the ticket tier if the ticket tier exists
       if (!ticketTier) {
+        console.log(
+          "Ticket tier not found or the price doesn't match the ticket tier"
+        );
         throw new Error(
           "Ticket tier not found or the price doesn't match the ticket tier"
         );
@@ -105,33 +110,28 @@ async function addAttendee(req, res) {
     if (promocode) {
       promocodeObj = await promocodeModel.findOne({ code: promocode });
       if (!promocodeObj) {
+        console.log("Promocode not found");
         throw new Error("Promocode not found");
       }
     }
 
-    //book ticket for each attendee invited to the event
-    //loop over the tickettier array to acess ticket info of each attendee
-    for (const tier of ticketTierSelected) {
-      const ticketname = tier.ticketname;
-      const quantity = tier.quantity;
-      if (tier.tickets) {
-        for (const attendee of tier.tickets) {
-          const firstname = attendee.firstname;
-          const lastname = attendee.lastname;
-          const email = attendee.email;
+    generateTickets(
+      ticketTierSelected,
+      eventId,
+      promocodeObj,
+      user._id,
+      buyerId,
+      orderId
+    );
 
-          //book the ticket
-          //Generate the tickets
-          generateTickets(ticketTierSelected, eventId, promocodeObj, user._id);
-          console.log("Ticket has been created successfully");
-          //send email
-        }
-      } else {
-        throw new Error("Some tickets information is missing");
-      }
-    }
+    console.log("Ticket has been created successfully");
+    // generate QrCode and connects it to the evenURL
+    const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
+
+    sendEmailsToattendees(event, user, ticketTierSelected);
 
     return res.status(200).json({
+      success: true,
       eventImage: event.basicInfo.eventImage,
       ticketTiers: event.ticketTiers,
     });
@@ -142,6 +142,76 @@ async function addAttendee(req, res) {
     });
   }
 }
+async function sendEmailsToattendees(event, user, ticketTierSelected) {
+  //get some inviter information
+  const email = user.email;
+  const inviterName = user.firstName + " " + user.lastName;
+
+  //some event information
+  const eventName = event.basicInfo.eventName;
+
+  const dateObj = new Date(event.basicInfo.startDateTime);
+  const eventStartDate = dateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  //const eventPublicDate = dateObj.toISOString().substring(0, 10);
+  const hours = dateObj.getUTCHours();
+  const minutes = dateObj.getUTCMinutes();
+  const seconds = dateObj.getUTCSeconds();
+
+  // getting time
+  let amOrPm;
+  if (hours >= 12) {
+    amOrPm = "PM";
+  } else {
+    amOrPm = "AM";
+  }
+  const hoursTwelveHourFormat = hours % 12 || 12;
+  const eventTime = `${
+    hoursTwelveHourFormat < 10 ? "0" : ""
+  }${hoursTwelveHourFormat}:${minutes < 10 ? "0" : ""}${minutes}:${
+    seconds < 10 ? "0" : ""
+  }${seconds} ${amOrPm}`;
+  eventTime;
+  const eventDate = eventStartDate + ", at " + eventTime;
+
+  if (event.isOnline) {
+    var eventLocation = "Online";
+  } else {
+    var eventLocation =
+      event.basicInfo.location.streetNumber +
+      " " +
+      event.basicInfo.location.route +
+      ", " +
+      event.basicInfo.location.city +
+      ", " +
+      event.basicInfo.location.country;
+  }
+  console.log(email, inviterName, eventName, eventDate, eventLocation);
+  //book ticket for each attendee invited to the event
+  //loop over the tickettier array to acess ticket info of each attendee
+  for (const tier of ticketTierSelected) {
+    //some tickets information for email
+    const ticketname = tier.ticketname;
+    const quantity = tier.quantity;
+    const price = tier.price;
+    if (tier.tickets) {
+      for (const attendee of tier.tickets) {
+        //some attendees information
+        const firstname = attendee.firstname;
+        const lastname = attendee.lastname;
+        const email = attendee.email;
+
+        //send email
+      }
+    }
+  }
+}
+
 module.exports = {
   addAttendee,
 };

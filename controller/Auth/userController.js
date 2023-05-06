@@ -95,7 +95,6 @@ async function signUp(req, res) {
  * @param {string} req.body.password - The user's password.
  * @param {Object} res - The response object that will be sent back to the client.
  * @returns {Object} - A response object with information about whether the sign in was successful and an access token if it was.
- *
  * @throws {Object} - An error object if there was an error while signing in the user.
  * @throws {Object} Returns an error response if email or password are left blank.
  * @throws {Object} Returns an error response if user email is not found or the password is incorrect.
@@ -106,7 +105,7 @@ async function signIn(req, res) {
 		const { email, password } = req.body; // Getting email and password from request body
 
 		// Prompting to user  if email or password are left blank
-		if (!email || !password) {
+		if (!req.body || !email || !password) {
 			return res.status(200).json({
 				success: false,
 				message: "Email and password are required",

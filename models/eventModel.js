@@ -83,7 +83,11 @@ const eventSchema = new mongoose.Schema(
 
     ticketTiers: [
       {
-        tierName: String,
+        // need the tierName to be unique
+        tierName: {
+          type: String,
+          unique: true,
+        },
 
         quantitySold: Number,
 
@@ -133,6 +137,10 @@ const eventSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "userModel",
         },
+        // it takes a uuid id
+        orderId: {
+          type: String,
+        },
       },
     ],
 
@@ -144,8 +152,11 @@ const eventSchema = new mongoose.Schema(
 
     promocodes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "promocodeModel",
+        promocodeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "promocodeModel",
+        },
+        code: String,
       },
     ],
   },

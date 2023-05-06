@@ -49,7 +49,8 @@
     "passport-google-oauth20": "^2.0.0",
     "randomstring": "^1.2.3",
     "secure-password": "^4.0.0",
-    "shortid": "^2.2.16"
+    "shortid": "^2.2.16",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

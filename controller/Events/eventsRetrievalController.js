@@ -23,6 +23,7 @@ const jwt = require("jsonwebtoken");
  */
 async function listEvents(req, res) {
   try {
+    console.log("Gonna list events by creator");
     // get filterBy parameter from query string
     const filterBy = req.query.filterBy;
 
@@ -79,6 +80,7 @@ async function listEvents(req, res) {
 
     //filter events by query object
     const events = await eventModel.find(query);
+    console.log(`events filtered by ${filterBy}`);
     // If no events were found, return an error response
     if (!events) {
       return res
@@ -89,6 +91,7 @@ async function listEvents(req, res) {
     // If there are no events, return an empty response with only the keys defined below
     if (events.length === 0) {
       return res.status(200).json({
+        success: true,
         filteredEvents: [],
         eventsoldtickets: [],
         isEventOnSale: [],
@@ -115,7 +118,6 @@ async function listEvents(req, res) {
         ticketTiers,
         summary,
         description,
-        eventStatus,
         isPublic,
         published,
         creatorId,
@@ -193,9 +195,10 @@ async function listEvents(req, res) {
       //push max event capcity into maxCapacity array
       maxCapacity.push(totalEventCapacity);
     });
-
+    console.log("events by creator listed successfully");
     //return filtered events and corresponding arrays
     return res.status(200).json({
+      success: true,
       filteredEvents,
       eventsoldtickets,
       isEventOnSale,
