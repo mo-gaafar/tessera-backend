@@ -56,7 +56,6 @@ async function exportsListEvents(req, res) {
 			const record = {
 				eventName: event.basicInfo.eventName,
 
-<<<<<<< HEAD
 				startDateTime: moment(event.basicInfo.startDateTime)
 					.utc()
 					.format("dddd, MMMM D, YYYY, h:mm A"),
@@ -67,82 +66,6 @@ async function exportsListEvents(req, res) {
 			};
 			records.push(record);
 		}
-=======
-for (let i = 0; i < event.ticketTiers.length; i++) {
-    const tierObject = event.ticketTiers[i];
-    const tierName = tierObject.tierName;
-    console.log(`Tier ${i + 1}: ${tierName}`);
-    const tierQuantitySold = tierObject.quantitySold;
-    tierPrice = tierObject.price;
-    if (tierPrice == 'Free') {
-      tierPrice = 0
-
-    }
-    console.log(" tier qs:", tierQuantitySold);
-    console.log(" tier price:", tierPrice);
-
-    if (allTiers === 'true') {
-
-      if (tierName === 'free') {
-        totalSales = totalSales + 0;
-      }
-
-      else {
-
-        totalSales = totalSales + tierQuantitySold * tierPrice;
-        totalSales = Math.round(totalSales)
-        console.log(" event sales:", totalSales);
-
-      }
-
-    }
-
-    else if (allTiers === 'false') {
-
-      console.log("inside false")
-      if (desiredTierName === 'Free') {
-        res.status(404).json({
-          success: false,
-          message: "There are no event sales for free ticket tiers ",
-        });
-
-      }
-
-      else if (tierName === desiredTierName) {
-        console.log("inside desired")
-
-        salesByTierType = salesByTierType + tierQuantitySold * tierPrice;
-        salesByTierType = Math.round(salesByTierType);
-        console.log("event quantity sold:", salesByTierType);
-
-      }
-
-
-    }
-
-  }
-
-  
-  if (totalSales > 0) {
-    res.status(200).json({
-      success: true,
-      message: "Total Event Sales:  ",
-      totalSales,
-    });
-
-  }
-
-  else {
-    console.log("inside last salesByType")
-
-    res.status(200).json({
-      success: true,
-      message: "Event Sales by the specified tier type:  ",
-      salesByTierType,
-    });
-
-  }
->>>>>>> 6ff00f5f37bb210c9ccecb1c21317a8f01e2f048
 
 		csvWriter.writeRecords(records).then(() => {
 			res.setHeader("Content-Type", "text/csv");
