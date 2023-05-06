@@ -91,6 +91,7 @@ async function listEvents(req, res) {
     // If there are no events, return an empty response with only the keys defined below
     if (events.length === 0) {
       return res.status(200).json({
+        success: true,
         filteredEvents: [],
         eventsoldtickets: [],
         isEventOnSale: [],
@@ -197,6 +198,7 @@ async function listEvents(req, res) {
     console.log("events by creator listed successfully");
     //return filtered events and corresponding arrays
     return res.status(200).json({
+      success: true,
       filteredEvents,
       eventsoldtickets,
       isEventOnSale,
