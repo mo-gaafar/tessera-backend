@@ -1,6 +1,8 @@
 const { response } = require("express");
 const eventModel = require("../../models/eventModel");
 const userModel = require("../Auth/userController");
+const userModel2 = require("../../models/userModel");
+const ticketModel = require("../../models/ticketModel");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const listEvents = require("../Events/eventsRetrievalController");
 const axios = require("axios");
@@ -60,7 +62,7 @@ async function exportsListEvents(req, res) {
 					.utc()
 					.format("dddd, MMMM D, YYYY, h:mm A"),
 
-				status: event.isOnline ? "Online" : "Offline",
+				status: event.eventStatus,
 				eventsoldtickets: eventsoldtickets[i],
 				RemainingTickets: remainingTickets,
 			};
@@ -85,7 +87,7 @@ async function exportsListEvents(req, res) {
 }
 
 async function listAttendee(eventID) {
-	try {
+	/*try {
 		console.log(`this is eventID inside listattendee ${eventID} `);
 		const event = await eventModel
 			.findById(eventID)
@@ -93,17 +95,110 @@ async function listAttendee(eventID) {
 		if (!event) {
 			throw new Error(`Event with ID ${eventID} not found`);
 		}
-		const attendeeList = event.soldTickets.map((ticket) => ticket.userId);
+		//const attendeeList = event.soldTickets.map((ticket) => ticket.userId);
+		console.log(`im inside list function${event.soldTickets.userId}`);
 		return { attendees: attendeeList };
 	} catch (error) {
 		console.error(error);
-		return { error: error.message };
+		return { error: error.message }; 
+	}*/
+
+	/*try {
+		const event = await eventModel
+			.findById(eventID)
+			.populate("soldTickets.userId");
+		if (!event) {
+			throw new Error("Event not found");
+		}
+
+		const attendees = event.soldTickets.map((ticket) => ticket.userId);
+		return attendees;
+	} catch (error) {
+		console.error(error);
+		throw new Error("Failed to list attendees");
+	}*/
+	try {
+		const event = await eventModel
+			.findById(eventID)
+			.populate("soldTickets.userId");
+		if (!event) {
+			throw new Error("Event not found");
+		}
+		const attendeeIds = event.soldTickets.map((ticket) => ticket.userId);
+		return attendeeIds;
+	} catch (error) {
+		console.error(error);
+		throw error;
 	}
 }
 
 async function exportAttendeeSummary(req, res) {
 	try {
-		const attendeeList = await listAttendee(req.params.eventID);
+		const lis = await listAttendee(req.params.eventID);
+		console.log(lis);
+		const event = await eventModel.findById(req.params.eventID);
+		if (!event) {
+			return res.status(404).send("Event not found");
+		}
+		const soldTickets = event.soldTickets;
+
+		const attendeeSummary = [];
+
+		for (let i = 0; i < soldTickets.length; i++) {
+			const ticket = await ticketModel.findById(soldTickets[i].ticketId);
+			if (!ticket) {
+				return res.status(404).send("ticket not found");
+			}
+			console.log(`ticket is ${ticket}`);
+			console.log(`sold tickets ${soldTickets}`);
+			console.log(`im checking user findbyid ${soldTickets[i].userId}`);
+			const user = await userModel2.findById(soldTickets[i].userId);
+			const user2 = await userModel2.findById(ticket.buyerId);
+			if (!user || !user2) {
+				return res.status(404).send("user not found");
+			}
+
+			console.log(`user is ${user}`);
+			const attendeeInfo = {
+				OrderId: soldTickets[i].orderId,
+				OrderDate: moment(ticket.createdAt).format("M/D/YY h:mm A"),
+				Attending: "Attending",
+				"Attendee Name": user.firstName + " " + user.lastName,
+				"attendee email": user.email,
+				"Event name": event.basicInfo.eventName,
+				"Ticket Quantity": 1,
+				"Ticket Type": ticket.tierName,
+				"Ticket Price": ticket.purchasePrice,
+				"Buyer name": user2.firstName + " " + user.lastName,
+				"Buyer email": user2.email,
+			};
+			attendeeSummary.push(attendeeInfo);
+		}
+
+		const csvWriter = createCsvWriter({
+			path: "attendee_summary.csv",
+			header: [
+				{ id: "OrderId", title: "OrderId" },
+				{ id: "OrderDate", title: "Order Date" },
+				{ id: "Attending", title: "Attending Status" },
+				{ id: "Attendee Name", title: "Name" },
+				{ id: "attendee email", title: "Email" },
+				{ id: "Event name", title: "Event name" },
+				{ id: "Ticket Quantity", title: "Ticket Quantity" },
+				{ id: "Ticket Type", title: "Ticket Type" },
+				{ id: "Ticket Price", title: "Ticket Price" },
+				{ id: "Buyer name", title: "Buyer Name" },
+				{ id: "Buyer email", title: "Buyer Email" },
+			],
+		});
+
+		await csvWriter.writeRecords(attendeeSummary);
+
+		res.download("attendee_summary.csv", () => {
+			console.log("CSV file downloaded successfully");
+		});
+
+		//console.log(`attendeeList ${attendeeList}`);
 		/*res.status(200).json({
 		success: true,
 		message: "Event sold tickets as a percentage of the capacity ",
@@ -139,13 +234,14 @@ async function exportAttendeeSummary(req, res) {
 				},
 			],
 		}; */
-		const csvWriter = createCsvWriter({
+		/*const csvWriter = createCsvWriter({
 			path: "attendee-summary.csv",
 			header: [
 				{ id: "firstName", title: "First Name" },
 				{ id: "lastName", title: "Last Name" },
 				{ id: "email", title: "Email" },
 				{ id: "userType", title: "User Type" },
+				{ id: "OrderID", title: "Order ID" },
 			],
 		});
 		await csvWriter.writeRecords(attendeeList.attendees.slice(1));
@@ -154,7 +250,7 @@ async function exportAttendeeSummary(req, res) {
 			"Content-Disposition",
 			"attachment; filename=attendee-summary.csv"
 		);
-		res.download("attendee-summary.csv");
+		res.download("attendee-summary.csv"); */
 	} catch (error) {
 		console.error(error);
 		return { error: error.message };

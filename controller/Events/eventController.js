@@ -21,7 +21,8 @@ Asynchronous function that creates a new event based on the request body and add
 */
 async function createEvent(req, res) {
 	try {
-		//const useridid = "6439f95a3d607d6c49e56a1e";
+		//const useridid = "643a56706f55e9085d193f48";
+
 		//const tok = GenerateToken(useridid);
 		//console.log(tok);
 		const userid = await authorized(req);
@@ -78,7 +79,7 @@ async function getEventById(req, res) {
 			return res.status(404).json({ message: "No event Found" });
 		}
 
-		const userid = await authorized(req);
+		//const userid = await authorized(req);
 
 		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
