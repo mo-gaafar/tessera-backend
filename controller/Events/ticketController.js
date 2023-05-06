@@ -51,6 +51,9 @@ async function bookTicket(req, res) {
       throw new Error("User not found");
     }
 
+    // Get the buyer id from the user object
+    const buyerId = user._id;
+
     // Find the event in the database.
     const event = await eventModel.findById(eventId);
 
@@ -92,6 +95,7 @@ async function bookTicket(req, res) {
       eventId,
       promocodeObj,
       user._id,
+      buyerId,
       orderId
     );
 
@@ -172,6 +176,7 @@ async function generateTickets(
   eventId,
   promocodeObj,
   userId,
+  buyerId,
   orderId
 ) {
   // Loop through each ticket tier object in the array
@@ -192,8 +197,10 @@ async function generateTickets(
       const ticket = new ticketModel({
         eventId: eventId,
         userId: userId,
+        buyerId: buyerId,
         promocodeUsed: promocodeObj ? promocodeObj.code : null,
-        purchaseDate: new Date(),
+        orderId: orderId,
+        purchaseDate: Date.now(),
         purchasePrice: ticketPrice,
         tierName: tierName,
       });
@@ -247,9 +254,11 @@ async function calculateTotalPrice(
 
 /**
  * Add a sold ticket to an event's soldTickets array
+ * @async
+ * @function addSoldTicketToEvent
  * @param {string} eventId - The ID of the event to add the sold ticket to
  * @param {object} soldTicket - The sold ticket object to add to the event's soldTickets array
- * @returns {Void} update the event object with the added sold ticket
+ * @returns {Void} update the event object with the added sold ticket and increment the quantitySold in the ticket tiers in the event model
  * @throws {Error} If the event is not found or if the sold ticket is already associated with the event
  */
 async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
@@ -288,7 +297,12 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
     // Throw an error if an error occurs.
     throw new Error(err.message);
   }
-}
+
+} 
+
+
+// const token= GenerateToken("643bd6454bcebb6861183fa6")
+// console.log("token is:",token)
 
 /**
  * Creates a new ticket tier for an event.
@@ -370,9 +384,23 @@ async function createTicketTier(req, res) {
   }
 }
 
+
+
+
+/**
+Retrieves the ticket tiers details for the event by its ID
+@async
+@function
+@param {Object} res - The response object that has the ticket tiers details
+@param {Object} req.params - The parameters of the request.
+@param {string} req.params.eventID - The ID of the event to retrieve its ticket tiers.
+@returns {Object} - The retrieved ticket tier details object or an error message
+@throws {Error} - If an error occurs while retrieving the ticket tiers details
+@throws {Error} - If event is not found
+*/
+
+
 async function retrieveTicketTier(req, res) {
-  console.log("inside retrieveTicketTier");
-  // const event=await eventModel.findById(req.params.eventID);
   try {
     const event = await eventModel.findById(req.params.eventID); //returns event of given id
     if (!event) {
@@ -381,6 +409,8 @@ async function retrieveTicketTier(req, res) {
         message: "Event is not found",
       });
     }
+
+    // returning ticket tier details for the event
     const { ticketTiers } = event;
     return res.status(200).json({
       success: true,

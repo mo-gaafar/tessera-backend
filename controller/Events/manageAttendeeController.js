@@ -63,9 +63,6 @@ async function addAttendee(req, res) {
         .json({ success: false, message: "No event Found" });
     }
 
-    // generate QrCode and connects it to the evenURL
-    const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
-
     //check if user is authorized
     const userid = await authorized(req);
 
@@ -123,9 +120,13 @@ async function addAttendee(req, res) {
       eventId,
       promocodeObj,
       user._id,
+      buyerId,
       orderId
     );
+
     console.log("Ticket has been created successfully");
+    // generate QrCode and connects it to the evenURL
+    const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
     sendEmailsToattendees(event, user, ticketTierSelected);
 
