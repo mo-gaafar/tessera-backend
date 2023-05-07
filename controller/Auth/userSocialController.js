@@ -20,21 +20,26 @@ const { mobileSignUp, mobileSignIn } = require("./mobileSocialsController");
  */
 exports.facebookLogin = async (req, res, next) => {
   //for mobile app view
-  const socialMediaType = "facebook";
-  const userInfo = req.body;
-  const userFacebook_Id = userInfo.id;
-  const userEmail = userInfo.email;
+
   try {
+    //get body parameters
+    const socialMediaType = "facebook";
+    const userInfo = req.body;
+    const userFacebook_Id = userInfo.id;
+    const userEmail = userInfo.email;
+
     //checks if user exist first and if so, user shall be directed to landing page
     let user = await User.findOne({
       // facebookId: userFacebook_Id,
       email: userEmail,
     });
+
     if (user) {
       //generate token for the signed in user
       mobileSignIn(user, res);
       console.log("signing user in using facebook mobile app view");
     }
+
     if (!user) {
       mobileSignUp(userInfo, socialMediaType, res);
       console.log("signing user up using facebook mobile app view");
@@ -62,24 +67,26 @@ exports.facebookLogin = async (req, res, next) => {
 exports.googleLogin = async (req, res, next) => {
   //for mobile app view
 
-  const socialMediaType = "google";
-  const userInfo = req.body;
-  userGoogle_Id = userInfo.id;
-  userEmail = userInfo.email;
-
   try {
+    const socialMediaType = "google";
+    const userInfo = req.body;
+    userGoogle_Id = userInfo.id;
+    userEmail = userInfo.email;
+
     //New user is created and user shall be redirected to the landing page
     let user = await User.findOne({
       //googleId: userGoogle_Id,
       email: userEmail,
     });
+
     if (user) {
       mobileSignIn(user, res);
-      console.log("signing user in using google");
+      console.log("signing user in using google for mobile app view");
     }
+
     if (!user) {
       mobileSignUp(userInfo, socialMediaType, res);
-      console.log("signing user up using google");
+      console.log("signing user up using google for mobile app view");
     }
   } catch (err) {
     //error

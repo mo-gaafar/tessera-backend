@@ -26,6 +26,11 @@ module.exports = function (passport) {
         //create new user using information retreived from facebook api
 
         try {
+          if (!profile) {
+            throw new Error(
+              "User profile information was not provided from passport"
+            );
+          }
           const socialMediaType = "facebook";
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ email: profile.emails[0].value }); //find user by ID
@@ -57,6 +62,11 @@ module.exports = function (passport) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
+          if (!profile) {
+            throw new Error(
+              "User profile information was not provided from passport"
+            );
+          }
           const socialMediaType = "google";
           //checks if user exist first and if so, user shall be directed to sign in
           let user = await User.findOne({ email: profile.emails[0].value }); //find user by ID

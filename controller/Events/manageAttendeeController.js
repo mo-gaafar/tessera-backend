@@ -15,12 +15,18 @@ const {
 } = require("../Events/ticketController");
 const generateQRCodeWithLogo = require("../../utils/qrCodeGenerator");
 /**
- * Add attendee to an event
- * @param {Object} req - Request object
- * @param {Object} res - Response object
- * @param {Object} req.body.contactInformation - Contact information of the ticket buyer
- * @param {string} req.body.promocode - Promocode for the attendee
- * @param {Array} req.body.ticketTierSelected - Selected ticket tiers and contact information for the attendee
+ * Add attendee to an event manually
+ * @param {Object} req - The request object.
+ * @param {Object} req.body.contactInformation - The contact information of the user creating the ticket.
+ * @param {string} req.body.contactInformation.first_name - The first name of the user creating the ticket.
+ * @param {string} req.body.contactInformation.last_name - The last name of the user creating the ticket.
+ * @param {string} req.body.contactInformation.email - The email of the user creating the ticket.
+ * @param {string} req.body.promocode - The promocode used (optional).
+ * @param {Array} req.body.ticketTierSelected - An array of objects representing the selected ticket tiers.
+ * @param {string} req.body.ticketTierSelected[i].tierName - The name of the i-th ticket tier.
+ * @param {number} req.body.ticketTierSelected[i].quantity - The number of tickets to be booked for the i-th ticket tier.
+ * @param {number} req.body.ticketTierSelected[i].price - The price per ticket of the i-th ticket tier.
+ * @param {Object} req.body.ticketTierSelected[i].tickets - the contact information for the attendees
  * @param {boolean} req.body.SendEmail - Whether to send an email confirmation to the attendee
  * @returns {Object} -Array of event ticket tiers and event image
  */
@@ -39,14 +45,16 @@ async function addAttendee(req, res) {
     //check if inviter is a user
     const email = contactInformation.email;
 
-    // generate order id
-    const orderId = await generateUniqueId();
-
-    if (!ticketTierSelected || ticketTierSelected.length === 0) {
-      console.log("No attendees information was provided");
+    if (
+      !ticketTierSelected ||
+      ticketTierSelected.length === 0 ||
+      !contactInformation ||
+      !SendEmail
+    ) {
+      console.log("No attendees information was provided or it's incomplete");
       return res.status(404).json({
         success: false,
-        message: "No attendees information was provided",
+        message: "No attendees information was provided or it's incomplete",
       });
     }
 
@@ -96,50 +104,20 @@ async function addAttendee(req, res) {
       console.log("User not found");
       throw new Error("User not found");
     }
-    //get buyer id for booking tickets
-    const buyerId = user._id;
 
-    // check all the ticket tiers in the ticketTierSelected array if they all exist with the correct price in the ticket tiers of the event model
-    for (let i = 0; i < ticketTierSelected.length; i++) {
-      const ticketTier = event.ticketTiers.find(
-        (ticketTier) =>
-          ticketTier.tierName == ticketTierSelected[i].tierName &&
-          ticketTier.price == ticketTierSelected[i].price
-      );
-
-      // check the ticket tier if the ticket tier exists
-      if (!ticketTier) {
-        console.log(
-          "Ticket tier not found or the price doesn't match the ticket tier"
-        );
-        throw new Error(
-          "Ticket tier not found or the price doesn't match the ticket tier"
-        );
-      }
-    }
-
-    // Get the promocode object from the database by the promocode code
-    let promocodeObj = null;
-    if (promocode) {
-      promocodeObj = await promocodeModel.findOne({ code: promocode });
-      if (!promocodeObj) {
-        console.log("Promocode not found");
-        throw new Error("Promocode not found");
-      }
-    }
-
-    generateTickets(
+    await bookTicketForAttendees(
+      event,
+      user,
       ticketTierSelected,
-      eventId,
-      promocodeObj,
-      user._id,
-      buyerId,
-      orderId
+      promocode,
+      eventId
     );
 
     console.log("Ticket has been created successfully");
+
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
+
     if (SendEmail) {
       sendEmailsToattendees(event, user, ticketTierSelected);
     }
@@ -155,6 +133,72 @@ async function addAttendee(req, res) {
       message: error.message,
     });
   }
+}
+
+/**
+
+Books tickets for attendees.
+@async
+@function bookTicketForAttendees
+@param {Object} event - The event for which the tickets are being booked.
+@param {Object} user - The user for whom the tickets are being booked.
+@param {Array} ticketTierSelected - An array of objects representing the selected ticket tiers.
+@param {string} promocode - The promocode used (optional).
+@param {string} eventId - The ID of the event being booked.
+@throws {Error} If the ticket tier does not exist or the price is incorrect.
+@throws {Error} If the promocode does not exist.
+@returns {Promise<void>} Resolves when the tickets have been successfully booked.
+*/
+async function bookTicketForAttendees(
+  event,
+  user,
+  ticketTierSelected,
+  promocode,
+  eventId
+) {
+  // check all the ticket tiers in the ticketTierSelected array if they all exist with the correct price in the ticket tiers of the event model
+  for (let i = 0; i < ticketTierSelected.length; i++) {
+    const ticketTier = event.ticketTiers.find(
+      (ticketTier) =>
+        ticketTier.tierName == ticketTierSelected[i].tierName &&
+        ticketTier.price == ticketTierSelected[i].price
+    );
+
+    // check the ticket tier if the ticket tier exists
+    if (!ticketTier) {
+      console.log(
+        "Ticket tier not found or the price doesn't match the ticket tier"
+      );
+      throw new Error(
+        "Ticket tier not found or the price doesn't match the ticket tier"
+      );
+    }
+  }
+
+  // Get the promocode object from the database by the promocode code
+  let promocodeObj = null;
+  if (promocode) {
+    promocodeObj = await promocodeModel.findOne({ code: promocode });
+    if (!promocodeObj) {
+      console.log("Promocode not found");
+      throw new Error("Promocode not found");
+    }
+  }
+
+  //get buyer id for booking tickets
+  const buyerId = user._id;
+
+  // generate order id
+  const orderId = await generateUniqueId();
+
+  await generateTickets(
+    ticketTierSelected,
+    eventId,
+    promocodeObj,
+    user._id,
+    buyerId,
+    orderId
+  );
 }
 
 /**
