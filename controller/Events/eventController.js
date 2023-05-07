@@ -73,13 +73,12 @@ async function getEventById(req, res) {
 	try {
 		const eventId = req.params.eventID;
 		const event = await eventModel.findById(eventId); //search event by id
-		//const token = await retrieveToken(req);
-		//const decoded = await verifyToken(token);
+		//check if no events
 		if (!event) {
 			return res.status(404).json({ message: "No event Found" });
 		}
-
-		//const userid = await authorized(req);
+		//authorize that user exists
+		const userid = await authorized(req);
 
 		if (event.creatorId.toString() !== userid.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
@@ -113,13 +112,11 @@ async function deleteEvent(req, res) {
 		const eventIdd = req.params.eventID;
 		const event = await eventModel.findById(eventIdd); //search event by id
 		const userid = await authorized(req);
-		//const token = await retrieveToken(req);
-		//const decoded = await verifyToken(token);
 
 		if (!event) {
 			return res.status(404).json({ message: "No event Found" });
 		}
-
+		//check if user exists
 		if (!userid.authorized) {
 			res.status(402).json({
 				success: false,
@@ -178,7 +175,7 @@ async function updateEvent(req, res) {
 				message: "You are not authorized to update this event",
 			});
 		}
-
+		// search event by id and update using request body
 		await eventModel.findOneAndUpdate({ _id: eventId }, update, {
 			new: true,
 			runValidators: true,
