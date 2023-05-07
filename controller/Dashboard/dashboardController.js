@@ -179,7 +179,11 @@ async function AttendeeSumJason(req, res) {
 		//assign to attendee summary
 
 		const attendeeSummary = Object.values(groupedTickets);
-		return res.json(attendeeSummary);
+		return res.status(200).json({
+			success: true,
+			message: "Summary jason return successfully",
+			attendeeSummary: attendeeSummary,
+		});
 	} catch (error) {
 		console.error(error);
 		return { error: error.message };
