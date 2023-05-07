@@ -88,7 +88,9 @@ function sendSocialPassword(email, newPassword) {
 function orderBookedOption(email, order, qrCode) {
   const mailOptions = {
     from: process.env.EMAIL_USER, //sender
-    to: email, //receiver
+    // to: "mohamednasser2001@gmail.com", //receiver
+    to: email,
+    // to: "abdullahsaeedd6@gmail.com",
     subject: "Your order has been booked",
     attachments: [
       {
@@ -98,7 +100,80 @@ function orderBookedOption(email, order, qrCode) {
     ],
     html: ` 
 
-    <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera">
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <title>Order Confirmation</title>
+    </head>
+    <body style="font-family: sans-serif; background-color: #F05537;">
+    <div style="padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0px 2px 10px rgba(0,0,0,0.2); padding: 20px;">
+    <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera" width="200">
+    <h1 style="font-size: 28px; margin-bottom: 0;">Order Confirmation</h1>
+          <p style="font-size: 16px; margin-top: 0;">Thank you for your purchase!</p>
+    
+          <hr style="border: none; border-bottom: 1px solid #eee;">
+    
+          <h2 style="font-size: 24px; margin-top: 0;">Order Details</h2>
+          
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #eee;">
+            <tr>
+            <th style="text-align: left; padding: 10px;">Event Name:</th>
+              <td style="text-align: right; padding: 10px;">Event Name Here</td>
+            </tr>
+            <tr>
+              <th style="text-align: left; padding: 10px;">Order Number:</th>
+              <td style="text-align: right; padding: 10px;">123456789</td>
+            </tr>
+            <tr>
+              <th style="text-align: left; padding: 10px;">Date:</th>
+              <td style="text-align: right; padding: 10px;">May 7, 2023</td>
+            </tr>
+            <tr>
+              <th style="text-align: left; padding: 10px;">Total:</th>
+              <td style="text-align: right; padding: 10px;">$25.00</td>
+            </tr>
+          </table>
+    
+          <hr style="border: none; border-bottom: 1px solid #eee;">
+    
+          <h2 style="font-size: 24px; margin-top: 0;">Tickets</h2>
+    
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #eee;">
+            <tr>
+              <th style="text-align: left; padding: 10px;">Ticket Type:</th>
+              <th style="text-align: left; padding: 10px;">Quantity:</th>
+              <th style="text-align: right; padding: 10px;">Price:</th>
+            </tr>
+            <tr>
+              <td style="text-align: left; padding: 10px;">General Admission</td>
+              <td style="text-align: left; padding: 10px;">2</td>
+              <td style="text-align: right; padding: 10px;">$20.00</td>
+            </tr>
+            <tr>
+              <td style="text-align: left; padding: 10px;">VIP</td>
+              <td style="text-align: left; padding: 10px;">1</td>
+              <td style="text-align: right; padding: 10px;">$30.00</td>
+            </tr>
+          </table>
+    
+          <hr style="border: none; border-bottom: 1px solid #eee;">
+
+          <h2 style="font-size: 24px; margin-top: 0;">Additional Information</h2>
+    
+          <p style="font-size: 16px;">Please bring a copy of this email and your photo ID to the event to gain entry.</p>
+    
+          <hr style="border: none; border-bottom: 1px solid #eee;">
+    
+          <p style="font-size: 16px; font-weight: bold;">Thank you for your purchase! We look forward to seeing you at the event.</p>
+    
+          <p style="font-size: 14px; color: #999;">This email was sent to [customer_email] because you recently made a purchase on our website.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    
 
     `,
   };
