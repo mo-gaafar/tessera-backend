@@ -103,8 +103,11 @@ const eventSchema = new mongoose.Schema(
         },
         // derived attribute: capacityFull of tickets  --for Frontend and Cross-Platform
         // derived attribute: isFree  --for Frontend and Cross-Platform
+        
       },
+      
     ],
+    
 
     eventStatus: {
       type: String,

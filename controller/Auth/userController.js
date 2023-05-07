@@ -40,7 +40,7 @@ async function signUp(req, res) {
 	// Check if a user with the same email already exists
 	const userExist = await userModel.findOne({ email });
 	if (userExist) {
-		return res.status(200).json({
+		return res.status(409).json({
 			success: false,
 			message: "Email already exists",
 		});
@@ -48,7 +48,7 @@ async function signUp(req, res) {
 
 	// Check if the email and email confirmation fields match
 	if (email != emailConfirmation) {
-		return res.status(200).json({
+		return res.status(400).json({
 			success: false,
 			message: "Email address does not match the above",
 		});
@@ -106,7 +106,7 @@ async function signIn(req, res) {
 
 		// Prompting to user  if email or password are left blank
 		if (!req.body || !email || !password) {
-			return res.status(200).json({
+			return res.status(400).json({
 				success: false,
 				message: "Email and password are required",
 			});
@@ -116,7 +116,7 @@ async function signIn(req, res) {
 
 		// User email not found
 		if (!user) {
-			return res.status(200).json({
+			return res.status(401).json({
 				success: false,
 				message: "Invalid Email or Password",
 			});
@@ -124,7 +124,7 @@ async function signIn(req, res) {
 
 		// Check whether the user is verified or not
 		if (!user.isVerified) {
-			return res.status(200).json({
+			return res.status(401).json({
 				success: false,
 				message: "Please verify your email address",
 			});
@@ -137,7 +137,7 @@ async function signIn(req, res) {
 		const isMatched = await comparePassword(user.password, password);
 		// Password not matched
 		if (!isMatched) {
-			return res.status(200).json({
+			return res.status(401).json({
 				success: false,
 				message: "Incorrect password",
 			});
