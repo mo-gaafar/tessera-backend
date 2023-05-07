@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const userModel = require("../../models/userModel");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
 
 const {
 	sendUserEmail,
@@ -18,7 +19,6 @@ const {
 	authorized,
 } = require("../../utils/Tokens");
 const { sendVerification, verifyEmail } = require("./verificationController");
-
 
 /**
  * Creates a new user with the provided email and sends a verification email to the user's email address.
@@ -190,7 +190,7 @@ async function forgotPassword(req, res) {
 		// If user is found
 		if (user) {
 			// Generate verification token for user
-			const token = jwt.sign({ userId: user._id }, process.env.SECRETJWT, {
+			const token = jwt.sign({ user_id: user._id }, process.env.SECRETJWT, {
 				expiresIn: "1d",
 			});
 
@@ -216,7 +216,7 @@ async function forgotPassword(req, res) {
 
 /**
  
-* Resets user password using a token
+* Resets user password using a token in params
 *
 * @async
 * @param {Object} req - Express request object --> contains user's new password 
@@ -231,12 +231,11 @@ async function resetPassword(req, res) {
 		// Get token from request params
 		const token = req.params.token;
 		// Verify token
-		//console.log(decoded);
-		//const decoded = jwt.verify(token, process.env.SECRETJWT);
 		const decoded = await verifyToken(token);
-		//console.log(decoded.userId);
+
 		// Find user by ID
-		const user = await userModel.findById(decoded.userId);
+		const user = await userModel.findById(decoded.user_id);
+		console.log(user);
 		// If the user is found by ID
 		if (user) {
 			const password = req.body.password;
