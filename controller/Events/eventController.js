@@ -37,19 +37,19 @@ async function createEvent(req, res) {
     await eventModel.updateOne(
       { _id: event._id },
       {
-        $set: { eventUrl: `https://www.tessera.social/api/event/${event._id}` },
+        $set: { eventUrl: `https://www.tessera.social/event/${event._id}` },
       }
     );
     if (userid.authorized) {
       return res.status(200).json({
         success: true,
         message: "Event has been created successfully",
+        event_Id: event._id,
       });
     } else {
       return res.status(401).json({
         success: false,
         message: "the user doesnt have access",
-        event_Id: event._id,
       });
     }
   } catch (error) {
