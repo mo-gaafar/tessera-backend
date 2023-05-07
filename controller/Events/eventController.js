@@ -197,6 +197,18 @@ async function updateEvent(req, res) {
 
 // const token= GenerateToken("643a56706f55e9085d193f48")
 // console.log("token is:",token)
+/**
+
+Publishes an event by updating its attributes, such as making it public or setting a password or link to access it.
+@async
+@function publishEvent
+@param {Object} req - The request object containing the attributes of the event to be published.
+@param {string} req.body.isPublic - whether the event is public or private
+@param {string} req.body.isPublic - whether the event is public or private
+@param {Object} res - The response object containing the updated event attributes.
+@returns {Object} Returns the updated event object with its attributes.
+@throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
+*/
 async function publishEvent(req, res) {
 
 try{
@@ -205,7 +217,7 @@ try{
 const isPublic  = req.body.isPublic;
 const publishNow  = req.body.publishNow;
 const publicDate  = req.body.publicDate;
-const privateToPublicDate  = req.body.publicDate;
+const privateToPublicDate  = req.body.privateToPublicDate;
 const hasLink  = req.body.link;
 const hasPassword  = req.body.password;
 const alwaysPrivate  = req.body.alwaysPrivate;

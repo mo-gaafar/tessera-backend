@@ -280,7 +280,7 @@ async function eventSales(req, res) {
 		console.log(" tier price:", tierPrice);
 
 		if (allTiers === "true") {
-			if (tierName === "free") {
+			if (tierName === "Free") {
 				totalSales = totalSales + 0;
 			} else {
 				totalSales = totalSales + tierQuantitySold * tierPrice;
@@ -326,27 +326,34 @@ async function eventSales(req, res) {
 async function eventSoldTickets(req, res) {
 	const event = await eventModel.findById(req.params.eventID);
 	console.log("Event to be used in event sold tickets:", event);
+	const allTiers = req.query.allTiers;
+	console.log("all tiers:", allTiers);
+	const desiredTierName = req.query.tierName;
+	console.log("desired tier name:", desiredTierName);
 
 	totSales = 0;
+	salesByTierType=0
 	totalMaxCapacity = 0;
 	soldTickets = 0;
+	soldTicketsByTierType=0
 
 	for (let i = 0; i < event.ticketTiers.length; i++) {
 		const tierObject = event.ticketTiers[i];
 		const tierName = tierObject.tierName;
+		const tierPrice = tierObject.price;
 		console.log(`Tier ${i + 1}: ${tierName}`);
-		const maxCapacity = tierObject.maxCapacity;
+		maxCapacity = tierObject.maxCapacity;
+		const tierQuantitySold = tierObject.quantitySold;
 		console.log(" max Capacity:", maxCapacity);
-		if (tierName == "Free") {
+		if (allTiers==="true")
+		{
+		if (tierPrice === "Free") {
 			totSales = totSales + 0;
 			totalMaxCapacity = totalMaxCapacity + maxCapacity;
-			const tierQuantitySold = tierObject.quantitySold;
 			console.log(" tier qs:", tierQuantitySold);
 			soldTickets = soldTickets + tierQuantitySold;
 		} else {
-			const tierQuantitySold = tierObject.quantitySold;
 			soldTickets = soldTickets + tierQuantitySold;
-			const tierPrice = tierObject.price;
 			totalMaxCapacity = totalMaxCapacity + maxCapacity;
 			console.log(" tier qs:", tierQuantitySold);
 			console.log(" tier price:", tierPrice);
@@ -354,23 +361,61 @@ async function eventSoldTickets(req, res) {
 			console.log(" event quantity sold:", totSales);
 		}
 	}
+	else if(allTiers==="false"){
 
+        if (tierName === desiredTierName) {
+			console.log("inside desired");
+
+            capacityOfDesiredTier=maxCapacity
+			soldTicketsByTierType = soldTicketsByTierType + tierQuantitySold 
+			soldTicketsByTierType = Math.round(soldTicketsByTierType);
+			perSoldTicketsByTierType=(soldTicketsByTierType/capacityOfDesiredTier)*100
+			perSoldTicketsByTierType=Math.round(perSoldTicketsByTierType)
+			console.log("event quantity sold:", soldTicketsByTierType);
+		}
+
+	}
+	}
 	// 	}
 	totSales = Math.round(totSales);
 	totalMaxCapacity = Math.round(totalMaxCapacity);
-	soldTickets = Math.round(soldTickets);
-	console.log(" event quantity sold:", totSales);
-	console.log(" total max capacity", totalMaxCapacity);
-	console.log(" sold Tickets:", soldTickets);
-	soldTicketsFromCapacity = (soldTickets / totalMaxCapacity) * 100;
-	soldTicketsFromCapacity = Math.round(soldTicketsFromCapacity);
-	console.log("per of sold tickets:", soldTicketsFromCapacity);
 
-	res.status(200).json({
+
+
+	if (soldTickets>0) {
+
+		soldTickets = Math.round(soldTickets);
+		console.log(" event quantity sold:", totSales);
+		console.log(" total max capacity", totalMaxCapacity);
+		console.log(" sold Tickets:", soldTickets);
+		soldTicketsFromCapacity = (soldTickets / totalMaxCapacity) * 100;
+		soldTicketsFromCapacity = Math.round(soldTicketsFromCapacity);
+		console.log("per of sold tickets:", soldTicketsFromCapacity);
+	    res.status(200).json({
 		success: true,
 		message: "Event sold tickets as a percentage of the capacity ",
+		soldTickets,
+		totalMaxCapacity,
 		soldTicketsFromCapacity,
 	});
+
+	}
+
+    if(soldTicketsByTierType>0){
+     
+		res.status(200).json({
+			success: true,
+			message: "Event sold tickets by tier as a percentage of the capacity ",
+			soldTicketsByTierType,
+			capacityOfDesiredTier,
+			perSoldTicketsByTierType,
+		});
+
+
+	}
+
+
+	
 }
 
 module.exports = {
