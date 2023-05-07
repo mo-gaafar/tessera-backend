@@ -179,7 +179,7 @@ async function displayfilteredTabs(req, res) {
     ];
 
     console.log("displaying filtered tabs");
-    res.status(200).json({
+    return res.status(200).json({
       success: "true",
       filteredEvents, //array of filtered events
       isEventFreeArray, //array of booleans to show whether event is free or not
@@ -188,9 +188,10 @@ async function displayfilteredTabs(req, res) {
   } catch (err) {
     console.error(err);
     // Return error message
-    res
-      .status(500)
-      .json({ success: "false", message: "Internal server error" });
+    return res.status(500).json({
+      success: "false",
+      message: "could not display filtered tabs for landing page",
+    });
     throw err;
   }
 }
@@ -547,6 +548,7 @@ async function getEventInfo(req, res) {
   try {
     //get eventId from path parameter
     const eventId = req.params.eventID;
+
     if (!eventId) {
       return res.status(404).json({
         success: false,
@@ -656,7 +658,7 @@ async function getEventInfo(req, res) {
 
     console.log("getting event information");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: "true",
       filteredEvents, //event information
       tierCapacityFull, //array of object Tiers with their capacity full or not
@@ -665,9 +667,10 @@ async function getEventInfo(req, res) {
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ success: "false", message: "Internal server error" });
+    return res.status(500).json({
+      success: "false",
+      message: "Could not retieve event information for event page",
+    });
     throw err;
   }
 }
