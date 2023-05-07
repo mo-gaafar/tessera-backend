@@ -510,7 +510,8 @@ async function queryWithAreaLevel(query, administrative_area_level_1) {
 
 /**
  * retreive events categories inside event schema
- *
+ * @async
+ * @function listAllCategories
  * @param {Object} req
  * @param {object} res -enum of categories
  */
@@ -571,19 +572,13 @@ async function getEventInfo(req, res) {
       .find(query)
       //get only these fields from creator
       .populate("creatorId", "_id firstName lastName");
+
     if (!event[0]) {
       return res.status(404).json({
         success: false,
         message: "Event is not found",
       });
     }
-
-    //create dictionary to store ticketCapacity information
-    const tierCapacityFull = [];
-    var isEventCapacityFull = true;
-    var isEventFree = true;
-    var counter1 = 0;
-    var counter2 = 0;
 
     //loop over ticketTiers array
     if (!event[0].ticketTiers || event[0].ticketTiers.length === 0) {
@@ -594,37 +589,9 @@ async function getEventInfo(req, res) {
     }
 
     try {
-      for (let i = 0; i < event[0].ticketTiers.length; i++) {
-        const tier = event[0].ticketTiers[i];
-        //checks if capacity full for each tier
-        const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
-        //count if capacity is not full
-        if (isTierCapacityFull === false) {
-          counter1 = counter1 + 1;
-        }
-        //count if event is not free
-        if (tier.price != "Free") {
-          counter2 = counter2 + 1;
-        }
-        //push tier name and boolean state as an object inside tierCapacityFull array
-        tierCapacityFull.push({
-          tierName: tier.tierName,
-          isCapacityFull: isTierCapacityFull,
-        });
-      }
-
-      //if counter greater than zero,then event overall capacity is not full
-      if (counter1 > 0) {
-        isEventCapacityFull = false;
-      } else {
-        isEventCapacityFull = true;
-      }
-      //if counter greater than zero,then event overall is not full
-      if (counter2 > 0) {
-        isEventFree = false;
-      } else {
-        isEventFree = true;
-      }
+      //compute some event information like: isEventFree, isEventCapacityFull, tierCapacityFull
+      var { isEventFree, isEventCapacityFull, tierCapacityFull } =
+        await computeEventInfo(event);
     } catch (err) {
       console.error(err);
       return res
@@ -632,29 +599,8 @@ async function getEventInfo(req, res) {
         .json({ success: "false", message: "Internal server error" });
     }
 
-    //exclude unnecessary fields
-    const filteredEvents = event.map((eventModel) => {
-      const {
-        _id,
-        createdAt,
-        updatedAt,
-        __v,
-        eventStatus,
-        published,
-        isPublic,
-        isVerified,
-        promocodes,
-        startSelling,
-        endSelling,
-        publicDate,
-        emailMessage,
-        soldTickets,
-        privatePassword,
-
-        ...filtered
-      } = eventModel._doc;
-      return filtered;
-    });
+    //execlude all unnecessary fields
+    const filteredEvents = await removeExtraAttributes(event);
 
     console.log("getting event information");
 
@@ -673,6 +619,95 @@ async function getEventInfo(req, res) {
     });
     throw err;
   }
+}
+/**
+ * Computes information about an event's ticket tiers and overall capacity.
+ *
+ * @async
+ * @function computeEventInfo
+ * @param {Object} event -event information object
+ * @returns {Object} -An object containing information about the event's overall capacity and the capacity of each ticket tier.
+ * @returns {boolean} -isEventCapacityFull - A boolean value indicating whether the event's overall capacity is full or not.
+ * @returns {boolean} -isEventFree - A boolean value indicating whether the event is free or not.
+ * @returns {Array}- tierCapacityFull - An array of objects representing the capacity status of each ticket tier.
+ * @returns {string} tierCapacityFull[i].tierName - The name of the i-th ticket tier.
+ * @returns {boolean} tierCapacityFull[i].isCapacityFull - A boolean value indicating whether the capacity for the i-th ticket tier is full or not.
+ */
+async function computeEventInfo(event) {
+  //create dictionary to store ticketCapacity information
+  const tierCapacityFull = [];
+  var isEventCapacityFull = true;
+  var isEventFree = true;
+  var counter1 = 0;
+  var counter2 = 0;
+  for (let i = 0; i < event[0].ticketTiers.length; i++) {
+    const tier = event[0].ticketTiers[i];
+    //checks if capacity full for each tier
+    const isTierCapacityFull = tier.maxCapacity === tier.quantitySold;
+    //count if capacity is not full
+    if (isTierCapacityFull === false) {
+      counter1 = counter1 + 1;
+    }
+    //count if event is not free
+    if (tier.price != "Free") {
+      counter2 = counter2 + 1;
+    }
+    //push tier name and boolean state as an object inside tierCapacityFull array
+    tierCapacityFull.push({
+      tierName: tier.tierName,
+      isCapacityFull: isTierCapacityFull,
+    });
+  }
+
+  //if counter greater than zero,then event overall capacity is not full
+  if (counter1 > 0) {
+    isEventCapacityFull = false;
+  } else {
+    isEventCapacityFull = true;
+  }
+  //if counter greater than zero,then event overall is not full
+  if (counter2 > 0) {
+    isEventFree = false;
+  } else {
+    isEventFree = true;
+  }
+  return { isEventFree, isEventCapacityFull, tierCapacityFull };
+}
+
+/**
+
+Remove extra attributes from the event object.
+@async
+@function removeExtraAttributes
+@param {Array<Object>} events - An array of event objects to be filtered.
+@returns {Array<Object>} - An array of event objects with only the desired properties.
+
+*/
+async function removeExtraAttributes(event) {
+  //exclude unnecessary fields
+  const filteredEvents = event.map((eventModel) => {
+    const {
+      _id,
+      createdAt,
+      updatedAt,
+      __v,
+      eventStatus,
+      published,
+      isPublic,
+      isVerified,
+      promocodes,
+      startSelling,
+      endSelling,
+      publicDate,
+      emailMessage,
+      soldTickets,
+      privatePassword,
+
+      ...filtered
+    } = eventModel._doc;
+    return filtered;
+  });
+  return filteredEvents;
 }
 module.exports = {
   displayfilteredTabs,

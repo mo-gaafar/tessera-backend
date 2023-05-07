@@ -162,8 +162,6 @@ Remove extra attributes from an array of event objects.
 @function removeExtraAttributes
 @param {Array<Object>} events - An array of event objects to be filtered.
 @returns {Array<Object>} - An array of event objects with only the desired properties.
-@throws {Object} - The HTTP response with an error message if an error occurs.
-@example
 */
 
 async function removeExtraAttributes(events) {
