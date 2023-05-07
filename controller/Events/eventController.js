@@ -195,162 +195,183 @@ async function updateEvent(req, res) {
   }
 }
 
-// const token= GenerateToken("6418b9920a40ca7bd287fcd4")
+// const token= GenerateToken("643a56706f55e9085d193f48")
 // console.log("token is:",token)
-
 async function publishEvent(req, res) {
-  const isPublic = req.body.isPublic;
-  const publishNow = req.body.publishNow;
-  console.log("public:", isPublic);
-  console.log("public:", publishNow);
 
-  const token = await retrieveToken(req); //getting the token of the event publisher
-  console.log("token is:", token);
+try{
 
-  const decodedToken = verifyToken(token); //decoding the token
+// getting attributes from body    
+const isPublic  = req.body.isPublic;
+const publishNow  = req.body.publishNow;
+const publicDate  = req.body.publicDate;
+const privateToPublicDate  = req.body.publicDate;
+const hasLink  = req.body.link;
+const hasPassword  = req.body.password;
+const alwaysPrivate  = req.body.alwaysPrivate;
 
-  decodedToken.then((resolvedValue) => {
-    publisherID = resolvedValue.user_id;
-    console.log("publisher ID:", publisherID); // getting ID of event publisher
-  });
+const event = await eventModel.findById(req.params.eventID); //getting event by its ID
 
-  const event = await eventModel.findById(req.params.eventID); //getting event by its ID
   // event not found
   if (!event) {
-    return res.status(404).json({
-      success: false,
-      message: "No event Found",
-    });
-  }
+    return res.status(404).json({ 
+      success:false,
+      message: "No event Found", });
+  } 
 
-  console.log("creator ID:", event.creatorId);
+const userid = await authorized(req);
 
-  // checking if creator of the event is the one who publishes it
-  if (event.creatorId == publisherID) {
-    console.log(
-      "creator of the event is the one who publishes it:",
-      event.creatorId
-    );
-  } else {
-    console.log("Can't publish the event as publisher is not the creator");
-
-    res.status(201).json({
-      success: false,
-      message:
-        "Can't publish the event as creator and publisher are not the same",
-    });
-  }
-
-  console.log("user authorized");
-
-  // event is public
-  if (isPublic) {
-    if (publishNow) {
-      const currentDate = new Date();
-      console.log("Date is:", currentDate);
-
-      // setting the event with the publish date
-      const update = { publicDate: new Date(currentDate) };
-      const updatedEvent = await eventModel.findOneAndUpdate(
-        { _id: req.params.eventID },
-        update,
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-
-      console.log("updated event is:", updatedEvent);
-      const publicDateSet = await event.publicDate;
-      console.log("public Date Set:", publicDateSet);
-
-      const eventPublicDate = publicDateSet.toISOString().substring(0, 10);
-      console.log("public Date Only Set:", eventPublicDate);
-      const hours = publicDateSet.getHours();
-      const minutes = publicDateSet.getMinutes();
-      const seconds = publicDateSet.getSeconds();
-
-      // getting time
-      let amOrPm;
-      if (hours >= 12) {
-        amOrPm = "PM";
-      } else {
-        amOrPm = "AM";
-      }
-      const hoursTwelveHourFormat = hours % 12 || 12;
-      const eventPublicTime = `${
-        hoursTwelveHourFormat < 10 ? "0" : ""
-      }${hoursTwelveHourFormat}:${minutes < 10 ? "0" : ""}${minutes}:${
-        seconds < 10 ? "0" : ""
-      }${seconds} ${amOrPm}`;
-      console.log("event public time:", eventPublicTime);
+    // user not found
+    if (!userid.authorized) {
+      res.status(402).json({
+        success: false,
+        message: "the user is not found",
+      });
     }
+
+    
+
+    // checking if the creator of the event is the one who publishes it
+    if (event.creatorId.toString() !== userid.user_id.toString()) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to publish this event"
+      });
+    }
+
+
+else{
+
+const url=await event.eventUrl  // getting url for event
+password=event.privatePassword // getting password for event
+const isPublished=await event.published // getting if event was published
+
+
+// event is public
+  if (isPublic){
+
+   // updating the event attributes with the public date and making the event public
+   const update = { publicDate: new Date(publicDate) , isPublic:true };
+   const updatedEvent= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update , {
+  new: true,
+  runValidators: true,
+});
+  
+// console.log("updated event is:",updatedEvent)
+
+const publicDateSet=await event.publicDate
+console.log("public Date Set:",publicDateSet)
+
+      res.status(200).json({
+    success: true,
+    message: "Event is publicly accessed by this Link",
+    url
+       });	
+
+}
+
+
+//if event is private
+  else{
+
+  // updating event attributes to be private
+  const update = {  isPublic:false };
+  const updatedEvent= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update , {
+     new: true,
+     runValidators: true,
+   });
+
+   console.log("updated event is:",updatedEvent)
+
+    // validating that a private event cannot be published by both password and link
+
+      if (hasPassword && hasLink) {
+    res.status(400).json({
+      success: false,
+      message: "Event cannot be published by both password and private link."
+    });
+    
+    // validating that a private event cannot be published without a password or link
+
+    } else if (!hasPassword && !hasLink) {
+    res.status(400).json({
+      success: false,
+      message: "Event cannot be published without a password or private link."
+    });
+    
+  }
+   
+  // event accessed by password
+  else if (hasPassword){
+
+    res.status(200).json({
+          success: true,
+          message: "Event is accessed by this password",
+          password,
+          url
+             });		  
+      } 
+
+      // event accessed by link
+       else if (hasLink){
+
+          res.status(200).json({
+    success: true,
+    message: "Event is accessed by this Private Link",
+    url
+       });	
+
+    }
+    
+     //checking if event will turn public one day
+      if (!alwaysPrivate){
+         
+     //setting public date for event   
+    const update_2 = { publicDate: new Date(privateToPublicDate) };
+    const updatedEventFinal= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update_2 , {
+       new: true,
+       runValidators: true,
+     });
+
+     console.log("updated event is:",updatedEventFinal)
+
+
   }
 
-  // isPublished=event.published // getiing whether the event is already published
-  // url=event.eventUrl // getiing event URL
-  // password=event.privatePassword // getting password for event
-  // console.log("published:", isPublished);
+         
 
-  // // if event is not published
-  // if (!isPublished){
-  // // update the published attribute to be true to publish the event
-  // const update = { published:true };
-  // const updatedEvent= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update , {
-  // 	new: true,
-  // 	runValidators: true,
-  // });
-  // console.log('Updated event:', updatedEvent);
-  // }
-  // // if event is already published
-  // else{
-  // console.log("event is already published")
-  // }
+  }
 
-  // public=event.isPublic // getiing whether the event is public or private
-  // console.log("public:", public);
-
-  // // if event is private
-  // if (!public){
-  // const accessMethod=req.query.AccessMethod 	// getting access method for the event
-  // console.log('Access Method:', accessMethod);
-
-  // // if event is accessed by password
-  // if (accessMethod === 'password') {
-  // 		res.status(200).json({
-  // 		success: true,
-  // 		message: "Event is accessed by this password",
-  // 		password
-  //        });
-  // }
-
-  // // if event is accessed by link
-  // else if (accessMethod === 'link') {
-  // 	res.status(200).json({
-  // 		success: true,
-  // 		message: "Event is accessed by this Private Link",
-  // 		url
-  //        });
-  // }
-  // else {
-  //     res.status(400).json({
-  // 		success: false,
-  // 		message: "Invalid Access Method",
-  //        });
-  // }
-  // }
-
-  // // event is public
-  // else{
-
-  // 	res.status(200).json({
-  // 		success: true,
-  // 		message: "Event is publicly accessed by this Link",
-  // 		url
-  //        });
-
-  // }
+     
+// if event is not published
+if (!isPublished){
+// update the published attribute to be true to publish the event
+  const update_last = { published:true };
+const updatedEvent_last= await eventModel.findOneAndUpdate({ _id: req.params.eventID }, update_last , {
+  new: true,
+  runValidators: true,
+});
+  console.log('Updated event:', updatedEvent_last);
 }
+// if event is already published
+  else{
+  console.log("event is already published")
+}
+  
+}
+}
+catch{
+  res.status(400).json({
+    success: false,
+    message: "invalid error"
+  });
+}
+
+}
+
+// }
+
+
 
 //list events
 

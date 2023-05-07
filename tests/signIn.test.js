@@ -35,7 +35,7 @@ describe('signIn', () => {
   
     signIn(req, res);
   
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Email and password are required',
@@ -59,7 +59,7 @@ describe('signIn', () => {
     
         await signIn(req, res);
     
-        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
           success: false,
           message: 'Invalid Email or Password',
@@ -85,7 +85,7 @@ describe('signIn', () => {
     
         await signIn(req, res);
     
-        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
           success: false,
           message: 'Please verify your email address',
