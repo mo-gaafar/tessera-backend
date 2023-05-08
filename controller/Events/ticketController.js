@@ -113,7 +113,8 @@ async function bookTicket(req, res) {
     // Return a success response if the ticket is created successfully.
     return res.status(200).json({
       success: true,
-      message: "Ticket has been created successfully",
+      message:
+        "Ticket has been created successfully" + ` Email sent to ${email}`,
     });
   } catch (err) {
     console.error(err);
@@ -450,10 +451,9 @@ async function retrieveTicketTier(req, res) {
       tierName: tier.tierName,
       quantitySold: tier.quantitySold,
       maxCapacity: tier.maxCapacity,
-      percentageSold: (tier.quantitySold / tier.maxCapacity)*100,
+      percentageSold: (tier.quantitySold / tier.maxCapacity) * 100,
       startSelling: tier.startSelling,
-      endSelling:tier.endSelling
-
+      endSelling: tier.endSelling,
     }));
 
     return res.status(200).json({
@@ -461,7 +461,6 @@ async function retrieveTicketTier(req, res) {
       message: "Ticket tier details for the event",
       ticketTiers: ticketTierDetails,
     });
-    
 
     // return res.status(200).json({
     //   success: true,
