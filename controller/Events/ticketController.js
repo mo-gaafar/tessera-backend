@@ -451,16 +451,22 @@ async function retrieveTicketTier(req, res) {
       tierName: tier.tierName,
       quantitySold: tier.quantitySold,
       maxCapacity: tier.maxCapacity,
-      percentageSold: (tier.quantitySold / tier.maxCapacity) * 100,
+      price:tier.price,
+      percentageSold: (tier.quantitySold / tier.maxCapacity)*100,
       startSelling: tier.startSelling,
-      endSelling: tier.endSelling,
+      endSelling:tier.endSelling
+
     }));
+
+    // console.log("price:",price)
+
 
     return res.status(200).json({
       success: true,
       message: "Ticket tier details for the event",
       ticketTiers: ticketTierDetails,
     });
+    
 
     // return res.status(200).json({
     //   success: true,
@@ -474,7 +480,6 @@ async function retrieveTicketTier(req, res) {
     });
   }
 }
-
 /**
  * Edits a ticket tier for an event.
  * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
