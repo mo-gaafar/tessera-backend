@@ -175,7 +175,7 @@ eventSchema.pre("save", async function (next) {
 	} else this.privatePassword = await passwordEncryption(null);
 });
 
-eventSchema.pre("findOneAndUpdate", function (next) {
+/*eventSchema.pre("findOneAndUpdate", function (next) {
 	const update = this.getUpdate();
 	if (update.basicInfo) {
 		const err = new Error("Cannot update basicInfo");
@@ -183,6 +183,6 @@ eventSchema.pre("findOneAndUpdate", function (next) {
 		return next(err);
 	}
 	next();
-});
+}); */
 module.exports = mongoose.model("eventModel", eventSchema);
 //TODO comment the attributes

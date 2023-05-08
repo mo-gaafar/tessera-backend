@@ -24,31 +24,25 @@ async function createEvent(req, res) {
 		//check if user exists
 		const userExist = await authorized(req);
 		//create event
-		if (userExist.authorized) {
-			const event = await eventModel.create({
-				...req.body,
-				creatorId: userExist.user_id,
-			});
-			//sets events url
-			await eventModel.updateOne(
-				{ _id: event._id },
-				{
-					$set: { eventUrl: `https://www.tessera.social/event/${event._id}` },
-				}
-			);
+		//if (userExist.authorized) {
+		const event = await eventModel.create({
+			...req.body,
+			creatorId: userExist.user_id,
+		});
+		//sets events url
+		await eventModel.updateOne(
+			{ _id: event._id },
+			{
+				$set: { eventUrl: `https://www.tessera.social/event/${event._id}` },
+			}
+		);
 
-			return res.status(200).json({
-				success: true,
-				message: "Event has been created successfully",
-				event_Id: event._id,
-			});
-		}
-		if (!userExist.authorized) {
-			return res.status(401).json({
-				success: false,
-				message: "Event creation failure",
-			});
-		}
+		return res.status(200).json({
+			success: true,
+			message: "Event has been created successfully",
+			event_Id: event._id,
+		});
+		//}
 	} catch (error) {
 		res.status(400).json({
 			success: false,
@@ -159,6 +153,12 @@ async function updateEvent(req, res) {
 	try {
 		const eventId = req.params.eventID; // get the event ID from the request URL
 		const update = req.body; // get the update object from the request body
+		if (update.basicInfo) {
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to update basicInfo",
+			});
+		}
 		const event = await eventModel.findById(eventId);
 		const userExist = await authorized(req);
 
