@@ -138,7 +138,7 @@ function orderBookedOption(email, order, qrCode) {
             <tr>
             <th style="text-align: left; padding: 10px;">Location:</th>
             <td style="text-align: right; padding: 10px;">${
-              order.eventBasicInfo.locationn
+              order.locationString
             }</td>
           </tr>
           <tr>
@@ -205,10 +205,59 @@ function orderBookedOption(email, order, qrCode) {
   return mailOptions;
 }
 
+function addAttendeeOption(email, order, qrCode) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER, //sender
+    // to: "mohamednasser2001@gmail.com", //receiver
+    to: email,
+    // to: "abdullahsaeedd6@gmail.com",
+    subject: "Your order has been booked",
+    attachments: [
+      {
+        content: Buffer.from(qrCode, "base64"),
+        contentType: "image/png",
+      },
+    ],
+    html: ` 
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Invitation to Event</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
+      <div style="text-align: center;">
+        <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera" style="max-width: 500px;">
+      </div>
+      <p style="font-size: 20px;">Hello,</p>
+      <p style="font-size: 20px;">You have been invited to an event by [name of inviter]. The event details are as follows:</p>
+      <ul>
+        <li style="font-size: 18px;">Event Name: [name of event]</li>
+        <li style="font-size: 18px;">Date: [date of event]</li>
+        <li style="font-size: 18px;">Time: [time of event]</li>
+        <li style="font-size: 18px;">Location: [location of event]</li>
+      </ul>
+      <p style="font-size: 20px;">Please RSVP by clicking the button below:</p>
+      <div style="text-align: center;">
+        <a href="[RSVP link]" style="background-color: #F05537; color: white; padding: 10px 20px; border: none; border-radius: 4px; text-decoration: none; display: inline-block;">
+          RSVP
+        </a>
+      </div>
+      <p style="font-size: 20px;">Thank you,</p>
+      <p style="font-size: 20px;">[Your name]</p>
+    </body>
+    </html>
+    
+
+    `,
+  };
+  return mailOptions;
+}
+
 module.exports = {
   sendUserEmail,
   verficationOption,
   forgetPasswordOption,
   sendSocialPassword,
   orderBookedOption,
+  addAttendeeOption,
 };
