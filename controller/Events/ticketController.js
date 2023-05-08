@@ -11,7 +11,7 @@ const {
   verifyToken,
   GenerateToken,
   generateUniqueId,
-  authorized
+  authorized,
 } = require("../../utils/Tokens");
 
 const { sendUserEmail, orderBookedOption } = require("../../utils/sendEmail");
@@ -101,7 +101,14 @@ async function bookTicket(req, res) {
     );
 
     // send email with order and Qr-Code
-    sendOrderEmail(eventId, promocodeObj, ticketTierSelected, email);
+    sendOrderEmail(
+      eventId,
+      promocodeObj,
+      ticketTierSelected,
+      email,
+      orderId,
+      contactInformation.first_name
+    );
 
     // Return a success response if the ticket is created successfully.
     return res.status(200).json({
@@ -133,9 +140,12 @@ async function sendOrderEmail(
   eventID,
   promocodeObj,
   ticketTierSelectedArray,
-  email
+  email,
+  orderId,
+  firstName
 ) {
   try {
+    let totalOrderPrice = 0;
     // add new attribute in ticketTierSelected equal to the new price multiplied with the quantity using the implemented functions
     for (let i = 0; i < ticketTierSelectedArray.length; i++) {
       totalPrice = await calculateTotalPrice(
@@ -145,17 +155,28 @@ async function sendOrderEmail(
       );
       ticketTierSelectedArray[i].totalPrice =
         totalPrice * ticketTierSelectedArray[i].quantity;
+      totalOrderPrice += ticketTierSelectedArray[i].totalPrice; // add to total order price
     }
 
+    console.log(
+      "🚀 ~ file: ticketController.js:150 ~ totalOrderPrice:",
+      totalOrderPrice
+    );
     // get the event basic info from events
     let event = await eventModel.findOne({ _id: eventID });
-    let eventBasicInfo = [event.basicInfo];
+    let eventBasicInfo = event.basicInfo;
 
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
     // const order = { ticketTierSelectedArray, eventBasicInfo, qrcode };
-    const order = { ticketTierSelectedArray, eventBasicInfo };
+    const order = {
+      ticketTierSelectedArray,
+      eventBasicInfo,
+      totalOrderPrice,
+      orderId,
+      firstName,
+    };
     console.log("🚀 ~ file: ticketController.js:123 ~ order:", order);
 
     // send email with order and Qr-Code
@@ -281,26 +302,16 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
 
     // Add the sold ticket to the event's soldTickets array.
     event.soldTickets.push(soldTicket);
-    console.log(
-      "🚀 ~ file: ticketController.js:274 ~ addSoldTicketToEvent ~ soldTicket:",
-      soldTicket
-    );
 
     // Save the updated event to the database.
     await event.save();
-    console.log(
-      "🚀 ~ file: ticketController.js:281 ~ addSoldTicketToEvent ~ event:",
-      event
-    );
   } catch (err) {
     console.error(err);
 
     // Throw an error if an error occurs.
     throw new Error(err.message);
   }
-
 }
-
 
 // const token= GenerateToken("643a56706f55e9085d193f48")
 // console.log("token is:",token)
@@ -323,21 +334,25 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
  */
 
 async function createTicketTier(req, res) {
-
   //getting the attributes of ticket tier from body
   try {
     const { tierName, maxCapacity, price, startSelling, endSelling } = req.body;
 
     //checking that all attributes are present
-    if (!req.body || !tierName || !maxCapacity || !price || !startSelling || !endSelling) {
+    if (
+      !req.body ||
+      !tierName ||
+      !maxCapacity ||
+      !price ||
+      !startSelling ||
+      !endSelling
+    ) {
       return res.status(200).json({
         success: false,
         message: "All tier attributes should be entered",
       });
     }
 
- 
-    
     const quantitySold = 0;
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
 
@@ -360,30 +375,24 @@ async function createTicketTier(req, res) {
       });
     }
 
-
-     // check if the creator of the event matches the user creating the tier
+    // check if the creator of the event matches the user creating the tier
     if (event.creatorId.toString() !== userid.user_id.toString()) {
       return res.status(401).json({
         success: false,
-        message: "You are not authorized to create tier for this event"
+        message: "You are not authorized to create tier for this event",
       });
-    }
+    } else {
+      const ticketTier = event.ticketTiers.find(
+        (tier) => tier.tierName === tierName
+      ); // searching if the tier name provided in the body is already found in the array
 
-    else{
-
-
-    const ticketTier = event.ticketTiers.find((tier) => tier.tierName === tierName); // searching if the tier name provided in the body is already found in the array
-
-    //tier name not unique 
-    if (ticketTier) {
-
-      return res.status(404).json({
-        success: false,
-        message:
-          "Ticket Tier Name is not unique",
-      });
-
-    }
+      //tier name not unique
+      if (ticketTier) {
+        return res.status(404).json({
+          success: false,
+          message: "Ticket Tier Name is not unique",
+        });
+      }
 
       // creating new tier object
       const newTicketTier = {
@@ -403,8 +412,7 @@ async function createTicketTier(req, res) {
         message: "Ticket Tier Created",
         newTicketTier,
       });
-    } 
-
+    }
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -412,7 +420,6 @@ async function createTicketTier(req, res) {
     });
   }
 }
-
 
 /**
 Retrieves the ticket tiers details for the event by its ID
@@ -426,7 +433,6 @@ Retrieves the ticket tiers details for the event by its ID
 @throws {Error} - If event is not found
 */
 
-
 async function retrieveTicketTier(req, res) {
   try {
     const event = await eventModel.findById(req.params.eventID); //returns event of given id
@@ -439,11 +445,29 @@ async function retrieveTicketTier(req, res) {
 
     // returning ticket tier details for the event
     const { ticketTiers } = event;
+
+    const ticketTierDetails = event.ticketTiers.map((tier) => ({
+      tierName: tier.tierName,
+      quantitySold: tier.quantitySold,
+      maxCapacity: tier.maxCapacity,
+      percentageSold: (tier.quantitySold / tier.maxCapacity)*100,
+      startSelling: tier.startSelling,
+      endSelling:tier.endSelling
+
+    }));
+
     return res.status(200).json({
       success: true,
       message: "Ticket tier details for the event",
-      ticketTiers,
+      ticketTiers: ticketTierDetails,
     });
+    
+
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Ticket tier details for the event",
+    //   ticketTiers,
+    // });
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -469,94 +493,86 @@ async function retrieveTicketTier(req, res) {
  * @returns {Object} An object containing the success status and a message is sent
  */
 
-
 async function editTicketTier(req, res) {
   try {
-  const eventID = req.params.eventID; // get the event ID from the request URL
+    const eventID = req.params.eventID; // get the event ID from the request URL
 
-  // getting the parameters from the request body
-  const enteredTierName = req.body.desiredTierName;
-  if (!enteredTierName) {
-    return res.status(404).json({
-      success: false,
-      message: "Please enter the name of the tier to edit",
-    });
-  }
-  const newTierName = req.body.ticketTiers[0].tierName;
-  const newMaxCapacity = req.body.ticketTiers[0].maxCapacity;
-  const newPrice = req.body.ticketTiers[0].price;
-  const newStartSelling = req.body.ticketTiers[0].startSelling;
-  const newEndSelling = req.body.ticketTiers[0].endSelling;
-  console.log("new Tier Name:", newTierName);
+    // getting the parameters from the request body
+    const enteredTierName = req.body.desiredTierName;
+    if (!enteredTierName) {
+      return res.status(404).json({
+        success: false,
+        message: "Please enter the name of the tier to edit",
+      });
+    }
+    const newTierName = req.body.ticketTiers[0].tierName;
+    const newMaxCapacity = req.body.ticketTiers[0].maxCapacity;
+    const newPrice = req.body.ticketTiers[0].price;
+    const newStartSelling = req.body.ticketTiers[0].startSelling;
+    const newEndSelling = req.body.ticketTiers[0].endSelling;
+    console.log("new Tier Name:", newTierName);
 
-  const userid = await authorized(req);
+    const userid = await authorized(req);
 
-  const event = await eventModel.findById(req.params.eventID); //getting event by its ID
-  // event not found
-  if (!event) {
-    return res.status(404).json({
-      success: false,
-      message: "No event Found",
-    });
-  }
+    const event = await eventModel.findById(req.params.eventID); //getting event by its ID
+    // event not found
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "No event Found",
+      });
+    }
 
-   // user not found
-   if (!userid.authorized) {
-    res.status(402).json({
-      success: false,
-      message: "the user is not found",
-    });
-  }
+    // user not found
+    if (!userid.authorized) {
+      res.status(402).json({
+        success: false,
+        message: "the user is not found",
+      });
+    }
 
+    // check if the creator of the event matches the user editing the tier
+    if (event.creatorId.toString() !== userid.user_id.toString()) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to edit tier for this event",
+      });
+    } else {
+      const ticketTier = event.ticketTiers.find(
+        (tier) => tier.tierName === newTierName
+      ); // searching if the tier name provided in the body is already found in the array
+      console.log("found:", ticketTier);
 
-   // check if the creator of the event matches the user editing the tier
-  if (event.creatorId.toString() !== userid.user_id.toString()) {
-    return res.status(401).json({
-      success: false,
-      message: "You are not authorized to edit tier for this event"
-    });
-  } 
+      // tier name that is needed to be edited is not unique
+      if (ticketTier) {
+        return res.status(404).json({
+          success: false,
+          message: "Cannot edit ticket tier",
+        });
+      }
 
-  else{
+      // update the ticket tier attributes with the body parameters using the tier ID
+      const updatedEvent = await eventModel.findOneAndUpdate(
+        { _id: eventID, "ticketTiers.tierName": enteredTierName },
+        {
+          $set: {
+            "ticketTiers.$.tierName": newTierName,
+            "ticketTiers.$.maxCapacity": newMaxCapacity,
+            "ticketTiers.$.price": newPrice,
+            "ticketTiers.$.startSelling": newStartSelling,
+            "ticketTiers.$.endSelling": newEndSelling,
+          },
+        },
+        { new: true, runValidators: true }
+      );
 
-  const ticketTier = event.ticketTiers.find((tier) => tier.tierName === newTierName); // searching if the tier name provided in the body is already found in the array 
-  console.log("found:", ticketTier)
+      console.log("updated event:", updatedEvent);
 
-  // tier name that is needed to be edited is not unique
-  if (ticketTier) {
-
-    return res.status(404).json({
-      success: false,
-      message:
-        "Cannot edit ticket tier",
-    });
-
-  }
-
-
-  // update the ticket tier attributes with the body parameters using the tier ID
-  const updatedEvent = await eventModel.findOneAndUpdate(
-    { _id: eventID, "ticketTiers.tierName": enteredTierName },
-    {
-      $set: {
-        "ticketTiers.$.tierName": newTierName,
-        "ticketTiers.$.maxCapacity": newMaxCapacity,
-        "ticketTiers.$.price": newPrice,
-        "ticketTiers.$.startSelling": newStartSelling,
-        "ticketTiers.$.endSelling": newEndSelling,
-      },
-    },
-    { new: true, runValidators: true }
-  );
-
-  console.log("updated event:", updatedEvent);
-
-  return res.status(200).json({
-    success: true,
-    message: "Ticket tier has been successfully edited",
-  });
-
-}
+      return res.status(200).json({
+        success: true,
+        message: "Ticket tier has been successfully edited",
+      });
+    }
   } catch {
     // error
     res.status(400).json({

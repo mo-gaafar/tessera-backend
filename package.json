@@ -25,6 +25,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "csv-parse": "^5.3.10",
     "csv-parser": "^3.0.0",
     "csv-stringify": "^6.3.4",
     "csv-writer": "^1.6.0",
