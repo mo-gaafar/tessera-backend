@@ -9,6 +9,8 @@ const {
 } = require("../../utils/Tokens");
 const jwt = require("jsonwebtoken");
 
+const { comparePassword } = require("../../utils/passwords");
+
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
 @async
@@ -188,9 +190,6 @@ async function updateEvent(req, res) {
     });
   }
 }
-
-// const token= GenerateToken("643a56706f55e9085d193f48")
-// console.log("token is:",token)
 
 // Publishes an event by updating its attributes, such as making it public or setting a password or link to access it.
 // @async
@@ -388,7 +387,8 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_S3_SECRET_KEY,
 });
 const s3 = new AWS.S3();
-const uploadImage = async (req, res) => {
+
+async function uploadImage(req, res) {
   try {
     const eventId = req.params.eventID;
     console.log(
@@ -429,7 +429,7 @@ const uploadImage = async (req, res) => {
       message: err.message,
     });
   }
-};
+}
 
 module.exports = {
   createEvent,
