@@ -164,7 +164,7 @@ function orderBookedOption(email, order, qrCode) {
               <tr>
                 <th style="text-align: left; padding: 10px;">Ticket Type</th>
                 <th style="text-align: left; padding: 10px;">Quantity</th>
-                <th style="text-align: right; padding: 10px;">Price </th>
+                <th style="text-align: right; padding: 10px;">Total Price </th>
               </tr>
               ${order.ticketTierSelectedArray
                 .map(
