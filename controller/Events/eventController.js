@@ -9,6 +9,9 @@ const {
 } = require("../../utils/Tokens");
 const jwt = require("jsonwebtoken");
 
+const { comparePassword } = require("../../utils/passwords");
+
+
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
 @async
@@ -203,7 +206,7 @@ async function updateEvent(req, res) {
 // @throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
 // */
 async function publishEvent(req, res) {
-	try {
+	// try {
 		// getting attributes from body
 		const isPublic = req.body.isPublic;
 		const publishNow = req.body.publishNow;
@@ -372,12 +375,12 @@ async function publishEvent(req, res) {
 				console.log("event is already published");
 			}
 		}
-	} catch {
-		res.status(400).json({
-			success: false,
-			message: "invalid error",
-		});
-	}
+	// } catch {
+	// 	res.status(400).json({
+	// 		success: false,
+	// 		message: "invalid error",
+	// 	});
+	// }
 }
 
 module.exports = {
