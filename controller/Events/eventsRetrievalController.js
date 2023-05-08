@@ -62,6 +62,11 @@ async function listEvents(req, res) {
     // Extract only the desired properties from each event and return them in a new array
     const filteredEvents = await removeExtraAttributes(events);
 
+    // add event Id to the filtered Events
+    filteredEvents.forEach((event, index) => {
+      event["eventId"] = events[index]._id;
+    });
+
     //Computes selling information for an array of events
     const { eventsoldtickets, isEventOnSale, gross, maxCapacity } =
       await computeEventsSellingInformation(events);
