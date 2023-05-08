@@ -1,10 +1,12 @@
 const eventModel = require("../../models/eventModel");
 const promocodeModel = require("../../models/promocodeModel");
 const express = require("express");
+const bcrypt = require("bcrypt");
 const router = express.Router();
 const multer = require("multer");
-const csv = require("csv-parser");
+const { parse } = require("csv-parse");
 const { authorized } = require("../../utils/Tokens");
+const fs = require("fs");
 
 /**
  * Creates a new promocode for an event.
@@ -14,65 +16,62 @@ const { authorized } = require("../../utils/Tokens");
  * @throws {Error} Throws an error if the event or promocode code already exists.
  */
 
-/*async function importPromocode(req, res) {
-	const storage = multer.memoryStorage();
-	const upload = multer({ storage: storage });
-
-	// Route for importing promo codes from a CSV file
-	router.post(
-		`/event-management/import-promo/${req.params.eventID}`,
-		upload.single("csvFile"),
-		async (req, res) => {
-			try {
-				// Check if the event ID is valid
-				const eventId = req.params.eventId;
-				const event = await Event.findById(eventId);
-				if (!event) {
-					return res.status(404).json({ message: "Event not found" });
-				}
-
-				// Check if a file was uploaded
-				if (!req.file) {
-					return res.status(400).json({ message: "No file uploaded" });
-				}
-
-				// Parse the CSV file
-				const results = [];
-				const csvFile = req.file.buffer.toString();
-				csv(csvFile)
-					.on("data", (data) => results.push(data))
-					.on("end", async () => {
-						// Save the promocodes to the database
-						const promocodes = results.map((row) => {
-							return {
-								code: row.code,
-								discount: parseInt(row.discount),
-								expires: new Date(row.expires),
-								limitOfUses: parseInt(row.limitOfUses),
-								remainingUses: parseInt(row.limitOfUses),
-								event: eventId,
-							};
-						});
-						const savedPromocodes = await Promocode.insertMany(promocodes);
-
-						// Update the event with the new promocodes
-						event.promocodes.push(...savedPromocodes.map((p) => p._id));
-						await event.save();
-
-						// Return the imported promocodes
-						res.json(savedPromocodes);
-					});
-			} catch (err) {
-				console.error(err);
-				res.status(500).json({ message: "Internal server error" });
-			}
+async function importPromocode(req, res) {
+	try {
+		if (!req.file) {
+			return res.status(400).send("No file uploaded");
 		}
-	);*/ /*
-	if (!req.file) {
-		return res.status(400).json({ message: "No file uploaded" });
+
+		const csvData = await new Promise((resolve, reject) => {
+			const csvFilePath = req.file.path;
+			const csvParser = parse({ delimiter: "," }, (err, data) => {
+				if (err) reject(err);
+				else resolve(data);
+			});
+			fs.createReadStream(csvFilePath).pipe(csvParser);
+		});
+
+		// assuming the first row of the csv file contains the column names
+		const [header, ...rows] = csvData;
+		const [codeHeader, discountHeader, limitOfUsesHeader] = header;
+
+		const promocodes = [];
+
+		for (const row of rows) {
+			const [code, discount, limitOfUses] = row;
+			const newPromocode = new promocodeModel({
+				code,
+				discount: parseInt(discount),
+				limitOfUses,
+			});
+			await newPromocode.save();
+			promocodes.push({ id: newPromocode._id, code });
+		}
+
+		const eventId = req.params.eventID;
+		const event = await eventModel.findById(eventId);
+		if (!event) {
+			return res.status(404).send("Event not found");
+		}
+
+		event.promocodes.push(...promocodes);
+		await event.save();
+
+		return res.status(200).json({
+			success: true,
+			message: "Promocode has been imported successfully",
+			promocodes,
+		});
+	} catch (err) {
+		console.error(err);
+
+		// Return an error response if an error occurs.
+		return res.status(401).json({
+			success: false,
+			message: err.message,
+		});
 	}
-	res.send("hello");
-}*/
+}
 
 async function createPromocode(req, res) {
 	const eventId = req.params.event_Id;
@@ -227,5 +226,5 @@ module.exports = {
 	checkPromocode,
 	addPromocodeToEvent,
 	checkPromocodeExists,
-	//importPromocode,
+	importPromocode,
 };

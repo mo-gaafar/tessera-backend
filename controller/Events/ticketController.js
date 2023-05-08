@@ -445,11 +445,29 @@ async function retrieveTicketTier(req, res) {
 
     // returning ticket tier details for the event
     const { ticketTiers } = event;
+
+    const ticketTierDetails = event.ticketTiers.map((tier) => ({
+      tierName: tier.tierName,
+      quantitySold: tier.quantitySold,
+      maxCapacity: tier.maxCapacity,
+      percentageSold: (tier.quantitySold / tier.maxCapacity)*100,
+      startSelling: tier.startSelling,
+      endSelling:tier.endSelling
+
+    }));
+
     return res.status(200).json({
       success: true,
       message: "Ticket tier details for the event",
-      ticketTiers,
+      ticketTiers: ticketTierDetails,
     });
+    
+
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Ticket tier details for the event",
+    //   ticketTiers,
+    // });
   } catch (error) {
     res.status(400).json({
       success: false,
