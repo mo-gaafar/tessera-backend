@@ -14,7 +14,11 @@ const {
   authorized,
 } = require("../../utils/Tokens");
 
-const { sendUserEmail, orderBookedOption } = require("../../utils/sendEmail");
+const {
+  sendUserEmail,
+  orderBookedOption,
+  addAttendeeOption,
+} = require("../../utils/sendEmail");
 
 /**
  * Creates a new ticket for an event and user.
@@ -120,7 +124,7 @@ async function bookTicket(req, res) {
     console.error(err);
 
     // Return an error response if an error occurs.
-    return res.status(401).json({
+    return res.status(400).json({
       success: false,
       message: err.message,
     });
@@ -167,6 +171,12 @@ async function sendOrderEmail(
     let event = await eventModel.findOne({ _id: eventID });
     let eventBasicInfo = event.basicInfo;
 
+    // get the location info from events
+    let location = eventBasicInfo.location;
+
+    // generate location string
+    const locationString = `${location.streetNumber} ${location.route}, ${location.city}, ${location.administrativeAreaLevel1}, ${location.country}`;
+
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
@@ -177,11 +187,13 @@ async function sendOrderEmail(
       totalOrderPrice,
       orderId,
       firstName,
+      locationString,
     };
     console.log("🚀 ~ file: ticketController.js:123 ~ order:", order);
 
     // send email with order and Qr-Code
-    await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
+    // await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
+    await sendUserEmail(email, order, addAttendeeOption, qrcodeImage);
   } catch (error) {
     throw error;
   }
@@ -451,22 +463,19 @@ async function retrieveTicketTier(req, res) {
       tierName: tier.tierName,
       quantitySold: tier.quantitySold,
       maxCapacity: tier.maxCapacity,
-      price:tier.price,
-      percentageSold: (tier.quantitySold / tier.maxCapacity)*100,
+      price: tier.price,
+      percentageSold: (tier.quantitySold / tier.maxCapacity) * 100,
       startSelling: tier.startSelling,
-      endSelling:tier.endSelling
-
+      endSelling: tier.endSelling,
     }));
 
     // console.log("price:",price)
-
 
     return res.status(200).json({
       success: true,
       message: "Ticket tier details for the event",
       ticketTiers: ticketTierDetails,
     });
-    
 
     // return res.status(200).json({
     //   success: true,
