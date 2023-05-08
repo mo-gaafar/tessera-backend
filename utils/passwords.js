@@ -13,8 +13,15 @@ const bcrypt = require("bcrypt");
  */
 async function passwordEncryption(userPassword) {
 	try {
+		if (userPassword == null) {
+			console.log("password doesnt exist ");
+			return;
+		}
 		// Generate verification token
 		//const encryptedPassword = jwt.sign({ userPassword }, process.env.SECRETJWT);
+		if (!userPassword) {
+			throw new Error("Both password and salt are required for encryption.");
+		}
 		const salt = await bcrypt.genSalt(10);
 
 		// Hash the password with the salt

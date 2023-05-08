@@ -21,35 +21,32 @@ Asynchronous function that creates a new event based on the request body and add
 */
 async function createEvent(req, res) {
 	try {
-		//const useridid = "643a56706f55e9085d193f48";
+		//check if user exists
+		const userExist = await authorized(req);
+		//create event
+		if (userExist.authorized) {
+			const event = await eventModel.create({
+				...req.body,
+				creatorId: userExist.user_id,
+			});
+			//sets events url
+			await eventModel.updateOne(
+				{ _id: event._id },
+				{
+					$set: { eventUrl: `https://www.tessera.social/event/${event._id}` },
+				}
+			);
 
-		//const tok = GenerateToken(useridid);
-		//console.log(tok);
-		const userid = await authorized(req);
-		//const token = await retrieveToken(req);
-		//const decoded = await verifyToken(token);
-
-		const event = await eventModel.create({
-			...req.body,
-			creatorId: userid.user_id,
-		});
-		//const eventCreated= getEventById(event._id);
-		await eventModel.updateOne(
-			{ _id: event._id },
-			{
-				$set: { eventUrl: `https://www.tessera.social/event/${event._id}` },
-			}
-		);
-		if (userid.authorized) {
 			return res.status(200).json({
 				success: true,
 				message: "Event has been created successfully",
 				event_Id: event._id,
 			});
-		} else {
+		}
+		if (!userExist.authorized) {
 			return res.status(401).json({
 				success: false,
-				message: "the user doesnt have access",
+				message: "Event creation failure",
 			});
 		}
 	} catch (error) {
@@ -79,9 +76,9 @@ async function getEventById(req, res) {
 			return res.status(404).json({ message: "No event Found" });
 		}
 		//authorize that user exists
-		const userid = await authorized(req);
+		const userExist = await authorized(req);
 
-		if (event.creatorId.toString() !== userid.user_id.toString()) {
+		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
@@ -110,22 +107,22 @@ Deletes an event from the database by its ID.
 */
 async function deleteEvent(req, res) {
 	try {
-		const eventIdd = req.params.eventID;
-		const event = await eventModel.findById(eventIdd); //search event by id
-		const userid = await authorized(req);
+		const eventId = req.params.eventID;
+		const event = await eventModel.findById(eventId); //search event by id
+		const userExist = await authorized(req);
 
 		if (!event) {
 			return res.status(404).json({ message: "No event Found" });
 		}
 		//check if user exists
-		if (!userid.authorized) {
+		if (!userExist.authorized) {
 			res.status(402).json({
 				success: false,
 				message: "the user is not found",
 			});
 		}
 
-		if (event.creatorId.toString() !== userid.user_id.toString()) {
+		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
@@ -133,7 +130,7 @@ async function deleteEvent(req, res) {
 			});
 		}
 
-		await eventModel.findByIdAndDelete(eventIdd); // delete the found event
+		await eventModel.findByIdAndDelete(eventId); // delete the found event
 
 		return res
 			.status(200)
@@ -163,13 +160,13 @@ async function updateEvent(req, res) {
 		const eventId = req.params.eventID; // get the event ID from the request URL
 		const update = req.body; // get the update object from the request body
 		const event = await eventModel.findById(eventId);
-		const userid = await authorized(req);
+		const userExist = await authorized(req);
 
 		if (!event) {
 			return res.status(404).json({ error: "Event not found" });
 		}
 		// check if the updatedEvent exists
-		if (event.creatorId.toString() !== userid.user_id.toString()) {
+		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
 			return res.status(401).json({
 				success: false,
@@ -215,10 +212,10 @@ async function publishEvent(req, res) {
 			});
 		}
 
-		const userid = await authorized(req);
+		const userExist = await authorized(req);
 
 		// user not found
-		if (!userid.authorized) {
+		if (!userExist.authorized) {
 			res.status(402).json({
 				success: false,
 				message: "the user is not found",
@@ -226,7 +223,7 @@ async function publishEvent(req, res) {
 		}
 
 		// checking if the creator of the event is the one who publishes it
-		if (event.creatorId.toString() !== userid.user_id.toString()) {
+		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to publish this event",

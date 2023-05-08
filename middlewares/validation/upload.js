@@ -1,4 +1,4 @@
-const path = require("path");
+/*const path = require("path");
 const multer = require("multer");
 var storage = multer.diskStorage({
 	destination: function (req, file, cb) {
@@ -12,4 +12,4 @@ var storage = multer.diskStorage({
 var upload = multer({
 	storage: storage,
 });
-module.exports = upload;
+module.exports = upload; */
