@@ -334,6 +334,8 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
  * @throws {Error} If the ticket tier creator is not the one who created the event.
  */
 
+
+
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
   try {
@@ -481,21 +483,24 @@ async function retrieveTicketTier(req, res) {
   }
 }
 /**
- * Edits a ticket tier for an event.
- * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
- * @param {Object} req.params - The parameters of the request.
- * @param {string} req.params.eventID - The ID of the desired event to edit.
- * @param {Object} req.body - The body of the request.
- * @param {string} req.body.tierName - The name of the tier you want to edit
- * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
- * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
- * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
- * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
- * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
- * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
- * @param {Object} res - The response object.
- * @returns {Object} An object containing the success status and a message is sent
- */
+
+
+// * Edits a ticket tier for an event.
+//  * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
+//  * @param {Object} req.params - The parameters of the request.
+//  * @param {string} req.params.eventID - The ID of the desired event to edit.
+//  * @param {Object} req.body - The body of the request.
+//  * @param {string} req.body.tierName - The name of the tier you want to edit
+//  * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
+//  * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
+//  * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
+//  * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
+//  * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
+//  * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
+//  * @param {Object} res - The response object.
+//  * @returns {Object} An object containing the success status and a message is sent
+//  */
+
 
 async function editTicketTier(req, res) {
   try {
@@ -585,6 +590,9 @@ async function editTicketTier(req, res) {
     });
   }
 }
+
+
+
 
 module.exports = {
   bookTicket,
