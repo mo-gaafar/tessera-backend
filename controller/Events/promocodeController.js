@@ -6,37 +6,41 @@ const router = express.Router();
 const multer = require("multer");
 const { parse } = require("csv-parse");
 const { authorized } = require("../../utils/Tokens");
-const fs = require("fs");
+const upload = multer();
 
 /**
- * Creates a new promocode for an event.
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
- * @returns {object} Returns the new promocode object.
- * @throws {Error} Throws an error if the event or promocode code already exists.
- */
 
+Imports promocodes from a CSV file and adds them to an event.
+@async
+@function importPromocode
+@param {Object} req - Express request object.
+@param {Object} res - Express response object.
+@returns {Object} Response object with a success boolean, message, and imported promocodes.
+@throws {Object} Returns an error response object if an error occurs.
+*/
 async function importPromocode(req, res) {
 	try {
+		//check if file is uploaded
 		if (!req.file) {
 			return res.status(400).send("No file uploaded");
 		}
-
+		// Parse the CSV data from the file buffer
 		const csvData = await new Promise((resolve, reject) => {
-			const csvFilePath = req.file.path;
 			const csvParser = parse({ delimiter: "," }, (err, data) => {
 				if (err) reject(err);
 				else resolve(data);
 			});
-			fs.createReadStream(csvFilePath).pipe(csvParser);
+			const csvBuffer = req.file.buffer;
+			csvParser.write(csvBuffer);
+			csvParser.end();
 		});
 
 		// assuming the first row of the csv file contains the column names
 		const [header, ...rows] = csvData;
-		const [codeHeader, discountHeader, limitOfUsesHeader] = header;
+		const [headerCode, headerDiscount, headerlimitOfUses] = header;
 
+		// Process each row of the CSV file and create a new promocode object for each
 		const promocodes = [];
-
 		for (const row of rows) {
 			const [code, discount, limitOfUses] = row;
 			const newPromocode = new promocodeModel({
@@ -47,7 +51,7 @@ async function importPromocode(req, res) {
 			await newPromocode.save();
 			promocodes.push({ id: newPromocode._id, code });
 		}
-
+		// Find the event associated with the promocodes and add the promocodes to the event
 		const eventId = req.params.eventID;
 		const event = await eventModel.findById(eventId);
 		if (!event) {
@@ -227,4 +231,5 @@ module.exports = {
 	addPromocodeToEvent,
 	checkPromocodeExists,
 	importPromocode,
+	upload,
 };

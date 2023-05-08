@@ -166,19 +166,16 @@ async function signIn(req, res) {
 		});
 	}
 }
-
 /**
-Send a reset password email to the user's email address.
-
-* @async
-* @function
-* @param {Object} req - The request object --> contains user email that forgot password 
-* @param {String} req.body.email - The user's email.
-* @param {Object} res - The response object. --> success if user's email found and email sent
-* @returns {void}
-*
-* @throws {400} Throws an error if the user email doesn't exist or if there's a server error.
-*/
+ * @async
+ * @function
+ * @param {Object} req - The request object --> contains user email that forgot password
+ * @param {String} req.body.email - The user's email.
+ * @param {Object} res - The response object. --> success if user's email found and email sent
+ * @returns {void}
+ *
+ * @throws {400} Throws an error if the user email doesn't exist or if there's a server error.
+ */
 async function forgotPassword(req, res) {
 	try {
 		// Get email from request body

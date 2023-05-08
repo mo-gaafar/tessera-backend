@@ -15,11 +15,6 @@ router.get(
 );
 
 router.get(
-	"/event-management/csv-exports",
-	dashboardController.exportsListEvents
-);
-
-router.get(
 	"/dashboard/reports/sales/:eventID",
 	dashboardController.exportEventSales
 );
@@ -28,7 +23,6 @@ router.get(
 	"/dashboard/reportJason/attendees-list/:eventID",
 	dashboardController.AttendeeSumJason
 );
-
 router.get(
 	"/dashboard/eventsoldtickets/events/:eventID",
 	dashboardController.eventSoldTickets

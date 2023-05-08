@@ -13,6 +13,7 @@ const bcrypt = require("bcrypt");
  */
 async function passwordEncryption(userPassword) {
 	try {
+		if (userPassword == null) return;
 		// Generate verification token
 		//const encryptedPassword = jwt.sign({ userPassword }, process.env.SECRETJWT);
 		const salt = await bcrypt.genSalt(10);
