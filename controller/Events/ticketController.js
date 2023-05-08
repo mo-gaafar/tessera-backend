@@ -20,6 +20,8 @@ const {
   addAttendeeOption,
 } = require("../../utils/sendEmail");
 
+const { comparePassword } = require("../../utils/passwords");
+
 /**
  * Creates a new ticket for an event and user.
  *
