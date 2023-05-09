@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const eventController = require("../controller/Events/eventController");
-const fileUpload = require('express-fileupload');
+const fileUpload = require("express-fileupload");
 
 router.post("/event-management/creator", eventController.createEvent);
 

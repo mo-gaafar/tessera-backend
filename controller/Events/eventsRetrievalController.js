@@ -10,7 +10,6 @@ const {
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const moment = require("moment");
-require("dotenv").config();
 const { exportToCsv } = require("../../utils/exports");
 
 /**

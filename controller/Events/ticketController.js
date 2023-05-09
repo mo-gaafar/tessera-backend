@@ -222,6 +222,14 @@ async function generateTickets(
     tickets = [];
     const { tierName, quantity } = ticketTiers[i];
 
+    // check if the quantitySold excceds the maxCapacity in the tickets tier
+    if (ticketTiers[i].quantitySold >= ticketTiers[i].maxCapacity) {
+      // throw error if quantitySold exceeds maxCapacity
+      throw new Error(
+        `The quantity of tickets sold exceeds the capacity of the ticket tier. Ticket tier: ${tierName}. Quantity sold: ${ticketTiers[i].quantitySold}. Max capacity: ${ticketTiers[i].maxCapacity}.`
+      );
+    }
+
     // Loop through each quantity of the current ticket tier and create a ticket object for each one
     for (let j = 0; j < quantity; j++) {
       // Calculate the total price of the ticket
@@ -331,8 +339,8 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
   }
 }
 
-// const token= GenerateToken("643a56706f55e9085d193f48")
-// console.log("token is:",token)
+// const token = GenerateToken("643a56706f55e9085d193f48")
+// console.log("token is:", token)
 
 /**
  * Creates a new ticket tier for an event.

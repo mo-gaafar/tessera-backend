@@ -100,10 +100,6 @@ async function importPromocode(req, res) {
 async function createPromocode(req, res) {
   const eventId = req.params.event_Id;
   const { code, discount, limitOfUses } = req.body;
-
-  // Retrieve the JWT token from the request headers.
-  // const token = await retrieveToken(req);
-
   try {
     // Find the event in the database.
     const event = await eventModel.findById(eventId);
@@ -139,24 +135,24 @@ async function createPromocode(req, res) {
     if (promocodeExists) {
       throw new Error("Promocode code already exists for this event");
     }
+    let promocodeObj = {};
+    promocodeObj.code = code;
+    promocodeObj.discount = discount;
+    promocodeObj.limitOfUses = limitOfUses;
+    console.log(
+      "🚀 ~ file: promocodeController.js:142 ~ createPromocode ~ promocodeObj:",
+      promocodeObj
+    );
 
-    // Create a new promocode object and save it to the database.
-    const promocode = await promocodeModel.create({
-      code,
-      discount,
-      limitOfUses,
-      remainingUses:
-        limitOfUses === "unlimited" ? "unlimited" : Number(limitOfUses),
-      event: eventId,
-    });
-    await promocode.save();
+    await addPromocodeToDatabase(eventId, promocodeObj);
+
     // add the promcode to the event Schema
-    await addPromocodeToEvent(eventId, promocode);
+    await addPromocodeToEvent(eventId, promocodeObj);
     // Return the new promocode object in the response.
     return res.status(200).json({
       success: true,
       message: "Promocode has been created successfully",
-      promocode,
+      promocodeObj,
     });
   } catch (err) {
     console.error(err);
@@ -170,10 +166,6 @@ async function createPromocode(req, res) {
 }
 
 async function addPromocodeToDatabase(eventId, promocode) {
-  console.log(
-    "🚀 ~ file: promocodeController.js:206 ~ createPromocode ~ promocode:",
-    promocode
-  );
   code = promocode.code;
   discount = promocode.discount;
   limitOfUses = promocode.limitOfUses;
@@ -191,7 +183,6 @@ async function addPromocodeToDatabase(eventId, promocode) {
   await newPromocode.save();
   return newPromocode;
 }
-
 /**
  * Check if a promocode with the given code exists for the given event.
  * @param {string} eventId - The ID of the event to check for the promocode.
@@ -200,22 +191,11 @@ async function addPromocodeToDatabase(eventId, promocode) {
  * @throws {Error} - If an error occurs while checking for the promocode.
  */
 async function checkPromocodeExists(eventId, code) {
-  console.log(
-    "🚀 ~ file: promocodeController.js:173 ~ checkPromocodeExists ~ code:",
-    code
-  );
   try {
     // Find a promocode with the given event ID and code in the database.
     const promocode = await promocodeModel.findOne({ event: eventId, code });
-    console.log(
-      "🚀 ~ file: promocodeController.js:180 ~ checkPromocodeExists ~ promocode Exist or noooo:",
-      promocode
-    );
-
-    if (!promocode) {
-      return false;
-    }
-    return true;
+    // Return the discount if a promocode was found, false otherwise.
+    return promocode ? promocode.discount : false;
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
     console.error(err);

@@ -13,6 +13,14 @@ const {
   retrieveTicketTier,
   generateTickets,
 } = require("../Events/ticketController");
+
+const {
+  sendUserEmail,
+  orderBookedOption,
+  addAttendeeOption,
+  addAttendeeBuyerOption,
+} = require("../../utils/sendEmail");
+
 const generateQRCodeWithLogo = require("../../utils/qrCodeGenerator");
 /**
  * Add attendee to an event manually
@@ -139,9 +147,19 @@ async function addAttendee(req, res) {
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
+    // generate order id
+    const orderId = await generateUniqueId();
+
     //if creator want to send email
     if (SendEmail) {
-      sendEmailsToattendees(event, user, ticketTierSelected, invitationsExist);
+      sendEmailsToattendees(
+        event,
+        user,
+        ticketTierSelected,
+        invitationsExist,
+        orderId,
+        qrcodeImage
+      );
     }
 
     return res.status(200).json({
@@ -210,17 +228,13 @@ async function bookTicketForAttendees(
   //get buyer id for booking tickets
   const buyerId = user._id;
 
-  // generate order id
-  const orderId = await generateUniqueId();
-
   //generate the tickets
   await generateTickets(
     ticketTierSelected,
     eventId,
     promocodeObj,
     user._id,
-    buyerId,
-    orderId
+    buyerId
   );
 }
 
@@ -237,7 +251,9 @@ async function sendEmailsToattendees(
   event,
   user,
   ticketTierSelected,
-  invitationsExist
+  invitationsExist,
+  orderId,
+  qrcodeImage
 ) {
   //get some inviter information
   const buyerEmail = user.email;
@@ -299,6 +315,7 @@ async function sendEmailsToattendees(
     eventName: eventName,
     eventDate: eventDate,
     eventLocation: eventLocation,
+    orderId: orderId,
   };
 
   const attendeesArray = [];
@@ -335,17 +352,25 @@ async function sendEmailsToattendees(
             eventBasicInfo: eventBasicInfoObj,
             attendeesInformation: [attendeesInformation],
           };
-          console.log("Attendee order:");
-          console.log(attendeeOrderObj);
 
-          //TODO abdallah:: send email with order info for each attendee invited to the event
-
+          console.log(
+            "🚀 ~ file: manageAttendeeController.js:356 ~ attendeeOrderObj:",
+            attendeeOrderObj
+          );
+          //addAttendeeOption(email,attendeeOrderObj,qrcodeImage)
+          await sendUserEmail(
+            email,
+            attendeeOrderObj,
+            addAttendeeOption,
+            qrcodeImage
+          );
           console.log(`Sending email to ${firstname} to add attendees`);
         }
       }
     }
 
-    //add all objects to a single objectto send for email
+    // addAttendeeOption(email, attendeeOrderObj, qrcodeImage);
+    //add all objects to a single object to send for email
     buyerOrderObj = {
       buyerContactInformation: buyerContactInformation,
       eventBasicInfo: eventBasicInfoObj,
@@ -354,10 +379,19 @@ async function sendEmailsToattendees(
     console.log(`Sending email to ${buyerName} to add attendees`);
     console.log("Buyer object for email:");
     console.log(buyerOrderObj);
-
+    console.log(
+      "🚀 ~ file: manageAttendeeController.js:381 ~ buyerOrderObj:",
+      buyerOrderObj
+    );
+    const emailOfBuyer = buyerContactInformation.email;
+    await sendUserEmail(
+      emailOfBuyer,
+      buyerOrderObj,
+      addAttendeeBuyerOption,
+      qrcodeImage
+    );
     //TODO abdallah::send email to the ticket buyer with attendees information
   } else {
-    //TODO abdallah::send email with order info for ticket buyer & the attendee is the buyer
     const buyerOrderObj = {
       buyerContactInformation: buyerContactInformation,
       eventBasicInfo: eventBasicInfoObj,

@@ -110,7 +110,6 @@ const eventSchema = new mongoose.Schema(
       type: String,
       enum: ["started", "ended", "completed", "cancelled", "live"],
     },
-
     // if the creator have published the event ( it will be availble for the users to book tickets)
     published: {
       type: Boolean,
