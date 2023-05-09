@@ -1,7 +1,89 @@
-/*const {
+const {
 	AttendeeSumJason,
 } = require("../../controller/Dashboard/dashboardController");
 const eventModel = require("../../models/eventModel");
+const ticketModel = require("../../models/ticketModel");
+const userModel2 = require("../../models/userModel");
+const userModel = require("../../models/userModel");
+
+describe("AttendeeSumJason function", () => {
+	let req;
+	let res;
+
+	beforeEach(() => {
+		req = { params: { eventID: "someID" } };
+		res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+	});
+
+	afterEach(() => {
+		jest.resetAllMocks();
+	});
+
+	test("returns attendee summary when all data is found", async () => {
+		// Arrange
+		const mockEvent = {
+			_id: "someID",
+			basicInfo: { eventName: "someEvent" },
+			soldTickets: [
+				{ ticketId: "ticketID", userId: "userID", orderId: "orderID" },
+			],
+		};
+		const mockTicket = {
+			_id: "ticketID",
+			buyerId: "buyerID",
+			tierName: "VIP",
+			purchasePrice: 100,
+		};
+		const mockUser = {
+			_id: "userID",
+			firstName: "John",
+			lastName: "Doe",
+			email: "johndoe@example.com",
+		};
+		const mockBuyer = {
+			_id: "buyerID",
+			firstName: "Jane",
+			lastName: "Doe",
+			email: "janedoe@example.com",
+		};
+		eventModel.findById = jest.fn().mockResolvedValue(mockEvent);
+		ticketModel.findById = jest.fn().mockResolvedValue(mockTicket);
+		userModel2.findById = jest
+			.fn()
+			.mockResolvedValueOnce(mockUser)
+			.mockResolvedValueOnce(mockBuyer);
+
+		// Act
+		await AttendeeSumJason(req, res);
+
+		// Assert
+		expect(eventModel.findById).toHaveBeenCalledWith("someID");
+		expect(ticketModel.findById).toHaveBeenCalledWith("ticketID");
+		expect(userModel2.findById).toHaveBeenCalledWith("userID");
+		expect(userModel2.findById).toHaveBeenCalledWith("buyerID");
+		expect(res.status).toHaveBeenCalledWith(200);
+		expect(res.json).toHaveBeenCalledWith({
+			success: true,
+			message: "Summary jason return successfully",
+			attendeeSummary: [
+				{
+					OrderId: "orderID",
+					OrderDate: expect.any(String),
+					Attending: "Attending",
+					"Attendee Name": "John Doe",
+					"attendee email": "johndoe@example.com",
+					"Event name": "someEvent",
+					"Ticket Type": "VIP",
+					"Ticket Price": 100,
+					"Buyer name": "Jane Doe",
+					"Buyer email": "janedoe@example.com",
+					"Ticket Quantity": 1,
+				},
+			],
+		});
+	});
+});
+/*const eventModel = require("../../models/eventModel");
 const ticketModel = require("../../models/ticketModel");
 const userModel2 = require("../../models/userModel");
 
@@ -142,8 +224,8 @@ describe("AttendeeSumJason", () => {
 		expect(res.send).toHaveBeenCalledWith(new Error("Failed to fetch attendee summary");
 	});
 }); 
-*/
-const { exportAttendeeSummary } = require("./myModule"); // replace with actual module name
+
+/*const { exportAttendeeSummary } = require("./myModule"); // replace with actual module name
 
 describe("exportAttendeeSummary", () => {
 	test("should export attendee summary to CSV file and download it", async () => {
@@ -225,4 +307,126 @@ describe("exportAttendeeSummary", () => {
 		expect(console.error).toHaveBeenCalledWith(expect.any(Error));
 		expect(result.error).toEqual(expectedErrorMessage);
 	});
+});*/
+
+/*describe("AttendeeSumJason", () => {
+	it("should return 404 if event is not found", async () => {
+		const req = { params: { eventID: "invalidEventID" } };
+		const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+		const eventModel = { findById: jest.fn().mockReturnValue(null) };
+		const ticketModel = { findById: jest.fn() };
+		const userModel2 = { findById: jest.fn() };
+		await AttendeeSumJason(req, res, eventModel, ticketModel, userModel2);
+		expect(res.status).toHaveBeenCalledWith(404);
+		expect(res.send).toHaveBeenCalledWith("Event not found");
+	});
+
+	it("should return 404 if ticket is not found", async () => {
+		const req = { params: { eventID: "validEventID" } };
+		const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+		const eventModel = {
+			findById: jest.fn().mockReturnValue({
+				soldTickets: [
+					{
+						ticketId: "invalidTicketID",
+						userId: "validUserID",
+						orderId: "validOrderID",
+					},
+				],
+			}),
+		};
+		const ticketModel = { findById: jest.fn().mockReturnValue(null) };
+		const userModel2 = { findById: jest.fn() };
+		await AttendeeSumJason(req, res, eventModel, ticketModel, userModel2);
+		expect(res.status).toHaveBeenCalledWith(404);
+		expect(res.send).toHaveBeenCalledWith("ticket not found");
+	});
+
+	it("should return 404 if user or buyer is not found", async () => {
+		const req = { params: { eventID: "validEventID" } };
+		const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+		const eventModel = {
+			findById: jest.fn().mockReturnValue({
+				soldTickets: [
+					{
+						ticketId: "validTicketID",
+						userId: "invalidUserID",
+						orderId: "validOrderID",
+					},
+				],
+			}),
+		};
+		const ticketModel = {
+			findById: jest.fn().mockReturnValue({
+				buyerId: "invalidBuyerID",
+				tierName: "validTicketType",
+				purchasePrice: "validTicketPrice",
+				createdAt: "2023-05-09T11:51:30.035Z",
+			}),
+		};
+		const userModel2 = { findById: jest.fn().mockReturnValue(null) };
+		await AttendeeSumJason(req, res, eventModel, ticketModel, userModel2);
+		expect(res.status).toHaveBeenCalledWith(404);
+		expect(res.send).toHaveBeenCalledWith("user not found");
+	});
+
+	it("should return a summary of attendees in JSON format", async () => {
+		await AttendeeSumJason(mockReq, mockRes);
+
+		expect(eventModel.findById).toHaveBeenCalledWith(mockReq.params.eventID);
+		expect(ticketModel.findById).toHaveBeenCalledWith(
+			mockEvent.soldTickets[0].ticketId
+		);
+		expect(userModel2.findById).toHaveBeenCalledTimes(2);
+		expect(userModel2.findById).toHaveBeenCalledWith(
+			mockEvent.soldTickets[0].userId
+		);
+		expect(userModel2.findById).toHaveBeenCalledWith(mockTicket.buyerId);
+		expect(mockRes.status).toHaveBeenCalledWith(200);
+		expect(mockRes.json).toHaveBeenCalledWith({
+			success: true,
+			message: "Summary jason return successfully",
+			attendeeSummary: [
+				{
+					OrderId: mockEvent.soldTickets[0].orderId,
+					OrderDate: moment(mockTicket.createdAt).format("M/D/YY h:mm A"),
+					Attending: "Attending",
+					"Attendee Name": `${mockUser.firstName} ${mockUser.lastName}`,
+					"attendee email": mockUser.email,
+					"Event name": mockEvent.basicInfo.eventName,
+					"Ticket Type": mockTicket.tierName,
+					"Ticket Price": mockTicket.purchasePrice,
+					"Buyer name": `${mockUser.firstName} ${mockUser.lastName}`,
+					"Buyer email": mockUser.email,
+					"Ticket Quantity": 1,
+				},
+			],
+		});
+
+		// Mock the necessary functions
+		eventModel.findById = jest.fn().mockResolvedValue(event);
+		ticketModel.findById = jest.fn().mockResolvedValue(ticket);
+		userModel2.findById = jest.fn().mockImplementation((userId) => {
+			if (userId === "userID") return user;
+			else if (userId === "buyerID") return buyer;
+			else return null;
+		});
+		const momentMock = jest
+			.spyOn(moment, "format")
+			.mockReturnValue("5/9/23 12:00 AM");
+		// Act
+		await AttendeeSumJason(req, res);
+		// Assert
+		expect(res.status).toHaveBeenCalledWith(200);
+		expect(res.json).toHaveBeenCalledWith(expectedResponse);
+		expect(eventModel.findById).toHaveBeenCalledWith("someID");
+		expect(ticketModel.findById).toHaveBeenCalledWith("ticketID");
+		expect(userModel2.findById).toHaveBeenCalledWith("userID");
+		expect(userModel2.findById).toHaveBeenCalledWith("buyerID");
+		expect(momentMock).toHaveBeenCalledWith(
+			"2023-05-09T00:00:00.000Z",
+			"M/D/YY h:mm A"
+		);
+	});
 });
+*/
