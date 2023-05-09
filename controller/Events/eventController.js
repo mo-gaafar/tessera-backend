@@ -390,6 +390,7 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_S3_SECRET_KEY,
 });
 const s3 = new AWS.S3();
+
 /**
  * Uploads an image to S3 and updates the event with the image URL.
  * @async
