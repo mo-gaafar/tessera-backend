@@ -53,6 +53,38 @@ async function createEvent(req, res) {
   }
 }
 
+// async function addEventDetails(req,res)
+// try {
+// 		const eventId = req.params.eventID;
+// 		const event = await eventModel.findById(eventId); //search event by id
+// 		//check if no events
+// 		if (!event) {
+// 			return res.status(404).json({ message: "No event Found" });
+// 		}
+// 		//authorize that user exists
+// 		const userExist = await authorized(req);
+
+// 		if (event.creatorId.toString() !== userExist.user_id.toString()) {
+// 			// check if the creator of the event matches the user making the delete request
+// 			return res.status(401).json({
+// 				success: false,
+// 				message: "You are not authorized to retrieve this event",
+// 			});
+// 		}
+
+// 	return res.status(200).json({
+// 		success: true,
+// 		message: "Event has been created successfully",
+// 		event_Id: event._id,
+// 	});
+// 	//}
+// } catch (error) {
+// 	res.status(400).json({
+// 		success: false,
+// 		message: error.message,
+// 	});
+// }
+
 /**
 Retrieves an event from the database by its ID.
 @async

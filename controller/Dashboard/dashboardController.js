@@ -79,8 +79,10 @@ async function AttendeeSumJason(req, res) {
       attendeeSummary: attendeeSummary,
     });
   } catch (error) {
-    console.error(error);
-    return { error: error.message };
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 }
 
@@ -93,8 +95,10 @@ async function getAttendeeSummary(eventID) {
     const response = await axios.get(url);
     return response.data.attendeeSummary;
   } catch (error) {
-    console.error(error);
-    return { error: error.message };
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 }
 /**
@@ -131,8 +135,10 @@ async function exportAttendeeSummary(req, res) {
       console.log("CSV file downloaded successfully");
     });
   } catch (error) {
-    console.error(error);
-    return { error: error.message };
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 }
 
@@ -202,7 +208,7 @@ async function exportEventSales(req, res) {
 }
 
 // function to get the event url
-async function getEventURL(res, req) {
+async function getEventUrl(res, req) {
   try {
     const eventId = req.params.eventID;
     const event = await eventModel.findById(eventId); //search event by id
