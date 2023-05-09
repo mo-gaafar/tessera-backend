@@ -20,10 +20,20 @@ Imports promocodes from a CSV file and adds them to an event.
 */
 async function importPromocode(req, res) {
   try {
-    //check if file is uploaded
+    // Find the event associated with the promocodes and add the promocodes to the event
+    const eventId = req.params.eventID;
+    const event = await eventModel.findById(eventId);
+
+    // Check if the event exists
+    if (!event) {
+      return res.status(404).send("Event not found");
+    }
+
+    // Check if a file has been uploaded
     if (!req.file) {
       return res.status(400).send("No file uploaded");
     }
+
     // Parse the CSV data from the file buffer
     const csvData = await new Promise((resolve, reject) => {
       const csvParser = parse({ delimiter: "," }, (err, data) => {
@@ -35,40 +45,50 @@ async function importPromocode(req, res) {
       csvParser.end();
     });
 
-    // assuming the first row of the csv file contains the column names
+    // Assuming the first row of the csv file contains the column names
     const [header, ...rows] = csvData;
     const [headerCode, headerDiscount, headerlimitOfUses] = header;
 
     // Process each row of the CSV file and create a new promocode object for each
-    const promocodes = [];
-    for (const row of rows) {
+    const promocodes = rows.map((row) => {
       const [code, discount, limitOfUses] = row;
-      const newPromocode = new promocodeModel({
+      return {
         code,
         discount: parseInt(discount),
         limitOfUses,
-      });
-      await newPromocode.save();
-      promocodes.push({ id: newPromocode._id, code });
-    }
-    // Find the event associated with the promocodes and add the promocodes to the event
-    const eventId = req.params.eventID;
-    const event = await eventModel.findById(eventId);
-    if (!event) {
-      return res.status(404).send("Event not found");
+      };
+    });
+
+    // Check all the promocodes if one of them exists and add them to exists array and if not add it to the database
+    const exists = [];
+    const notExists = [];
+    for (const promocode of promocodes) {
+      const { code } = promocode;
+      const promocodeExists = await checkPromocodeExists(eventId, code);
+
+      if (promocodeExists) {
+        exists.push(promocode);
+      } else {
+        notExists.push(promocode);
+      }
     }
 
-    event.promocodes.push(...promocodes);
-    await event.save();
+    for (const newPromocodes of notExists) {
+      addPromocodeToDatabase(eventId, newPromocodes);
+    }
 
+    // Add the newPromocodes to the event using a for loop
+    for (const newPromocode of notExists) {
+      addPromocodeToEvent(eventId, newPromocode);
+    }
+
+    // Return the imported promocodes in the response.
     return res.status(200).json({
       success: true,
       message: "Promocode has been imported successfully",
-      promocodes,
+      promocodesAdded: notExists.length > 0 ? notExists : null,
     });
   } catch (err) {
-    console.error(err);
-
     // Return an error response if an error occurs.
     return res.status(401).json({
       success: false,
@@ -149,6 +169,29 @@ async function createPromocode(req, res) {
   }
 }
 
+async function addPromocodeToDatabase(eventId, promocode) {
+  console.log(
+    "🚀 ~ file: promocodeController.js:206 ~ createPromocode ~ promocode:",
+    promocode
+  );
+  code = promocode.code;
+  discount = promocode.discount;
+  limitOfUses = promocode.limitOfUses;
+
+  // create a new promocode object and save it to the database
+  const newPromocode = await promocodeModel.create({
+    code,
+    discount,
+    limitOfUses,
+    remainingUses:
+      limitOfUses === "unlimited" ? "unlimited" : Number(limitOfUses),
+    event: eventId,
+  });
+
+  await newPromocode.save();
+  return newPromocode;
+}
+
 /**
  * Check if a promocode with the given code exists for the given event.
  * @param {string} eventId - The ID of the event to check for the promocode.
@@ -157,11 +200,22 @@ async function createPromocode(req, res) {
  * @throws {Error} - If an error occurs while checking for the promocode.
  */
 async function checkPromocodeExists(eventId, code) {
+  console.log(
+    "🚀 ~ file: promocodeController.js:173 ~ checkPromocodeExists ~ code:",
+    code
+  );
   try {
     // Find a promocode with the given event ID and code in the database.
     const promocode = await promocodeModel.findOne({ event: eventId, code });
-    // Return the discount if a promocode was found, false otherwise.
-    return promocode ? promocode.discount : false;
+    console.log(
+      "🚀 ~ file: promocodeController.js:180 ~ checkPromocodeExists ~ promocode Exist or noooo:",
+      promocode
+    );
+
+    if (!promocode) {
+      return false;
+    }
+    return true;
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
     console.error(err);

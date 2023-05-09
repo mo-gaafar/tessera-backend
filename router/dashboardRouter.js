@@ -5,28 +5,30 @@ const dashboardController = require("../controller/Dashboard/dashboardController
 
 // to be modified
 router.get(
-	"/dashboard/eventsales/events/:eventID",
-	dashboardController.eventSales
+  "/dashboard/eventsales/events/:eventID",
+  dashboardController.eventSales
 );
 
 router.get(
-	"/dashboard/report/attendees-list/:eventID",
-	dashboardController.exportAttendeeSummary
+  "/dashboard/report/attendees-list/:eventID",
+  dashboardController.exportAttendeeSummary
 );
 
 router.get(
-	"/dashboard/reports/sales/:eventID",
-	dashboardController.exportEventSales
+  "/dashboard/reports/sales/:eventID",
+  dashboardController.exportEventSales
 );
 
 router.get(
-	"/dashboard/reportJason/attendees-list/:eventID",
-	dashboardController.AttendeeSumJason
+  "/dashboard/reportJason/attendees-list/:eventID",
+  dashboardController.AttendeeSumJason
 );
 router.get(
-	"/dashboard/eventsoldtickets/events/:eventID",
-	dashboardController.eventSoldTickets
+  "/dashboard/eventsoldtickets/events/:eventID",
+  dashboardController.eventSoldTickets
 );
+
+router.get("/dashboard/event-url/:eventID", dashboardController.getEventUrl);
 
 
 //
