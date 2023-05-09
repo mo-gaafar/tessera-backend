@@ -32,18 +32,14 @@ const generateQRCodeWithLogo = require("../../utils/qrCodeGenerator");
  */
 
 async function addAttendee(req, res) {
-  console.log("Gonna add attendee manually");
-  // const useridid = "643a56706f55e9085d193f48";
+  // console.log("Gonna add attendee manually");
+  // const useridid = "6439f95a3d607d6c49e56a1e";
   // const tok = GenerateToken(useridid);
   // console.log(tok);
   try {
     //get request body
     const { contactInformation, promocode, ticketTierSelected, SendEmail } =
       req.body;
-    //get path parameter
-    const eventId = req.params.eventID;
-    //check if inviter is a user
-    const email = contactInformation.email;
 
     if (
       !ticketTierSelected ||
@@ -57,6 +53,11 @@ async function addAttendee(req, res) {
         message: "No attendees information was provided or it's incomplete",
       });
     }
+
+    //get path parameter
+    const eventId = req.params.eventID;
+    //check if inviter is a user
+    const email = contactInformation.email;
 
     if (!eventId) {
       console.log("No parameter was provided");
@@ -94,7 +95,7 @@ async function addAttendee(req, res) {
       });
     }
 
-    // Get the user object from the database
+    // Get the buyer information object from the database
     const user = await userModel.findOne({
       email: email,
     });
@@ -105,6 +106,26 @@ async function addAttendee(req, res) {
       throw new Error("User not found");
     }
 
+    //check if no attendees invited
+    let invitationsExist = true;
+    for (let i = 0; i < ticketTierSelected.length; i++) {
+      if (
+        ticketTierSelected[i].quantity !== ticketTierSelected[i].tickets.length
+      ) {
+        console.log("No attendees information was provided or it's incomplete");
+        throw new Error(
+          "No attendees information was provided or it's incomplete"
+        );
+      }
+      if (
+        !ticketTierSelected[i].tickets ||
+        ticketTierSelected[i].tickets.length === 0
+      ) {
+        invitationsExist = false;
+      }
+    }
+
+    //book tickets for attendees added manually
     await bookTicketForAttendees(
       event,
       user,
@@ -118,8 +139,9 @@ async function addAttendee(req, res) {
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
+    //if creator want to send email
     if (SendEmail) {
-      sendEmailsToattendees(event, user, ticketTierSelected);
+      sendEmailsToattendees(event, user, ticketTierSelected, invitationsExist);
     }
 
     return res.status(200).json({
@@ -191,6 +213,7 @@ async function bookTicketForAttendees(
   // generate order id
   const orderId = await generateUniqueId();
 
+  //generate the tickets
   await generateTickets(
     ticketTierSelected,
     eventId,
@@ -214,11 +237,17 @@ async function sendEmailsToattendees(
   event,
   user,
   ticketTierSelected,
-  SendEmail
+  invitationsExist
 ) {
   //get some inviter information
-  const email = user.email;
-  const inviterName = user.firstName + " " + user.lastName;
+  const buyerEmail = user.email;
+  const buyerName = user.firstName + " " + user.lastName;
+
+  //create buyer Contact Information object
+  buyerContactInformation = {
+    name: buyerName,
+    email: buyerEmail,
+  };
 
   //some event information
   const eventName = event.basicInfo.eventName;
@@ -243,6 +272,7 @@ async function sendEmailsToattendees(
   } else {
     amOrPm = "AM";
   }
+
   const hoursTwelveHourFormat = hours % 12 || 12;
   const eventTime = `${
     hoursTwelveHourFormat < 10 ? "0" : ""
@@ -250,6 +280,7 @@ async function sendEmailsToattendees(
     seconds < 10 ? "0" : ""
   }${seconds} ${amOrPm}`;
   eventTime;
+
   const eventDate = eventStartDate + ", at " + eventTime;
 
   if (event.isOnline) {
@@ -264,25 +295,24 @@ async function sendEmailsToattendees(
       ", " +
       event.basicInfo.location.country;
   }
-  //send email to the ticket buyer
+  eventBasicInfoObj = {
+    eventName: eventName,
+    eventDate: eventDate,
+    eventLocation: eventLocation,
+  };
 
-  //check if no attendees invited
-  var invitationsExist = true;
-  for (let i = 0; i < ticketTierSelected.length; i++) {
-    if (
-      !ticketTierSelected[i].tickets ||
-      ticketTierSelected[i].tickets.length === 0
-    ) {
-      invitationsExist = false;
-    }
-  }
-
+  const attendeesArray = [];
+  /* abdallah:: hena ana ba3mel if condition bas 3lshan 
+  lw l buyer gayb l tickets b esmo hwa w msh 3azem had ,
+  mafesh attendees f ana keda m3andesh list of attendees 
+  w keda hab3at nafs l email bt3 l attendees bas ll buyer da 
+  in the else statement 3lshan shoft eventbrite by3mel keda.
+  */
   //if there are invitations then get attendees info and send email
   if (invitationsExist) {
     for (const tier of ticketTierSelected) {
       //some tickets information for email
-      const ticketname = tier.ticketname;
-      const quantity = tier.quantity;
+      const ticketname = tier.tierName;
       const price = tier.price;
       //loop over the tickettier array to acess ticket info of each attendee
       if (tier.tickets) {
@@ -291,15 +321,52 @@ async function sendEmailsToattendees(
           const firstname = attendee.firstname;
           const lastname = attendee.lastname;
           const email = attendee.email;
+          const attendeesInformation = {
+            name: firstname + " " + lastname,
+            email: email,
+            tierName: ticketname,
+            price: price,
+          };
 
-          //send email with order info for each attendee invited to the event
+          attendeesArray.push(attendeesInformation);
+
+          const attendeeOrderObj = {
+            buyerContactInformation: buyerContactInformation,
+            eventBasicInfo: eventBasicInfoObj,
+            attendeesInformation: [attendeesInformation],
+          };
+          console.log("Attendee order:");
+          console.log(attendeeOrderObj);
+
+          //TODO abdallah:: send email with order info for each attendee invited to the event
+
           console.log(`Sending email to ${firstname} to add attendees`);
         }
       }
     }
+
+    //add all objects to a single objectto send for email
+    buyerOrderObj = {
+      buyerContactInformation: buyerContactInformation,
+      eventBasicInfo: eventBasicInfoObj,
+      attendeesArray: attendeesArray,
+    };
+    console.log(`Sending email to ${buyerName} to add attendees`);
+    console.log("Buyer object for email:");
+    console.log(buyerOrderObj);
+
+    //TODO abdallah::send email to the ticket buyer with attendees information
   } else {
-    //send email with order info for ticket buyer
-    console.log(`Sending email to ${inviterName} to add attendees`);
+    //TODO abdallah::send email with order info for ticket buyer & the attendee is the buyer
+    const buyerOrderObj = {
+      buyerContactInformation: buyerContactInformation,
+      eventBasicInfo: eventBasicInfoObj,
+      attendeesArray: [buyerContactInformation], //abdallah:: note that it's an array of a single value
+    };
+
+    console.log(`Sending email to ${buyerName} to add attendee`);
+    console.log("buyer object for email:  ");
+    console.log(buyerOrderObj);
   }
 }
 

@@ -11,7 +11,6 @@ const jwt = require("jsonwebtoken");
 
 const { comparePassword } = require("../../utils/passwords");
 
-
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
 @async
@@ -206,18 +205,6 @@ async function updateEvent(req, res) {
 // @throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
 // */
 async function publishEvent(req, res) {
-<<<<<<< HEAD
-	// try {
-		// getting attributes from body
-		const isPublic = req.body.isPublic;
-		const publishNow = req.body.publishNow;
-		const publicDate = req.body.publicDate;
-		const privateToPublicDate = req.body.privateToPublicDate;
-		const hasLink = req.body.link;
-		const generatedPassword = req.body.generatedPassword;
-		const hasPassword = req.body.password;
-		const alwaysPrivate = req.body.alwaysPrivate;
-=======
   try {
     // getting attributes from body
     const isPublic = req.body.isPublic;
@@ -228,7 +215,6 @@ async function publishEvent(req, res) {
     const generatedPassword = req.body.generatedPassword;
     const hasPassword = req.body.password;
     const alwaysPrivate = req.body.alwaysPrivate;
->>>>>>> d7b4345e5942273e4da628c70bbc3aceac2ec2f8
 
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
 
@@ -369,33 +355,6 @@ async function publishEvent(req, res) {
         }
       }
 
-<<<<<<< HEAD
-			// if event is not published
-			if (!isPublished) {
-				// update the published attribute to be true to publish the event
-				const update_last = { published: true };
-				const updatedEvent_last = await eventModel.findOneAndUpdate(
-					{ _id: req.params.eventID },
-					update_last,
-					{
-						new: true,
-						runValidators: true,
-					}
-				);
-				console.log("Updated event:", updatedEvent_last);
-			}
-			// if event is already published
-			else {
-				console.log("event is already published");
-			}
-		}
-	// } catch {
-	// 	res.status(400).json({
-	// 		success: false,
-	// 		message: "invalid error",
-	// 	});
-	// }
-=======
       // if event is not published
       if (!isPublished) {
         // update the published attribute to be true to publish the event
@@ -421,7 +380,6 @@ async function publishEvent(req, res) {
       message: "invalid error",
     });
   }
->>>>>>> d7b4345e5942273e4da628c70bbc3aceac2ec2f8
 }
 
 const AWS = require("aws-sdk");
