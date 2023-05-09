@@ -12,6 +12,7 @@ const axios = require("axios");
 const moment = require("moment");
 require("dotenv").config();
 const { exportToCsv } = require("../../utils/exports");
+const logger = require("../Logger");
 
 /**
  * List events filtered by creator id and optionally by status (upcoming, past, or draft)
@@ -304,15 +305,15 @@ Exports a list of events with sales data to a CSV file.
 @returns {Object} - Returns an object with a success message or an error message if an error occurred.
 */
 async function exportsListEvents(req, res) {
-	const instance = axios.create({
-		baseURL: process.env.BASE_URL,
-		timeout: 1000,
-	});
-	const filtering = req.query.filterBy;
-	const url =
-		process.env.BASE_URL +
-		`/event-management/listEvents/?filterBy=${filtering}`;
 	try {
+		const instance = axios.create({
+			baseURL: process.env.BASE_URL,
+			timeout: 1000,
+		});
+		const filtering = req.query.filterBy;
+		const url =
+			process.env.BASE_URL +
+			`/event-management/listEvents/?filterBy=${filtering}`;
 		// Get event data from the API endpoint
 		const response = await instance.get(url, {
 			headers: {
@@ -321,7 +322,12 @@ async function exportsListEvents(req, res) {
 		});
 		// Extract relevant data from the response
 		const filteredEvents = response.data.filteredEvents;
+		if (filteredEvents)
+			logger.loggerController.log("info", "filtered events retrieve success");
+
 		const eventsoldtickets = response.data.eventsoldtickets;
+		if (eventsoldtickets)
+			logger.loggerController.log("info", "eventsoldTickets retrieve success");
 		// Define CSV headers and file path
 		const csvHeaders = [
 			{ id: "eventName", title: "EventName" },
@@ -352,15 +358,17 @@ async function exportsListEvents(req, res) {
 		}
 		// Export data to CSV file
 		await exportToCsv(records, csvFilePath, csvHeaders);
+		logger.loggerController.log("info", "creator events csv exported success");
 		// Set headers for CSV download and send file to client
 		res.setHeader("Content-Type", "text/csv");
 		res.setHeader("Content-Disposition", "attachment; filename=listEvents.csv");
 		res.download(csvFilePath);
 	} catch (error) {
-		console.error(error);
+		//console.error(error);
+		logger.loggerController.log("error", "error in fetching event data");
 		res.status(500).json({
 			success: false,
-			message: "Error occurred while fetching event sales data",
+			message: "Error occurred while fetching event data",
 		});
 	}
 }

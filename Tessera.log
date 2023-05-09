@@ -1,0 +1,216 @@
+{"level":"error","message":"jwt expired","timestamp":"2023-05-09T16:14:43.307Z"}
+{"level":"info","message":"user exits and ask to forget password","timestamp":"2023-05-09T16:14:54.042Z"}
+{"level":"info","message":"sent Reset Email","timestamp":"2023-05-09T16:14:55.656Z"}
+{"level":"info","message":"user exits and ask to forget password","timestamp":"2023-05-09T16:17:44.904Z"}
+{"level":"info","message":"sent Reset Email","timestamp":"2023-05-09T16:17:46.527Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:17:46.553Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:17:46.557Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:17:49.820Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:17:49.828Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:17:49.831Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:17:53.313Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:17:53.325Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:17:53.331Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:17:55.137Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:17:55.145Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:17:55.152Z"}
+{"level":"info","message":"filtered events retrieve success","timestamp":"2023-05-09T16:17:55.785Z"}
+{"level":"info","message":"eventsoldTickets retrieve success","timestamp":"2023-05-09T16:17:55.788Z"}
+{"level":"info","message":"creator events csv exported success","timestamp":"2023-05-09T16:17:55.818Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:17:56.642Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:17:56.657Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:17:56.660Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:17:56.666Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:17:58.049Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:17:58.054Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:17:58.063Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:17:58.779Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:17:58.797Z"}
+{"level":"info","message":" attendeeSummary csv downloaded Successfully","timestamp":"2023-05-09T16:17:58.799Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:17:58.804Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:17:58.805Z"}
+{"level":"info","message":"user wants to resetpassword exists","timestamp":"2023-05-09T16:18:01.275Z"}
+{"level":"info","message":"password encrypted success","timestamp":"2023-05-09T16:18:01.277Z"}
+{"level":"info","message":"user password has been reset","timestamp":"2023-05-09T16:18:01.278Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:18:01.284Z"}
+{"level":"info","message":"user exits and ask to forget password","timestamp":"2023-05-09T16:20:12.021Z"}
+{"level":"info","message":"sent Reset Email","timestamp":"2023-05-09T16:20:13.437Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:20:13.461Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:20:14.881Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:20:14.971Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:14.995Z"}
+{"level":"info","message":" attendeeSummary csv downloaded Successfully","timestamp":"2023-05-09T16:20:14.974Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:14.994Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:14.997Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:14.997Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:20:13.460Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:20:13.466Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:20:13.468Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:20:15.408Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:20:15.419Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:20:15.418Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:20:15.424Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:20:15.425Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:20:19.160Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:20:19.163Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:20:19.170Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:20:19.178Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:20:19.171Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:20:19.180Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:20:20.653Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:20:20.656Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:20:20.666Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:20:20.671Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:20:20.667Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:20:20.672Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:20:22.377Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:20:22.379Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:20:24.661Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:20:24.702Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:20:24.727Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:20:24.704Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:20:24.723Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:20:22.386Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:20:22.399Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:20:22.387Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:20:22.400Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:20:25.841Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:20:25.855Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:20:25.863Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:20:25.857Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:20:25.862Z"}
+{"level":"info","message":"user wants to resetpassword exists","timestamp":"2023-05-09T16:20:27.441Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:20:27.451Z"}
+{"level":"info","message":"password encrypted success","timestamp":"2023-05-09T16:20:27.443Z"}
+{"level":"info","message":"user password has been reset","timestamp":"2023-05-09T16:20:27.444Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:20:27.450Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:20:28.208Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:20:28.224Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:28.232Z"}
+{"level":"info","message":" attendeeSummary csv downloaded Successfully","timestamp":"2023-05-09T16:20:28.226Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:28.231Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:28.234Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:20:28.235Z"}
+{"level":"info","message":"filtered events retrieve success","timestamp":"2023-05-09T16:20:28.816Z"}
+{"level":"info","message":"eventsoldTickets retrieve success","timestamp":"2023-05-09T16:20:28.818Z"}
+{"level":"info","message":"creator events csv exported success","timestamp":"2023-05-09T16:20:28.836Z"}
+{"level":"info","message":"filtered events retrieve success","timestamp":"2023-05-09T16:22:22.949Z"}
+{"level":"info","message":"eventsoldTickets retrieve success","timestamp":"2023-05-09T16:22:22.954Z"}
+{"level":"info","message":"creator events csv exported success","timestamp":"2023-05-09T16:22:22.996Z"}
+{"level":"info","message":"user wants to resetpassword exists","timestamp":"2023-05-09T16:26:56.383Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:26:56.410Z"}
+{"level":"info","message":"password encrypted success","timestamp":"2023-05-09T16:26:56.387Z"}
+{"level":"info","message":"user password has been reset","timestamp":"2023-05-09T16:26:56.388Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:26:56.403Z"}
+{"level":"info","message":"user exits and ask to forget password","timestamp":"2023-05-09T16:27:03.631Z"}
+{"level":"info","message":"sent Reset Email","timestamp":"2023-05-09T16:27:05.302Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:27:05.322Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:27:05.321Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:27:05.329Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:27:05.330Z"}
+{"level":"info","message":"user exits and ask to forget password","timestamp":"2023-05-09T16:27:36.999Z"}
+{"level":"info","message":"sent Reset Email","timestamp":"2023-05-09T16:27:38.261Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:27:38.275Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:27:38.273Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:27:38.297Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:27:38.299Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:27:40.078Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:27:40.086Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:27:40.085Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:27:40.089Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:27:40.090Z"}
+{"level":"info","message":"user wants to resetpassword exists","timestamp":"2023-05-09T16:27:43.234Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:27:43.247Z"}
+{"level":"info","message":"password encrypted success","timestamp":"2023-05-09T16:27:43.237Z"}
+{"level":"info","message":"user password has been reset","timestamp":"2023-05-09T16:27:43.238Z"}
+{"level":"error","message":"link is expired","timestamp":"2023-05-09T16:27:43.246Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:27:45.072Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:27:45.076Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:27:45.089Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:27:45.099Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:27:45.090Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:27:45.100Z"}
+{"level":"info","message":"filtered events retrieve success","timestamp":"2023-05-09T16:27:45.897Z"}
+{"level":"info","message":"eventsoldTickets retrieve success","timestamp":"2023-05-09T16:27:45.906Z"}
+{"level":"info","message":"user exits and ask to forget password","timestamp":"2023-05-09T16:27:46.726Z"}
+{"level":"info","message":"creator events csv exported success","timestamp":"2023-05-09T16:27:45.934Z"}
+{"level":"info","message":"sent Reset Email","timestamp":"2023-05-09T16:27:48.085Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:27:48.105Z"}
+{"level":"error","message":"error email doesn't exist","timestamp":"2023-05-09T16:27:48.104Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:27:48.111Z"}
+{"level":"error","message":"test error","timestamp":"2023-05-09T16:27:48.112Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:27:49.303Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:27:49.305Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:27:49.312Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:27:49.319Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:27:49.313Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:27:49.320Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:27:50.744Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:27:50.746Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:27:50.750Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:27:50.754Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:27:50.751Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:27:50.755Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:27:52.992Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:27:53.009Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:27:53.016Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:27:53.010Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:27:53.016Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:27:53.686Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:27:53.698Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:27:53.706Z"}
+{"level":"info","message":" attendeeSummary csv downloaded Successfully","timestamp":"2023-05-09T16:27:53.700Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:27:53.705Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:27:53.713Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:27:53.714Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:27:59.974Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:27:59.997Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:28:01.801Z"}
+{"level":"error","message":"No event found","timestamp":"2023-05-09T16:28:01.804Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:27:59.996Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:28:00.004Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:28:00.005Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:28:01.820Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:28:01.834Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:28:01.827Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:28:01.835Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:28:03.368Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:28:03.371Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:28:03.388Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:28:03.401Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:28:03.389Z"}
+{"level":"error","message":"Database error","timestamp":"2023-05-09T16:28:03.402Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:28:06.620Z"}
+{"level":"error","message":"no event found","timestamp":"2023-05-09T16:28:06.622Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:28:06.630Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:28:06.635Z"}
+{"level":"error","message":"unauthorized access","timestamp":"2023-05-09T16:28:06.631Z"}
+{"level":"error","message":"Something wrong with the request","timestamp":"2023-05-09T16:28:06.636Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:28:48.335Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:28:48.347Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:28:48.346Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:28:48.352Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:28:48.353Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:28:50.535Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:28:50.548Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:28:50.547Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:28:50.554Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:28:50.556Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:29:42.483Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:29:42.492Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:29:42.491Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:29:42.501Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:29:42.502Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:30:14.359Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:30:14.372Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:30:14.371Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:30:14.378Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:30:14.379Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:30:34.016Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:30:34.029Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:30:34.028Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:30:34.033Z"}
+{"level":"error","message":"Cannot read properties of undefined (reading '_id')","timestamp":"2023-05-09T16:30:34.034Z"}
+{"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:32:06.842Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:32:06.852Z"}
+{"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:32:06.851Z"}

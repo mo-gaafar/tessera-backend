@@ -11,6 +11,8 @@ const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const { exportToCsv } = require("../../utils/exports");
 const { authorized } = require("../../utils/Tokens");
+const logger = require("../Logger");
+//const { Logger } = require("./../utils/logger");
 // to be modified
 
 /**
@@ -28,6 +30,7 @@ async function AttendeeSumJason(req, res) {
 		//search for event
 		const event = await eventModel.findById(req.params.eventID);
 		if (!event) {
+			logger.loggerController.log("error", "event not found");
 			return res.status(404).send("Event not found");
 		}
 		//Retrieve soldTicket attribute of event
@@ -39,12 +42,14 @@ async function AttendeeSumJason(req, res) {
 			const ticket = await ticketModel.findById(soldTickets[i].ticketId);
 			//check ticket is found
 			if (!ticket) {
+				logger.loggerController.log("error", "ticket not found");
 				return res.status(404).send("ticket not found");
 			}
 			//retrieve usermodel of user and buyer
 			const user = await userModel2.findById(soldTickets[i].userId);
 			const buyer = await userModel2.findById(ticket.buyerId);
 			if (!user || !buyer) {
+				logger.loggerController.log("error", "user not found");
 				return res.status(404).send("user not found");
 			}
 
@@ -73,12 +78,14 @@ async function AttendeeSumJason(req, res) {
 		//assign to attendee summary
 
 		const attendeeSummary = Object.values(groupedTickets);
+		logger.loggerController.log("info", "Summary jason return successfully");
 		return res.status(200).json({
 			success: true,
 			message: "Summary jason return successfully",
 			attendeeSummary: attendeeSummary,
 		});
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
@@ -93,8 +100,11 @@ async function getAttendeeSummary(eventID) {
 		// Get event data from the API endpoint
 		// Extract relevant data from the response
 		const response = await axios.get(url);
+		//console.log(response.data);
+		logger.loggerController.log("info", " summary Json Extract Successfully");
 		return response.data.attendeeSummary;
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
@@ -115,7 +125,9 @@ Export attendee summary to CSV file and download it
 async function exportAttendeeSummary(req, res) {
 	try {
 		const attendeeSummary = await getAttendeeSummary(req.params.eventID);
-
+		if (!attendeeSummary) {
+			logger.loggerController.log("error", "error in attendeeSummary");
+		}
 		const csvHeaders = [
 			{ id: "OrderId", title: "OrderId" },
 			{ id: "OrderDate", title: "Order Date" },
@@ -130,11 +142,20 @@ async function exportAttendeeSummary(req, res) {
 			{ id: "Buyer email", title: "Buyer Email" },
 		];
 		await exportToCsv(attendeeSummary, "attendee_summary.csv", csvHeaders);
+		logger.loggerController.log(
+			"info",
+			"attendeeSummary exported to csv Successfully"
+		);
 		//download
 		res.download("attendee_summary.csv", () => {
 			console.log("CSV file downloaded successfully");
 		});
+		logger.loggerController.log(
+			"info",
+			" attendeeSummary csv downloaded Successfully"
+		);
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
@@ -154,24 +175,26 @@ Export event sales to a CSV file and download it
 @throws {Error} If an error occurs while fetching event sales data
 */
 async function exportEventSales(req, res) {
-	// configure axios
-	const instance = axios.create({
-		baseURL: process.env.BASE_URL,
-		timeout: 1000,
-	});
-	// read params and queries
-	const eventID = req.params.eventID;
-	const allTiers = req.query.allTiers;
-	const tierName = req.query.tierName;
-	// prepare the Url of axios to call
-	const url =
-		process.env.BASE_URL +
-		`/dashboard/eventsales/events/${eventID}?allTiers=${allTiers}&tierName=${tierName}`;
-	// replace with the actual event ID
 	try {
+		// configure axios
+		const instance = axios.create({
+			baseURL: process.env.BASE_URL,
+			timeout: 1000,
+		});
+		// read params and queries
+		const eventID = req.params.eventID;
+		const allTiers = req.query.allTiers;
+		const tierName = req.query.tierName;
+		// prepare the Url of axios to call
+		const url =
+			process.env.BASE_URL +
+			`/dashboard/eventsales/events/${eventID}?allTiers=${allTiers}&tierName=${tierName}`;
+		// replace with the actual event ID
+
 		// axios call
 		const response = await instance.get(url);
-		console.log(response.data);
+		//console.log(response.data);
+		logger.loggerController.log("info", "Event sales response Success");
 		// write to csv
 		const csvHeaders = [
 			// Headers
@@ -188,7 +211,10 @@ async function exportEventSales(req, res) {
 			},
 		];
 		await exportToCsv(data, csvFilePath, csvHeaders);
-
+		logger.loggerController.log(
+			"info",
+			"Event sales exported to csv Successfully"
+		);
 		// download the csv
 		res.setHeader("Content-Type", "text/csv");
 		res.setHeader(
@@ -198,8 +224,13 @@ async function exportEventSales(req, res) {
 		res.download(csvFilePath, () => {
 			console.log("CSV file downloaded successfully");
 		});
+		logger.loggerController.log(
+			"info",
+			" event sales csv downloaded Successfully"
+		);
 	} catch (error) {
-		console.error(error);
+		logger.loggerController.log("error", `${error.message}`);
+		//console.error(error);
 		res.status(500).json({
 			success: false,
 			message: "Error occurred while fetching event sales data",
@@ -208,7 +239,7 @@ async function exportEventSales(req, res) {
 }
 
 // function to get the event url
-async function getEventURL(res, req) {
+/*async function getEventURL(res, req) {
 	try {
 		const eventId = req.params.eventID;
 		const event = await eventModel.findById(eventId); //search event by id
@@ -241,7 +272,7 @@ async function getEventURL(res, req) {
 			message: "invalid error",
 		});
 	}
-}
+} */
 
 async function eventSales(req, res) {
 	const event = await eventModel.findById(req.params.eventID);

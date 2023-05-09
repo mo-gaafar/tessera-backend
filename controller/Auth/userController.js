@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const userModel = require("../../models/userModel");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+const logger = require("../Logger");
 
 const {
 	sendUserEmail,
@@ -191,13 +192,17 @@ async function forgotPassword(req, res) {
 		// If user is found
 		if (user) {
 			// Generate verification token for user
+			logger.loggerController.log(
+				"info",
+				"user exits and ask to forget password"
+			);
 			const token = jwt.sign({ user_id: user._id }, process.env.SECRETJWT, {
 				expiresIn: "1d",
 			});
 
 			// Send email to user with reset password token
 			await sendUserEmail(email, token, forgetPasswordOption);
-
+			logger.loggerController.log("info", "sent Reset Email");
 			// Return success message
 			res.status(200).send({
 				success: true,
@@ -205,11 +210,13 @@ async function forgotPassword(req, res) {
 			});
 		} else {
 			// Return error message if email is not found
+			logger.loggerController.log("error", "error email doesn't exist");
 			res
 				.status(200)
 				.send({ success: true, message: "this email doesnt exist" });
 		}
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		// Return error message if an error occurs
 		res.status(400).send({ success: false, message: error.message });
 	}
@@ -236,13 +243,15 @@ async function resetPassword(req, res) {
 
 		// Find user by ID
 		const user = await userModel.findById(decoded.user_id);
-		console.log(user);
+		//console.log(user);
 		// If the user is found by ID
 		if (user) {
+			logger.loggerController.log("info", "user wants to resetpassword exists");
 			const password = req.body.password;
 
 			// Encrypt user password
 			let encryptedPassword = await passwordEncryption(password);
+			logger.loggerController.log("info", "password encrypted success");
 
 			// Update user password in MongoDB database
 			await userModel.findByIdAndUpdate(
@@ -250,16 +259,18 @@ async function resetPassword(req, res) {
 				{ $set: { password: encryptedPassword, token: "" } },
 				{ new: true }
 			);
-
+			logger.loggerController.log("info", "user password has been reset");
 			res.status(200).send({
 				success: true,
 				message: "User password has been reset",
 			});
 		} else {
 			// If the user is not found by ID, the token is expired
+			logger.loggerController.log("error", "jwt token expired");
 			res.status(200).send({ success: true, message: "this link is expired" });
 		}
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		// If an error occurs, return an error message
 		res.status(400).send({ success: false, message: error.message });
 	}

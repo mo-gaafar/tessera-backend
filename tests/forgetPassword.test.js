@@ -26,7 +26,7 @@ describe("forgotpassword", () => {
 
 		expect(userModel.findOne).toHaveBeenCalledWith({ email: req.body.email });
 		expect(jwt.sign).toHaveBeenCalledWith(
-			{ userId: user._id },
+			{ user_id: user._id },
 			process.env.SECRETJWT,
 			{ expiresIn: "1d" }
 		);

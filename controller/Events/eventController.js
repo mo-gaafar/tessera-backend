@@ -1,5 +1,6 @@
 const eventModel = require("../../models/eventModel");
 const userModel = require("../Auth/userController");
+const logger = require("../Logger");
 
 const {
 	GenerateToken,
@@ -38,7 +39,7 @@ async function createEvent(req, res) {
 				$set: { eventUrl: `https://www.tessera.social/event/${event._id}` },
 			}
 		);
-
+		logger.loggerController.log("info", "event has been created successfully");
 		return res.status(200).json({
 			success: true,
 			message: "Event has been created successfully",
@@ -46,6 +47,7 @@ async function createEvent(req, res) {
 		});
 		//}
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
@@ -69,6 +71,7 @@ async function getEventById(req, res) {
 		const event = await eventModel.findById(eventId); //search event by id
 		//check if no events
 		if (!event) {
+			logger.loggerController.log("error", "no event found");
 			return res.status(404).json({ message: "No event Found" });
 		}
 		//authorize that user exists
@@ -76,6 +79,7 @@ async function getEventById(req, res) {
 
 		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
+			logger.loggerController.log("error", "unauthorized access");
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to retrieve this event",
@@ -83,6 +87,7 @@ async function getEventById(req, res) {
 		}
 		return res.status(200).json({ event });
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
@@ -108,10 +113,12 @@ async function deleteEvent(req, res) {
 		const userExist = await authorized(req);
 
 		if (!event) {
+			logger.loggerController.log("error", "No event found");
 			return res.status(404).json({ message: "No event Found" });
 		}
 		//check if user exists
 		if (!userExist.authorized) {
+			logger.loggerController.log("error", "no user found");
 			res.status(402).json({
 				success: false,
 				message: "the user is not found",
@@ -120,6 +127,7 @@ async function deleteEvent(req, res) {
 
 		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
+			logger.loggerController.log("error", "unauthorized access");
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to delete this event",
@@ -132,6 +140,7 @@ async function deleteEvent(req, res) {
 			.status(200)
 			.json({ success: true, message: "the event is deleted" });
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
@@ -156,6 +165,10 @@ async function updateEvent(req, res) {
 		const eventId = req.params.eventID; // get the event ID from the request URL
 		const update = req.body; // get the update object from the request body
 		if (update.basicInfo) {
+			logger.loggerController.log(
+				"error",
+				"not authorized to update basicInfo"
+			);
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to update basicInfo",
@@ -165,11 +178,13 @@ async function updateEvent(req, res) {
 		const userExist = await authorized(req);
 
 		if (!event) {
+			logger.loggerController.log("error", "no event found");
 			return res.status(404).json({ error: "Event not found" });
 		}
 		// check if the updatedEvent exists
 		if (event.creatorId.toString() !== userExist.user_id.toString()) {
 			// check if the creator of the event matches the user making the delete request
+			logger.loggerController.log("error", "unauthorized access");
 			return res.status(401).json({
 				success: false,
 				message: "You are not authorized to update this event",
@@ -184,6 +199,7 @@ async function updateEvent(req, res) {
 			.status(200)
 			.json({ success: true, message: "the event is updated" });
 	} catch (error) {
+		logger.loggerController.log("error", `${error.message}`);
 		res.status(400).json({
 			success: false,
 			message: error.message,
