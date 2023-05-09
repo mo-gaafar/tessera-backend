@@ -9,7 +9,6 @@ const { authorized } = require("../../utils/Tokens");
 const upload = multer();
 
 /**
-
 Imports promocodes from a CSV file and adds them to an event.
 @async
 @function importPromocode
@@ -97,6 +96,20 @@ async function importPromocode(req, res) {
   }
 }
 
+/**
+ * Creates a new promocode for a given event.
+ * @async
+ * @function
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @param {string} req.params.event_Id - The ID of the event to create the promocode for.
+ * @param {Object} req.body - The request body.
+ * @param {string} req.body.code - The promocode code.
+ * @param {number} req.body.discount - The discount percentage.
+ * @param {number} req.body.limitOfUses - The maximum number of times the promocode can be used.
+ * @returns {Promise<Object>} A Promise that resolves with the new promocode object.
+ * @throws {Error} If the event is not found, if the user is not authorized, if the promocode code already exists, or if there is an error adding the promocode to the database or event.
+ */
 async function createPromocode(req, res) {
   const eventId = req.params.event_Id;
   const { code, discount, limitOfUses } = req.body;
@@ -165,6 +178,18 @@ async function createPromocode(req, res) {
   }
 }
 
+/**
+ * Adds a new promocode to the database.
+ * @async
+ * @function
+ * @param {string} eventId - The ID of the event that the promocode belongs to.
+ * @param {Object} promocode - The promocode object.
+ * @param {string} promocode.code - The promocode code.
+ * @param {number} promocode.discount - The discount percentage.
+ * @param {number|string} promocode.limitOfUses - The maximum number of times the promocode can be used. Use "unlimited" for unlimited uses.
+ * @returns {Promise<Object>} A Promise that resolves with the new promocode object.
+ * @throws {Error} If there is an error creating or saving the promocode object.
+ */
 async function addPromocodeToDatabase(eventId, promocode) {
   code = promocode.code;
   discount = promocode.discount;
