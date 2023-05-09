@@ -188,7 +188,7 @@ async function removeExtraAttributes(events) {
       publicDate,
       emailMessage,
       soldTickets,
-      //   ticketTiers,
+      ticketTiers,
       summary,
       description,
       isPublic,
