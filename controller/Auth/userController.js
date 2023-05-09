@@ -180,10 +180,6 @@ async function forgotPassword(req, res) {
 	try {
 		// Get email from request body
 		const email = req.body.email;
-		//const useridid = "643a56706f55e9085d193f48";
-
-		//const tok = GenerateToken(useridid);
-		//console.log(tok);
 
 		// Find user by email
 		const user = await userModel.findOne({ email: email });

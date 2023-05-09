@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 
 const { comparePassword } = require("../../utils/passwords");
 
+
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
 @async
@@ -52,38 +53,6 @@ async function createEvent(req, res) {
     });
   }
 }
-
-// async function addEventDetails(req,res)
-// try {
-// 		const eventId = req.params.eventID;
-// 		const event = await eventModel.findById(eventId); //search event by id
-// 		//check if no events
-// 		if (!event) {
-// 			return res.status(404).json({ message: "No event Found" });
-// 		}
-// 		//authorize that user exists
-// 		const userExist = await authorized(req);
-
-// 		if (event.creatorId.toString() !== userExist.user_id.toString()) {
-// 			// check if the creator of the event matches the user making the delete request
-// 			return res.status(401).json({
-// 				success: false,
-// 				message: "You are not authorized to retrieve this event",
-// 			});
-// 		}
-
-// 	return res.status(200).json({
-// 		success: true,
-// 		message: "Event has been created successfully",
-// 		event_Id: event._id,
-// 	});
-// 	//}
-// } catch (error) {
-// 	res.status(400).json({
-// 		success: false,
-// 		message: error.message,
-// 	});
-// }
 
 /**
 Retrieves an event from the database by its ID.
@@ -223,6 +192,9 @@ async function updateEvent(req, res) {
   }
 }
 
+// const token= GenerateToken("643a56706f55e9085d193f48")
+// console.log("token is:",token)
+
 // Publishes an event by updating its attributes, such as making it public or setting a password or link to access it.
 // @async
 // @function publishEvent
@@ -234,6 +206,7 @@ async function updateEvent(req, res) {
 // @throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
 // */
 async function publishEvent(req, res) {
+
   try {
     // getting attributes from body
     const isPublic = req.body.isPublic;
@@ -407,58 +380,6 @@ async function publishEvent(req, res) {
     res.status(400).json({
       success: false,
       message: "invalid error",
-    });
-  }
-}
-
-const AWS = require("aws-sdk");
-
-// configure AWS SDK with your S3 bucket credentials
-AWS.config.update({
-  accessKeyId: process.env.AWS_S3_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_S3_SECRET_KEY,
-});
-const s3 = new AWS.S3();
-
-async function uploadImage(req, res) {
-  try {
-    const eventId = req.params.eventID;
-    console.log(
-      "🚀 ~ file: eventController.js:386 ~ uploadImage ~ eventId:",
-      eventId
-    );
-    // check if an event with this id exists
-    const event = await eventModel.findById(eventId);
-    if (!event) {
-      throw new Error("Event not found");
-    }
-
-    const base64data = Buffer.from(req.files.image.data, "base64");
-    const filename = `event-images/${eventId}/${event.basicInfo.eventName}`;
-
-    // upload the image to S3 bucket
-    const uploadParams = {
-      Bucket: process.env.AWS_S3_BUCKET,
-      Key: filename,
-      Body: base64data,
-      ContentType: "image/png",
-    };
-    const s3data = await s3.upload(uploadParams).promise();
-
-    // update event with the image url
-    event.basicInfo.eventImage = s3data.Location;
-    await event.save();
-
-    // return the uploaded image URL
-    res.status(201).json({
-      success: true,
-      imageUrl: s3data.Location,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({
-      success: false,
-      message: err.message,
     });
   }
 }
