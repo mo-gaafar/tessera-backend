@@ -11,7 +11,6 @@ const jwt = require("jsonwebtoken");
 
 const { comparePassword } = require("../../utils/passwords");
 
-
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
 @async
@@ -206,7 +205,6 @@ async function updateEvent(req, res) {
 // @throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
 // */
 async function publishEvent(req, res) {
-
   try {
     // getting attributes from body
     const isPublic = req.body.isPublic;
@@ -380,6 +378,65 @@ async function publishEvent(req, res) {
     res.status(400).json({
       success: false,
       message: "invalid error",
+    });
+  }
+}
+
+const AWS = require("aws-sdk");
+
+// configure AWS SDK with your S3 bucket credentials
+AWS.config.update({
+  accessKeyId: process.env.AWS_S3_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_S3_SECRET_KEY,
+});
+const s3 = new AWS.S3();
+/**
+ * Uploads an image to S3 and updates the event with the image URL.
+ * @async
+ * @param {object} req - The HTTP request object.
+ * @param {object} res - The HTTP response object.
+ * @returns {void} - A Promise that resolves when the response is sent.
+ */
+async function uploadImage(req, res) {
+  try {
+    const eventId = req.params.eventID;
+    console.log(
+      "🚀 ~ file: eventController.js:386 ~ uploadImage ~ eventId:",
+      eventId
+    );
+
+    // check if an event with this id exists
+    const event = await eventModel.findById(eventId);
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    const base64data = Buffer.from(req.files.image.data, "base64");
+    const filename = `event-images/${eventId}/${event.basicInfo.eventName}`;
+
+    // upload the image to S3 bucket
+    const uploadParams = {
+      Bucket: process.env.AWS_S3_BUCKET,
+      Key: filename,
+      Body: base64data,
+      ContentType: "image/png",
+    };
+    const s3data = await s3.upload(uploadParams).promise();
+
+    // update event with the image url
+    event.basicInfo.eventImage = s3data.Location;
+    await event.save();
+
+    // return the uploaded image URL
+    res.status(201).json({
+      success: true,
+      imageUrl: s3data.Location,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({
+      success: false,
+      message: err.message,
     });
   }
 }
