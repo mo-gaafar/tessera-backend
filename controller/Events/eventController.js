@@ -384,7 +384,6 @@ async function publishEvent(req, res) {
         }
       }
 
-
       // if event is not published
       if (!isPublished) {
         // update the published attribute to be true to publish the event
@@ -469,6 +468,6 @@ module.exports = {
   getEventById,
   deleteEvent,
   updateEvent,
-  publishEvent
-  // uploadImage,
+  publishEvent,
+  uploadImage,
 };
