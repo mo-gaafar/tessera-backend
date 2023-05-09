@@ -228,22 +228,24 @@ function addAttendeeOption(email, order, qrCode) {
       <div style="text-align: center;">
         <img src="https://i.postimg.cc/0Nv1F9CP/Logo-Full-Text.png" alt="Tessera" style="max-width: 500px;">
       </div>
-      <p style="font-size: 20px;">Hello,</p>
-      <p style="font-size: 20px;">You have been invited to an event by [name of inviter]. The event details are as follows:</p>
+      <p style="font-size: 20px;">Hello, ${order.attendeesContactInformation.name}</p>
+      <p style="font-size: 20px;">You have been invited to an event by ${order.buyerContactInformation.name}. The event details are as follows:</p>
       <ul>
-        <li style="font-size: 18px;">Event Name: [name of event]</li>
-        <li style="font-size: 18px;">Date: [date of event]</li>
-        <li style="font-size: 18px;">Time: [time of event]</li>
-        <li style="font-size: 18px;">Location: [location of event]</li>
+        <li style="font-size: 18px;">Event Name: ${order.eventBasicInfo.eventName}</li>
+        <li style="font-size: 18px;">Date: ${order.eventBasicInfo.eventDate}</li>
+        <li style="font-size: 18px;">Location:${order.eventBasicInfo.eventLocation}</li>
       </ul>
-      <p style="font-size: 20px;">Please RSVP by clicking the button below:</p>
-      <div style="text-align: center;">
-        <a href="[RSVP link]" style="background-color: #F05537; color: white; padding: 10px 20px; border: none; border-radius: 4px; text-decoration: none; display: inline-block;">
-          RSVP
-        </a>
-      </div>
+      
+      <p style="font-size: 20px;">The ticket details are as follows:</p>
+      <ul>
+        <li style="font-size: 18px;">Ticket Type: ${order.attendeesContactInformation.TierName}</li>
+        <li style="font-size: 18px;">price: ${order.eventBasicInfo.price}</li>
+        <li style="font-size: 18px;">Quantity: 1 </li>
+      </ul>
+      
+       
       <p style="font-size: 20px;">Thank you,</p>
-      <p style="font-size: 20px;">[Your name]</p>
+     
     </body>
     </html>
     
