@@ -199,25 +199,14 @@ async function updateEvent(req, res) {
 // @async
 // @function publishEvent
 // @param {Object} req - The request object containing the attributes of the event to be published.
-// @param {string} req.body.isPublic - whether the event is public or private
+// @param {string} req.body.isPublic - whether the event is public or privates
 // @param {string} req.body.isPublic - whether the event is public or private
 // @param {Object} res - The response object containing the updated event attributes.
 // @returns {Object} Returns the updated event object with its attributes.
 // @throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
 // */
 async function publishEvent(req, res) {
-<<<<<<< HEAD
-	// try {
-		// getting attributes from body
-		const isPublic = req.body.isPublic;
-		const publishNow = req.body.publishNow;
-		const publicDate = req.body.publicDate;
-		const privateToPublicDate = req.body.privateToPublicDate;
-		const hasLink = req.body.link;
-		const generatedPassword = req.body.generatedPassword;
-		const hasPassword = req.body.password;
-		const alwaysPrivate = req.body.alwaysPrivate;
-=======
+
   try {
     // getting attributes from body
     const isPublic = req.body.isPublic;
@@ -228,7 +217,6 @@ async function publishEvent(req, res) {
     const generatedPassword = req.body.generatedPassword;
     const hasPassword = req.body.password;
     const alwaysPrivate = req.body.alwaysPrivate;
->>>>>>> d7b4345e5942273e4da628c70bbc3aceac2ec2f8
 
     const event = await eventModel.findById(req.params.eventID); //getting event by its ID
 
@@ -369,33 +357,7 @@ async function publishEvent(req, res) {
         }
       }
 
-<<<<<<< HEAD
-			// if event is not published
-			if (!isPublished) {
-				// update the published attribute to be true to publish the event
-				const update_last = { published: true };
-				const updatedEvent_last = await eventModel.findOneAndUpdate(
-					{ _id: req.params.eventID },
-					update_last,
-					{
-						new: true,
-						runValidators: true,
-					}
-				);
-				console.log("Updated event:", updatedEvent_last);
-			}
-			// if event is already published
-			else {
-				console.log("event is already published");
-			}
-		}
-	// } catch {
-	// 	res.status(400).json({
-	// 		success: false,
-	// 		message: "invalid error",
-	// 	});
-	// }
-=======
+
       // if event is not published
       if (!isPublished) {
         // update the published attribute to be true to publish the event
@@ -421,65 +383,13 @@ async function publishEvent(req, res) {
       message: "invalid error",
     });
   }
->>>>>>> d7b4345e5942273e4da628c70bbc3aceac2ec2f8
 }
-
-const AWS = require("aws-sdk");
-
-// configure AWS SDK with your S3 bucket credentials
-AWS.config.update({
-  accessKeyId: process.env.AWS_S3_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_S3_SECRET_KEY,
-});
-const s3 = new AWS.S3();
-const uploadImage = async (req, res) => {
-  try {
-    const eventId = req.params.eventID;
-    console.log(
-      "🚀 ~ file: eventController.js:386 ~ uploadImage ~ eventId:",
-      eventId
-    );
-    // check if an event with this id exists
-    const event = await eventModel.findById(eventId);
-    if (!event) {
-      throw new Error("Event not found");
-    }
-
-    const base64data = Buffer.from(req.files.image.data, "base64");
-    const filename = `event-images/${eventId}/${event.basicInfo.eventName}`;
-
-    // upload the image to S3 bucket
-    const uploadParams = {
-      Bucket: process.env.AWS_S3_BUCKET,
-      Key: filename,
-      Body: base64data,
-      ContentType: "image/png",
-    };
-    const s3data = await s3.upload(uploadParams).promise();
-
-    // update event with the image url
-    event.basicInfo.eventImage = s3data.Location;
-    await event.save();
-
-    // return the uploaded image URL
-    res.status(201).json({
-      success: true,
-      imageUrl: s3data.Location,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
 
 module.exports = {
   createEvent,
   getEventById,
   deleteEvent,
   updateEvent,
-  publishEvent,
-  uploadImage,
+  publishEvent
+  // uploadImage,
 };

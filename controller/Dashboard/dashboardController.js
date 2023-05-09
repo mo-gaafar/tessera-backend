@@ -279,7 +279,7 @@ async function eventSales(req, res) {
 // 	salesByTierType = 0;
 // 	totalMaxCapacity = 0;
 // 	soldTickets = 0;
-// 	soldTicketsByTierType = 0;
+// 	soldTicketsByTierType = 0; 
 
 // 	for (let i = 0; i < event.ticketTiers.length; i++) {
 // 		const tierObject = event.ticketTiers[i];
@@ -322,6 +322,7 @@ async function eventSales(req, res) {
 // 	totalMaxCapacity = Math.round(totalMaxCapacity);
 
 // 	if (soldTickets > 0) {
+// 		console.log("inside all sold tickets")
 // 		soldTickets = Math.round(soldTickets);
 // 		console.log(" event quantity sold:", totSales);
 // 		console.log(" total max capacity", totalMaxCapacity);
@@ -339,6 +340,7 @@ async function eventSales(req, res) {
 // 	}
 
 // 	if (soldTicketsByTierType > 0) {
+// 		console.log("inside sold tickets by tier type")
 // 		res.status(200).json({
 // 			success: true,
 // 			message: "Event sold tickets by tier as a percentage of the capacity ",
@@ -363,6 +365,7 @@ async function eventSoldTickets(req, res) {
 	totalMaxCapacity = 0;
 	soldTickets = 0;
 	soldTicketsByTierType=0
+	allSales=0
 
 	for (let i = 0; i < event.ticketTiers.length; i++) {
 		const tierObject = event.ticketTiers[i];
@@ -374,8 +377,10 @@ async function eventSoldTickets(req, res) {
 		console.log(" max Capacity:", maxCapacity);
 		if (allTiers==="true")
 		{
+		 allSales=1
 		if (tierPrice === "Free") {
 			totSales = totSales + 0;
+			soldTickets=soldTickets+quantitySold
 			totalMaxCapacity = totalMaxCapacity + maxCapacity;
 			console.log(" tier qs:", tierQuantitySold);
 			soldTickets = soldTickets + tierQuantitySold;
@@ -389,10 +394,13 @@ async function eventSoldTickets(req, res) {
 		}
 	}
 	else if(allTiers==="false"){
+		
+
+		console.log("all tiers:",allTiers)
 
         if (tierName === desiredTierName) {
 			console.log("inside desired");
-
+			
             capacityOfDesiredTier=maxCapacity
 			soldTicketsByTierType = soldTicketsByTierType + tierQuantitySold 
 			soldTicketsByTierType = Math.round(soldTicketsByTierType);
@@ -409,8 +417,9 @@ async function eventSoldTickets(req, res) {
 
 
 
-	if (soldTickets>0) {
+	if (allSales===1) {
 
+		console.log("inside sold Tickets")
 		soldTickets = Math.round(soldTickets);
 		console.log(" event quantity sold:", totSales);
 		console.log(" total max capacity", totalMaxCapacity);
@@ -428,7 +437,8 @@ async function eventSoldTickets(req, res) {
 
 	}
 
-    if(soldTicketsByTierType>0){
+    if(allSales===0){
+		console.log("inside sold tickets by tier type")
      
 		res.status(200).json({
 			success: true,
@@ -441,37 +451,56 @@ async function eventSoldTickets(req, res) {
 
 	}
 
-
-	
 }
+	
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = {
-	eventSales,
-	eventSoldTickets,
+  module.exports = {
+    eventSales,
+    eventSoldTickets,
 	exportAttendeeSummary,
 	exportEventSales,
 	AttendeeSumJason,
-};
+	getAttendeeSummary,
+	exportAttendeeSummary
+
+
+  };
+
+
+	
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// module.exports = {
+// 	eventSales,
+// 	eventSoldTickets,
+// 	exportAttendeeSummary,
+// 	exportEventSales,
+// 	AttendeeSumJason,
+// };

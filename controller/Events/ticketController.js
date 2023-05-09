@@ -328,8 +328,8 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
   }
 }
 
-// const token= GenerateToken("643a56706f55e9085d193f48")
-// console.log("token is:",token)
+// const token = GenerateToken("643a56706f55e9085d193f48")
+// console.log("token is:", token)
 
 /**
  * Creates a new ticket tier for an event.

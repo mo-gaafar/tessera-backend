@@ -28,6 +28,7 @@ router.get(
 	dashboardController.eventSoldTickets
 );
 
+
 //
 
 module.exports = router; //exporting the module in order to use it in other files
