@@ -214,3 +214,35 @@
 {"level":"info","message":"event has been created successfully","timestamp":"2023-05-09T16:32:06.842Z"}
 {"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:32:06.852Z"}
 {"level":"error","message":"Error creating event","timestamp":"2023-05-09T16:32:06.851Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:51:16.908Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:51:16.949Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:51:17.011Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:51:17.248Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:51:17.307Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:51:17.350Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:51:16.959Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:51:17.009Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:51:18.974Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:51:19.026Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:19.066Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:51:17.316Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:51:17.347Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:51:19.335Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:51:19.417Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:19.452Z"}
+{"level":"info","message":" attendeeSummary csv downloaded Successfully","timestamp":"2023-05-09T16:51:19.421Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:19.450Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:19.457Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:19.458Z"}
+{"level":"info","message":"Event sales response Success","timestamp":"2023-05-09T16:51:25.246Z"}
+{"level":"info","message":"Event sales exported to csv Successfully","timestamp":"2023-05-09T16:51:25.267Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:51:25.288Z"}
+{"level":"info","message":" event sales csv downloaded Successfully","timestamp":"2023-05-09T16:51:25.270Z"}
+{"level":"error","message":"Error occurred while fetching event sales data","timestamp":"2023-05-09T16:51:25.286Z"}
+{"level":"info","message":" summary Json Extract Successfully","timestamp":"2023-05-09T16:51:26.385Z"}
+{"level":"info","message":"attendeeSummary exported to csv Successfully","timestamp":"2023-05-09T16:51:26.408Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:26.430Z"}
+{"level":"info","message":" attendeeSummary csv downloaded Successfully","timestamp":"2023-05-09T16:51:26.413Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:26.426Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:26.435Z"}
+{"level":"error","message":"res is not defined","timestamp":"2023-05-09T16:51:26.441Z"}

@@ -238,42 +238,6 @@ async function exportEventSales(req, res) {
 	}
 }
 
-// function to get the event url
-/*async function getEventURL(res, req) {
-	try {
-		const eventId = req.params.eventID;
-		const event = await eventModel.findById(eventId); //search event by id
-		//check if no events
-		if (!event) {
-			return res.status(404).json({ message: "No event Found" });
-		}
-		//authorize that user exists
-		const userExist = await authorized(req);
-
-		if (event.creatorId.toString() !== userExist.user_id.toString()) {
-			// check if the creator of the event matches the user making the delete request
-			return res.status(401).json({
-				success: false,
-				message: "You are not authorized to retrieve this event",
-			});
-		}
-
-		// get the event URL
-		const url = await event.eventUrl;
-
-		res.status(200).json({
-			success: true,
-			message: "Event URL retrieved successfully",
-			url,
-		});
-	} catch {
-		res.status(400).json({
-			success: false,
-			message: "invalid error",
-		});
-	}
-} */
-
 async function eventSales(req, res) {
 	const event = await eventModel.findById(req.params.eventID);
 	console.log("Event to be used is:", event);
