@@ -24,6 +24,7 @@ async function createEvent(req, res) {
 		//check if user exists
 		const userExist = await authorized(req);
 		//create event
+
 		//if (userExist.authorized) {
 		const event = await eventModel.create({
 			...req.body,
