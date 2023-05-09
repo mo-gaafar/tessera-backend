@@ -319,12 +319,7 @@ async function sendEmailsToattendees(
   };
 
   const attendeesArray = [];
-  /* abdallah:: hena ana ba3mel if condition bas 3lshan 
-  lw l buyer gayb l tickets b esmo hwa w msh 3azem had ,
-  mafesh attendees f ana keda m3andesh list of attendees 
-  w keda hab3at nafs l email bt3 l attendees bas ll buyer da 
-  in the else statement 3lshan shoft eventbrite by3mel keda.
-  */
+  var totalOrderPrice = 0;
   //if there are invitations then get attendees info and send email
   if (invitationsExist) {
     for (const tier of ticketTierSelected) {
@@ -345,6 +340,7 @@ async function sendEmailsToattendees(
             price: price,
           };
 
+          totalOrderPrice = totalOrderPrice + price;
           attendeesArray.push(attendeesInformation);
 
           const attendeeOrderObj = {
@@ -368,13 +364,12 @@ async function sendEmailsToattendees(
         }
       }
     }
-
-    // addAttendeeOption(email, attendeeOrderObj, qrcodeImage);
     //add all objects to a single object to send for email
     buyerOrderObj = {
       buyerContactInformation: buyerContactInformation,
       eventBasicInfo: eventBasicInfoObj,
       attendeesArray: attendeesArray,
+      totalOrderPrice: totalOrderPrice,
     };
     console.log(`Sending email to ${buyerName} to add attendees`);
     console.log("Buyer object for email:");
@@ -390,17 +385,6 @@ async function sendEmailsToattendees(
       addAttendeeBuyerOption,
       qrcodeImage
     );
-    //TODO abdallah::send email to the ticket buyer with attendees information
-  } else {
-    const buyerOrderObj = {
-      buyerContactInformation: buyerContactInformation,
-      eventBasicInfo: eventBasicInfoObj,
-      attendeesArray: [buyerContactInformation], //abdallah:: note that it's an array of a single value
-    };
-
-    console.log(`Sending email to ${buyerName} to add attendee`);
-    console.log("buyer object for email:  ");
-    console.log(buyerOrderObj);
   }
 }
 
