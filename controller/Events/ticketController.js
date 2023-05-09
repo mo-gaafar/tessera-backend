@@ -194,8 +194,8 @@ async function sendOrderEmail(
     console.log("🚀 ~ file: ticketController.js:123 ~ order:", order);
 
     // send email with order and Qr-Code
-    // await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
-    await sendUserEmail(email, order, addAttendeeOption, qrcodeImage);
+    await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
+    // await sendUserEmail(email, order, addAttendeeOption, qrcodeImage);
   } catch (error) {
     throw error;
   }
@@ -276,6 +276,9 @@ async function calculateTotalPrice(
   promocodeObj,
   forEmail = null
 ) {
+  if (ticketTierSelected.price == "Free") {
+    ticketTierSelected.price = 0;
+  }
   let ticketPrice = ticketTierSelected.price; // Get the base ticket price
 
   let discount = 0;
@@ -355,8 +358,6 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
  * @throws {Error} If there is an internal server error.
  * @throws {Error} If the ticket tier creator is not the one who created the event.
  */
-
-
 
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
@@ -520,7 +521,6 @@ async function retrieveTicketTier(req, res) {
 //  * @returns {Object} An object containing the success status and a message is sent
 //  */
 
-
 async function editTicketTier(req, res) {
   try {
     const eventID = req.params.eventID; // get the event ID from the request URL
@@ -609,9 +609,6 @@ async function editTicketTier(req, res) {
     });
   }
 }
-
-
-
 
 module.exports = {
   bookTicket,
