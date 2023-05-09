@@ -14,7 +14,13 @@ const {
   authorized,
 } = require("../../utils/Tokens");
 
-const { sendUserEmail, orderBookedOption } = require("../../utils/sendEmail");
+const {
+  sendUserEmail,
+  orderBookedOption,
+  addAttendeeOption,
+} = require("../../utils/sendEmail");
+
+const { comparePassword } = require("../../utils/passwords");
 
 /**
  * Creates a new ticket for an event and user.
@@ -120,7 +126,7 @@ async function bookTicket(req, res) {
     console.error(err);
 
     // Return an error response if an error occurs.
-    return res.status(401).json({
+    return res.status(400).json({
       success: false,
       message: err.message,
     });
@@ -167,6 +173,12 @@ async function sendOrderEmail(
     let event = await eventModel.findOne({ _id: eventID });
     let eventBasicInfo = event.basicInfo;
 
+    // get the location info from events
+    let location = eventBasicInfo.location;
+
+    // generate location string
+    const locationString = `${location.streetNumber} ${location.route}, ${location.city}, ${location.administrativeAreaLevel1}, ${location.country}`;
+
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
@@ -177,11 +189,13 @@ async function sendOrderEmail(
       totalOrderPrice,
       orderId,
       firstName,
+      locationString,
     };
     console.log("🚀 ~ file: ticketController.js:123 ~ order:", order);
 
     // send email with order and Qr-Code
-    await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
+    // await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
+    await sendUserEmail(email, order, addAttendeeOption, qrcodeImage);
   } catch (error) {
     throw error;
   }
@@ -334,6 +348,8 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
  * @throws {Error} If the ticket tier creator is not the one who created the event.
  */
 
+
+
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
   try {
@@ -451,22 +467,19 @@ async function retrieveTicketTier(req, res) {
       tierName: tier.tierName,
       quantitySold: tier.quantitySold,
       maxCapacity: tier.maxCapacity,
-      price:tier.price,
-      percentageSold: (tier.quantitySold / tier.maxCapacity)*100,
+      price: tier.price,
+      percentageSold: (tier.quantitySold / tier.maxCapacity) * 100,
       startSelling: tier.startSelling,
-      endSelling:tier.endSelling
-
+      endSelling: tier.endSelling,
     }));
 
     // console.log("price:",price)
-
 
     return res.status(200).json({
       success: true,
       message: "Ticket tier details for the event",
       ticketTiers: ticketTierDetails,
     });
-    
 
     // return res.status(200).json({
     //   success: true,
@@ -481,21 +494,24 @@ async function retrieveTicketTier(req, res) {
   }
 }
 /**
- * Edits a ticket tier for an event.
- * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
- * @param {Object} req.params - The parameters of the request.
- * @param {string} req.params.eventID - The ID of the desired event to edit.
- * @param {Object} req.body - The body of the request.
- * @param {string} req.body.tierName - The name of the tier you want to edit
- * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
- * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
- * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
- * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
- * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
- * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
- * @param {Object} res - The response object.
- * @returns {Object} An object containing the success status and a message is sent
- */
+
+
+// * Edits a ticket tier for an event.
+//  * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
+//  * @param {Object} req.params - The parameters of the request.
+//  * @param {string} req.params.eventID - The ID of the desired event to edit.
+//  * @param {Object} req.body - The body of the request.
+//  * @param {string} req.body.tierName - The name of the tier you want to edit
+//  * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
+//  * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
+//  * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
+//  * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
+//  * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
+//  * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
+//  * @param {Object} res - The response object.
+//  * @returns {Object} An object containing the success status and a message is sent
+//  */
+
 
 async function editTicketTier(req, res) {
   try {
@@ -585,6 +601,9 @@ async function editTicketTier(req, res) {
     });
   }
 }
+
+
+
 
 module.exports = {
   bookTicket,

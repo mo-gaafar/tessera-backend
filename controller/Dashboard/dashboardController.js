@@ -10,7 +10,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const { exportToCsv } = require("../../utils/exports");
-
+const { authorized } = require("../../utils/Tokens");
 // to be modified
 
 /**
@@ -207,6 +207,42 @@ async function exportEventSales(req, res) {
 	}
 }
 
+// function to get the event url
+async function getEventURL(res, req) {
+	try {
+		const eventId = req.params.eventID;
+		const event = await eventModel.findById(eventId); //search event by id
+		//check if no events
+		if (!event) {
+			return res.status(404).json({ message: "No event Found" });
+		}
+		//authorize that user exists
+		const userExist = await authorized(req);
+
+		if (event.creatorId.toString() !== userExist.user_id.toString()) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to retrieve this event",
+			});
+		}
+
+		// get the event URL
+		const url = await event.eventUrl;
+
+		res.status(200).json({
+			success: true,
+			message: "Event URL retrieved successfully",
+			url,
+		});
+	} catch {
+		res.status(400).json({
+			success: false,
+			message: "invalid error",
+		});
+	}
+}
+
 async function eventSales(req, res) {
 	const event = await eventModel.findById(req.params.eventID);
 	console.log("Event to be used is:", event);
@@ -272,6 +308,88 @@ async function eventSales(req, res) {
 }
 
 // to be modified
+
+// async function eventSoldTickets(req, res) {
+// 	const event = await eventModel.findById(req.params.eventID);
+// 	console.log("Event to be used in event sold tickets:", event);
+// 	const allTiers = req.query.allTiers;
+// 	console.log("all tiers:", allTiers);
+// 	const desiredTierName = req.query.tierName;
+// 	console.log("desired tier name:", desiredTierName);
+
+// 	totSales = 0;
+// 	salesByTierType = 0;
+// 	totalMaxCapacity = 0;
+// 	soldTickets = 0;
+// 	soldTicketsByTierType = 0;
+
+// 	for (let i = 0; i < event.ticketTiers.length; i++) {
+// 		const tierObject = event.ticketTiers[i];
+// 		const tierName = tierObject.tierName;
+// 		const tierPrice = tierObject.price;
+// 		console.log(`Tier ${i + 1}: ${tierName}`);
+// 		maxCapacity = tierObject.maxCapacity;
+// 		const tierQuantitySold = tierObject.quantitySold;
+// 		console.log(" max Capacity:", maxCapacity);
+// 		if (allTiers === "true") {
+// 			if (tierPrice === "Free") {
+// 				totSales = totSales + 0;
+// 				totalMaxCapacity = totalMaxCapacity + maxCapacity;
+// 				console.log(" tier qs:", tierQuantitySold);
+// 				soldTickets = soldTickets + tierQuantitySold;
+// 			} else {
+// 				soldTickets = soldTickets + tierQuantitySold;
+// 				totalMaxCapacity = totalMaxCapacity + maxCapacity;
+// 				console.log(" tier qs:", tierQuantitySold);
+// 				console.log(" tier price:", tierPrice);
+// 				totSales = totSales + tierQuantitySold * tierPrice;
+// 				console.log(" event quantity sold:", totSales);
+// 			}
+// 		} else if (allTiers === "false") {
+// 			if (tierName === desiredTierName) {
+// 				console.log("inside desired");
+
+// 				capacityOfDesiredTier = maxCapacity;
+// 				soldTicketsByTierType = soldTicketsByTierType + tierQuantitySold;
+// 				soldTicketsByTierType = Math.round(soldTicketsByTierType);
+// 				perSoldTicketsByTierType =
+// 					(soldTicketsByTierType / capacityOfDesiredTier) * 100;
+// 				perSoldTicketsByTierType = Math.round(perSoldTicketsByTierType);
+// 				console.log("event quantity sold:", soldTicketsByTierType);
+// 			}
+// 		}
+// 	}
+// 	// 	}
+// 	totSales = Math.round(totSales);
+// 	totalMaxCapacity = Math.round(totalMaxCapacity);
+
+// 	if (soldTickets > 0) {
+// 		soldTickets = Math.round(soldTickets);
+// 		console.log(" event quantity sold:", totSales);
+// 		console.log(" total max capacity", totalMaxCapacity);
+// 		console.log(" sold Tickets:", soldTickets);
+// 		soldTicketsFromCapacity = (soldTickets / totalMaxCapacity) * 100;
+// 		soldTicketsFromCapacity = Math.round(soldTicketsFromCapacity);
+// 		console.log("per of sold tickets:", soldTicketsFromCapacity);
+// 		res.status(200).json({
+// 			success: true,
+// 			message: "Event sold tickets as a percentage of the capacity ",
+// 			soldTickets,
+// 			totalMaxCapacity,
+// 			soldTicketsFromCapacity,
+// 		});
+// 	}
+
+// 	if (soldTicketsByTierType > 0) {
+// 		res.status(200).json({
+// 			success: true,
+// 			message: "Event sold tickets by tier as a percentage of the capacity ",
+// 			soldTicketsByTierType,
+// 			capacityOfDesiredTier,
+// 			perSoldTicketsByTierType,
+// 		});
+// 	}
+// }
 
 async function eventSoldTickets(req, res) {
 	const event = await eventModel.findById(req.params.eventID);
@@ -355,10 +473,58 @@ async function eventSoldTickets(req, res) {
 	}
 }
 
+/**
+ * Retrieves the URL for a specific event if the user is authorized.
+ *
+ * @async
+ * @function
+ * @param {Object} res - The response object.
+ * @param {Object} req - The request object containing the event ID in the parameters.
+ * @returns {Promise<Object>} Returns an object with the event URL if successful, or an error message if unsuccessful.
+ * @throws {Error} Throws an error if an invalid parameter is provided.
+ */
+async function getEventUrl(req, res) {
+	try {
+		const eventId = req.params.eventID;
+		const event = await eventModel.findById(eventId); //search event by id
+
+		//check if no events
+		if (!event) {
+			return res.status(404).json({ message: "No event Found" });
+		}
+
+		//authorize that user exists
+		const userExist = await authorized(req);
+
+		if (event.creatorId.toString() !== userExist.user_id.toString()) {
+			// check if the creator of the event matches the user making the delete request
+			return res.status(401).json({
+				success: false,
+				message: "You are not authorized to retrieve this event",
+			});
+		}
+
+		// get the event URL
+		const url = await event.eventUrl;
+
+		res.status(200).json({
+			success: true,
+			message: "Event URL retrieved successfully",
+			url,
+		});
+	} catch (err) {
+		res.status(400).json({
+			success: false,
+			message: err.message,
+		});
+	}
+}
+
 module.exports = {
 	eventSales,
 	eventSoldTickets,
 	exportAttendeeSummary,
 	exportEventSales,
 	AttendeeSumJason,
+	getEventUrl,
 };
