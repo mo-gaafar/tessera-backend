@@ -127,7 +127,8 @@ async function sendVerification(email) {
 
     // If user is not found, return error message
     if (!user) {
-      return { success: "false", message: "User not found" };
+      logger.error("User not found", { email });
+      return { success: false, message: "User not found" };
     }
 
     // Generate verification token
@@ -138,12 +139,15 @@ async function sendVerification(email) {
     // Send verification email
     await sendUserEmail(email, token, verficationOption);
 
+    // Log success message
+    logger.info("Verification email sent", { email });
+
     // Return success message
-    return { success: "true", message: "Verification email sent" };
+    return { success: true, message: "Verification email sent" };
   } catch (err) {
-    console.error(err);
+    logger.error("Internal server error", { email, error: err });
     // Return error message
-    return { success: "false", message: "Internal server error" };
+    return { success: false, message: "Internal server error" };
   }
 }
 
@@ -172,20 +176,24 @@ async function verifyEmail(req, res) {
     const decoded = jwt.verify(token, process.env.SECRETJWT);
 
     // Find the user with the decoded user ID
-    const user = await userModel.findById(decoded.userId);
+    const user = await userModel.findById(decoded.user_id);
 
     // If the user is not found, return a 404 error
     if (!user) {
+      logger.error("User not found", { userId: decoded.userId });
       return res
         .status(404)
-        .json({ success: "false", message: "User not found" });
+        .json({ success: false, message: "User not found" });
     }
 
     // If the user has already been verified, return a 400 error
     if (user.isVerified) {
+      logger.error("User has already been verified", {
+        userId: decoded.userId,
+      });
       return res
         .status(400)
-        .json({ success: "false", message: "User has already been verified" });
+        .json({ success: false, message: "User has already been verified" });
     }
 
     // Set the user as verified and clear the verification token
@@ -195,20 +203,17 @@ async function verifyEmail(req, res) {
     // Save the user
     await user.save();
 
+    // Log success message
+    logger.info("Email address verified", { userId: decoded.userId });
+
     // Return a 200 status code and a success message
     res
       .status(200)
-      .json(
-        { success: "true", message: "Email address verified" },
-        token,
-        user
-      );
+      .json({ success: true, message: "Email address verified" }, token, user);
   } catch (err) {
-    console.error(err);
+    logger.error("Internal server error", { error: err });
     // Return a 500 error if there is an internal server error
-    res
-      .status(500)
-      .json({ success: "false", message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
 
