@@ -29,6 +29,10 @@ async function mobileSignUp(userInfo, socialMediaType, res) {
       excludeSimilarCharacters: true,
     });
 
+    // Log the generated password
+    logger.info("Generated password for new user", { password: newPassword });
+
+    // Create user object with the provided information
     const newUser = {
       firstName: userInfo.firstname,
       lastName: userInfo.lastname,
@@ -37,27 +41,40 @@ async function mobileSignUp(userInfo, socialMediaType, res) {
       password: newPassword,
       userType: socialMediaType,
     };
+
+    // Check the social media type and update the user object accordingly
     if (newUser.userType === "facebook") {
-      // const userFacebook_Id = userInfo.id;
       newUser.facebookId = userInfo.id;
     } else if (newUser.userType === "google") {
-      // const userGoogle_Id = userInfo.id;
       newUser.googleId = userInfo.id;
     }
 
-    //New user is created and user shall be directed to sign in
-    const user = await User.create(newUser); //create new user
-    //generate token for the signed in user
+    // Create a new user in the database
+    const user = await User.create(newUser);
+
+    // Log the successful user creation
+    logger.info("New user created", { user });
+
+    // Generate token for the signed-in user
     const token = await GenerateToken(user._id);
-    //send user email with new generated password
+
+    // Log the successful token generation
+    logger.info("Token generated for the user", { user, token });
+
+    // Send user email with the new generated password
     await sendUserEmail(userInfo.email, newPassword, sendSocialPassword);
+
+    // Log the successful email sending
+    logger.info("Verification email sent to the new user", { user });
+
     return res.status(200).json({
       success: true,
       user,
       token,
     });
   } catch (err) {
-    //error
+    // Log the error message if an error occurs
+    logger.error("Error in mobileSignUp", { error: err });
     console.error(err);
     return res.status(400).json({
       success: false,
@@ -77,14 +94,19 @@ async function mobileSignUp(userInfo, socialMediaType, res) {
  */
 async function mobileSignIn(existingUser, res) {
   try {
-    //generate token for the signed in user
+    // Generate token for the signed-in user
     const token = await GenerateToken(existingUser._id);
+
+    // Log the successful token generation
+    logger.info("Token generated for the user", { user: existingUser, token });
+
     return res.status(200).json({
       success: true,
       token,
     });
   } catch (err) {
-    //error
+    // Log the error message if an error occurs
+    logger.error("Error in mobileSignIn", { error: err });
     console.error(err);
     return res.status(400).json({
       success: false,

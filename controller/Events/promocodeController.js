@@ -120,10 +120,10 @@ async function createPromocode(req, res) {
       throw new Error("Event not found");
     }
 
-    // Verify the JWT token and get an object contains the status of authorization and user id if authorized
+    // Verify the JWT token and get an object containing the status of authorization and user ID if authorized
     const userStatus = await authorized(req);
 
-    // decodedId equals the user Id got from the bearer token
+    // decodedId equals the user ID got from the bearer token
     let decodedId = null;
     if (userStatus.authorized) {
       decodedId = userStatus.user_id.toString();
@@ -148,19 +148,23 @@ async function createPromocode(req, res) {
     if (promocodeExists) {
       throw new Error("Promocode code already exists for this event");
     }
+
     let promocodeObj = {};
     promocodeObj.code = code;
     promocodeObj.discount = discount;
     promocodeObj.limitOfUses = limitOfUses;
-    console.log(
-      "🚀 ~ file: promocodeController.js:142 ~ createPromocode ~ promocodeObj:",
-      promocodeObj
-    );
+
+    // Log the promocode object before adding it to the database
+    logger.info("Promocode object:", { promocodeObj });
 
     await addPromocodeToDatabase(eventId, promocodeObj);
 
-    // add the promcode to the event Schema
+    // Add the promocode to the event Schema
     await addPromocodeToEvent(eventId, promocodeObj);
+
+    // Log the successful creation of the promocode
+    logger.info("Promocode created successfully", { promocodeObj });
+
     // Return the new promocode object in the response.
     return res.status(200).json({
       success: true,
@@ -168,6 +172,8 @@ async function createPromocode(req, res) {
       promocodeObj,
     });
   } catch (err) {
+    // Log the error message if an error occurs
+    logger.error("Error in createPromocode", { error: err });
     console.error(err);
 
     // Return an error response if an error occurs.

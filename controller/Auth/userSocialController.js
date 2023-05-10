@@ -19,8 +19,6 @@ const { mobileSignUp, mobileSignIn } = require("./mobileSocialsController");
  * @throws {Error} - If could not get user information
  */
 exports.facebookLogin = async (req, res, next) => {
-  //for mobile app view
-
   try {
     //get body parameters
     const socialMediaType = "facebook";
