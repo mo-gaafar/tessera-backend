@@ -6,6 +6,7 @@ const {
   sendSocialPassword,
 } = require("../../utils/sendEmail");
 const { GenerateToken, verifyToken } = require("../../utils/Tokens");
+const logger = require("../../utils/logger");
 /**
  * Resends the email verification to the user with the given email address.
  *
@@ -27,12 +28,14 @@ async function resendEmailVerification(req, res) {
 
     // If user is not found, return error message
     if (!user) {
+      logger.error(`User not found: ${email}`);
       return res
         .status(400)
         .json({ success: "false", message: "User not found" });
     }
     // If the user has already been verified, return a 400 error
     if (user.isVerified) {
+      logger.warn(`User already verified: ${email}`);
       return res
         .status(400)
         .json({ success: "false", message: "User has already been verified" });
@@ -45,10 +48,11 @@ async function resendEmailVerification(req, res) {
     // Send verification email
     await sendUserEmail(email, token, verficationOption);
 
+    logger.info(`Verification email sent to: ${email}`);
     // Return success message
     res.json({ success: "true", message: "Verification email sent" });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     // Return error message
     res
       .status(500)
@@ -82,19 +86,21 @@ async function emailExist(req, res) {
 
     // if the user is found, return a success message
     if (user) {
+      logger.info(`Email exists: ${email}`);
       return res.status(200).json({
         success: true,
         message: "Email exists",
       });
     }
 
+    logger.warn(`User not found: ${email}`);
     // if the user is not found, return an error
     res.status(404).json({
       success: false,
       message: "User not found",
     });
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
