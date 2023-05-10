@@ -1,5 +1,6 @@
+const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
-//const userModel = require("../../models/userModel");
+const userModel = require("../models/userModel");
 
 /**
  * Generates a JSON Web Token for the provided user ID using the SECRETJWT environment variable.
@@ -44,13 +45,14 @@ or null if not found or the auth type is not Bearer.
 */
 async function retrieveToken(req) {
 	const authHeader = req.headers.authorization;
-	//const authHeader = req.headers.authorization.split(' ');
-	// const authHeader= req.headers.authorization.split(' ')[1] || '';
 
+	//Separate token from Bearer
 	const [authType, token] = authHeader.split(" ");
+	//check if Auth type is Bearer  and token exists
 	if (authType !== "Bearer" || !token) {
 		return null;
 	}
+	//if true return the token only
 	return token;
 }
 
@@ -65,7 +67,7 @@ async function authorized(req) {
 	const token = await retrieveToken(req);
 	if (!token) {
 		console.log("Token not found");
-		return false;
+		return { authorized: false };
 	}
 	try {
 		const decoded = await verifyToken(token);
@@ -73,14 +75,28 @@ async function authorized(req) {
 		const user = await userModel.findById(decoded.user_id);
 		if (!user) {
 			console.log("User not found");
-			return false;
+			return { authorized: false };
 		}
-		console.log("User authorized");
-		return true, user.user_id;
+		console.log(`User authorized ${user._id}`);
+		return { authorized: true, user_id: user._id };
 	} catch (err) {
 		console.error(err);
-		return false;
+		return { authorized: false };
 	}
 }
+/**
+ * Generates a unique ID using the UUID library.
+ * @function generateUniqueId
+ * @returns {string} A unique ID in the form of a string.
+ */
+function generateUniqueId() {
+	return uuidv4();
+}
 
-module.exports = { GenerateToken, verifyToken, retrieveToken, authorized };
+module.exports = {
+	GenerateToken,
+	verifyToken,
+	retrieveToken,
+	authorized,
+	generateUniqueId,
+};

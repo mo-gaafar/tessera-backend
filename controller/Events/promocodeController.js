@@ -1,26 +1,118 @@
 const eventModel = require("../../models/eventModel");
 const promocodeModel = require("../../models/promocodeModel");
-const {
-  GenerateToken,
-  retrieveToken,
-  verifyToken,
-  authorized,
-} = require("../../utils/Tokens");
+const express = require("express");
+const bcrypt = require("bcrypt");
+const router = express.Router();
+const multer = require("multer");
+const { parse } = require("csv-parse");
+const { authorized } = require("../../utils/Tokens");
+const upload = multer();
 
 /**
- * Creates a new promocode for an event.
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
- * @returns {object} Returns the new promocode object.
- * @throws {Error} Throws an error if the event or promocode code already exists.
+Imports promocodes from a CSV file and adds them to an event.
+@async
+@function importPromocode
+@param {Object} req - Express request object.
+@param {Object} res - Express response object.
+@returns {Object} Response object with a success boolean, message, and imported promocodes.
+@throws {Object} Returns an error response object if an error occurs.
+*/
+async function importPromocode(req, res) {
+  try {
+    // Find the event associated with the promocodes and add the promocodes to the event
+    const eventId = req.params.eventID;
+    const event = await eventModel.findById(eventId);
+
+    // Check if the event exists
+    if (!event) {
+      return res.status(404).send("Event not found");
+    }
+
+    // Check if a file has been uploaded
+    if (!req.file) {
+      return res.status(400).send("No file uploaded");
+    }
+
+    // Parse the CSV data from the file buffer
+    const csvData = await new Promise((resolve, reject) => {
+      const csvParser = parse({ delimiter: "," }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+      const csvBuffer = req.file.buffer;
+      csvParser.write(csvBuffer);
+      csvParser.end();
+    });
+
+    // Assuming the first row of the csv file contains the column names
+    const [header, ...rows] = csvData;
+    const [headerCode, headerDiscount, headerlimitOfUses] = header;
+
+    // Process each row of the CSV file and create a new promocode object for each
+    const promocodes = rows.map((row) => {
+      const [code, discount, limitOfUses] = row;
+      return {
+        code,
+        discount: parseInt(discount),
+        limitOfUses,
+      };
+    });
+
+    // Check all the promocodes if one of them exists and add them to exists array and if not add it to the database
+    const exists = [];
+    const notExists = [];
+    for (const promocode of promocodes) {
+      const { code } = promocode;
+      const promocodeExists = await checkPromocodeExists(eventId, code);
+
+      if (promocodeExists) {
+        exists.push(promocode);
+      } else {
+        notExists.push(promocode);
+      }
+    }
+
+    for (const newPromocodes of notExists) {
+      addPromocodeToDatabase(eventId, newPromocodes);
+    }
+
+    // Add the newPromocodes to the event using a for loop
+    for (const newPromocode of notExists) {
+      addPromocodeToEvent(eventId, newPromocode);
+    }
+
+    // Return the imported promocodes in the response.
+    return res.status(200).json({
+      success: true,
+      message: "Promocode has been imported successfully",
+      promocodesAdded: notExists.length > 0 ? notExists : null,
+    });
+  } catch (err) {
+    // Return an error response if an error occurs.
+    return res.status(401).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+/**
+ * Creates a new promocode for a given event.
+ * @async
+ * @function
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @param {string} req.params.event_Id - The ID of the event to create the promocode for.
+ * @param {Object} req.body - The request body.
+ * @param {string} req.body.code - The promocode code.
+ * @param {number} req.body.discount - The discount percentage.
+ * @param {number} req.body.limitOfUses - The maximum number of times the promocode can be used.
+ * @returns {Promise<Object>} A Promise that resolves with the new promocode object.
+ * @throws {Error} If the event is not found, if the user is not authorized, if the promocode code already exists, or if there is an error adding the promocode to the database or event.
  */
 async function createPromocode(req, res) {
   const eventId = req.params.event_Id;
   const { code, discount, limitOfUses } = req.body;
-
-  // Retrieve the JWT token from the request headers.
-  const token = await retrieveToken(req);
-
   try {
     // Find the event in the database.
     const event = await eventModel.findById(eventId);
@@ -28,9 +120,18 @@ async function createPromocode(req, res) {
       throw new Error("Event not found");
     }
 
-    // Verify the JWT token and get the decoded user ID.
-    const decoded = await verifyToken(token);
-    const decodedId = decoded.user_id;
+    // Verify the JWT token and get an object contains the status of authorization and user id if authorized
+    const userStatus = await authorized(req);
+
+    // decodedId equals the user Id got from the bearer token
+    let decodedId = null;
+    if (userStatus.authorized) {
+      decodedId = userStatus.user_id.toString();
+    } else {
+      throw new Error(
+        "You are not authorized to create a promocode for this event"
+      );
+    }
 
     // Get the event creator ID.
     const creatorId = event.creatorId;
@@ -47,24 +148,24 @@ async function createPromocode(req, res) {
     if (promocodeExists) {
       throw new Error("Promocode code already exists for this event");
     }
+    let promocodeObj = {};
+    promocodeObj.code = code;
+    promocodeObj.discount = discount;
+    promocodeObj.limitOfUses = limitOfUses;
+    console.log(
+      "🚀 ~ file: promocodeController.js:142 ~ createPromocode ~ promocodeObj:",
+      promocodeObj
+    );
 
-    // Create a new promocode object and save it to the database.
-    const promocode = await promocodeModel.create({
-      code,
-      discount,
-      limitOfUses,
-      remainingUses:
-        limitOfUses === "unlimited" ? "unlimited" : Number(limitOfUses),
-      event: eventId,
-    });
-    await promocode.save();
+    await addPromocodeToDatabase(eventId, promocodeObj);
+
     // add the promcode to the event Schema
-    await addPromocodeToEvent(eventId, promocode);
+    await addPromocodeToEvent(eventId, promocodeObj);
     // Return the new promocode object in the response.
     return res.status(200).json({
       success: true,
       message: "Promocode has been created successfully",
-      promocode,
+      promocodeObj,
     });
   } catch (err) {
     console.error(err);
@@ -78,6 +179,36 @@ async function createPromocode(req, res) {
 }
 
 /**
+ * Adds a new promocode to the database.
+ * @async
+ * @function
+ * @param {string} eventId - The ID of the event that the promocode belongs to.
+ * @param {Object} promocode - The promocode object.
+ * @param {string} promocode.code - The promocode code.
+ * @param {number} promocode.discount - The discount percentage.
+ * @param {number|string} promocode.limitOfUses - The maximum number of times the promocode can be used. Use "unlimited" for unlimited uses.
+ * @returns {Promise<Object>} A Promise that resolves with the new promocode object.
+ * @throws {Error} If there is an error creating or saving the promocode object.
+ */
+async function addPromocodeToDatabase(eventId, promocode) {
+  code = promocode.code;
+  discount = promocode.discount;
+  limitOfUses = promocode.limitOfUses;
+
+  // create a new promocode object and save it to the database
+  const newPromocode = await promocodeModel.create({
+    code,
+    discount,
+    limitOfUses,
+    remainingUses:
+      limitOfUses === "unlimited" ? "unlimited" : Number(limitOfUses),
+    event: eventId,
+  });
+
+  await newPromocode.save();
+  return newPromocode;
+}
+/**
  * Check if a promocode with the given code exists for the given event.
  * @param {string} eventId - The ID of the event to check for the promocode.
  * @param {string} code - The code of the promocode to check for.
@@ -88,8 +219,8 @@ async function checkPromocodeExists(eventId, code) {
   try {
     // Find a promocode with the given event ID and code in the database.
     const promocode = await promocodeModel.findOne({ event: eventId, code });
-    // Return true if a promocode was found, false otherwise.
-    return promocode ? true : false;
+    // Return the discount if a promocode was found, false otherwise.
+    return promocode ? promocode.discount : false;
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
     console.error(err);
@@ -129,25 +260,25 @@ async function addPromocodeToEvent(eventId, promocode) {
 
 async function checkPromocode(req, res) {
   const eventId = req.params.eventId;
+
+  const codeName = req.query.code;
   console.log(
-    "🚀 ~ file: promocodeController.js:132 ~ checkPromocode ~ eventId:",
-    eventId
-  );
-  const { code } = req.body;
-  console.log(
-    "🚀 ~ file: promocodeController.js:133 ~ checkPromocode ~ code:",
-    code
+    "🚀 ~ file: promocodeController.js:206 ~ checkPromocode ~ codeName:",
+    codeName
   );
   try {
-    const isExists = await checkPromocodeExists(eventId, code);
-    console.log(
-      "🚀 ~ file: promocodeController.js:135 ~ checkPromocode ~ isExists:",
-      isExists
-    );
+    const isExists = await checkPromocodeExists(eventId, codeName);
 
-    return res.status(isExists ? 200 : 404).json({
-      success: isExists ? true : false,
-      message: isExists ? "Promocode exists" : "Promocode does not exist",
+    if (isExists == false)
+      return res.status(404).json({
+        success: false,
+        message: "Promocode does not exist",
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Promocode exists",
+      discout: isExists / 100,
     });
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
@@ -156,4 +287,11 @@ async function checkPromocode(req, res) {
   }
 }
 
-module.exports = { createPromocode, checkPromocode };
+module.exports = {
+  createPromocode,
+  checkPromocode,
+  addPromocodeToEvent,
+  checkPromocodeExists,
+  importPromocode,
+  upload,
+};

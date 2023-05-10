@@ -1,184 +1,192 @@
-// const mongoose = require("mongoose"); 
-// // require the necessary libraries
-// //const faker = require("faker");
+const mongoose = require("mongoose");
 
-// const {faker} = require('@faker-js/faker');
+const { faker } = require("@faker-js/faker");
 
-// const eventModel=require("../../models/eventModel");
+const eventModel = require("../../models/eventModel");
 
+async function connectDB() {
+  mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => console.log("DB Connected"))
+    .catch((err) => console.log(err));
+}
+//calling function connect to database using the connection string
+connectDB();
 
+async function seedDB(req, res) {
+  const events = [];
 
-// async function connectDB() {
-//     mongoose
-//       .connect(process.env.MONGODB_URI)
-//       .then(() => console.log("DB Connected"))
-//       .catch((err) => console.log(err));
-//   }
-//   //calling function connect to database using the connection string
-//   connectDB();
+  for (let i = 0; i < 5; i++) {
+    const newEvent = new eventModel({
+      basicInfo: {
+        eventName: faker.helpers.arrayElement([
+          "Where does Depression route from? _ Free Lecture",
+          "Learn How To Increase your Potential and Push yourself more! FREE EVENT!",
+          "Living Machines 2023",
+          "Gain skills in self development and business - Free Workshop",
+          "Adult Mental Health First Aid Training April 18 & 25",
+          "Anime North 2023",
+        ]),
+        startDateTime: faker.date.future(),
+        endDateTime: faker.date.future(),
+        eventImage: "https://picsum.photos/282/140",
 
+        categories: faker.helpers.arrayElement([
+          "Boat & Air",
+          "Business & Profession",
+          "Charity & Causes",
+          "Community & Culture",
+          "Family & Education",
+          "Fashion & Beauty",
+          "Film , Media & Entertainment",
+          "Food & Drink",
+          "Government & Politics",
+          "Health & Wellness",
+          "Hobbies & Special Interest",
+          "Home & Lifestyle",
+          "Music",
+          "Other",
+          "Performing & Visual Arts",
+          "Religion & Spirtuality",
+          "School Activities",
+          "Science & Technology",
+          "Seasonal Holiday",
+          "Sports & Fitness",
+          "Travel & Outdoor",
+        ]),
 
-// async function seedDB(req,res){
-// events=[]
+        //       location: {
+        //         // longitude:faker.datatype.number(0,180),
+        //         // latitude: faker.datatype.number(0,90),
+        //         // placeId:faker.random.alphaNumeric(),
+        //         // venueName: faker.lorem.words(),
+        //         // streetNumber:faker.datatype.number(1,999),
+        //         // route:faker.lorem.words(),
+        //         // country:faker.lorem.words(),
+        //         // city:faker.lorem.words(),
+        //         // administrativeAreaLevel1:faker.lorem.words(),
+        //         longitude:-40,
+        //         latitude:-4,
+        //         placeId:"ChIJgTwKgJcpQg0RaSKMYcHeNsQ",
+        //         venueName:"Prado Museum",
+        //         streetNumber:30,
+        //         route:"Paseo del Prado",
+        //         country:"Spain",
+        //         city:"Madrid",
+        //         administrativeAreaLevel1:"Community of Madrid"
 
-// //  const events=[];
-//  for (let i = 0; i < 2; i++){
-//     console.log('ana gwa')
+        // },
+      },
 
-//    const newEvent= new eventModel({
-//     basicInfo: {
-//       eventName: faker.lorem.words(),
-//       description: faker.lorem.sentences(),
-//       startDateTime: {
-//         // timezone: faker.address.timeZone(),
-//         utc: faker.date.future(),
-//         // console.console.log(utc),
+      summary: faker.helpers.arrayElement([
+        "Learn why your mind reacts in a negative way and why this can have an affect on our potential!",
+        " most exciting research under the theme of Living Machines ",
+        "largest fan-run Japanese Animation convention",
+        "Mental Health First Aid Training",
+        "Aiming to Achieve Self Confidence and remove self doubt",
+        "Learn how to Improve your self-awareness and emotional intelligence which can also help you in business. Free Workshop",
+      ]),
 
-//       },
-//       endDateTime: {
-//         timezone: faker.address.timeZone(),
-//         utc: faker.date.future().toISOString(),
-//       },
-//       categories: faker.helpers.arrayElement([
-//         "Boat & Air",
-//         "Business & Profession",
-//         "Charity & Causes",
-//         "Community & Culture",
-//         "Family & Education",
-//         "Fashion & Beauty",
-//         "Film , Media & Entertainment",
-//         "Food & Drink",
-//         "Government & Politics",
-//         "Health & Wellness",
-//         "Hobbies & Special Interest",
-//         "Home & Lifestyle",
-//         "Music",
-//         "Other",
-//         "Performing & Visual Arts",
-//         "Religion & Spirtuality",
-//         "School Activities",
-//         "Science & Technology",
-//         "Seasonal Holiday",
-//         "Sports & Fitness",
-//         "Travel & Outdoor",
-//       ]),
-//       // location: faker.address.city(),
+      description: faker.helpers.arrayElement([
+        " How does the mind work? Why do we get triggered by simple mistakes and mishaps in life? You can learn how your mind works and how where your triggers are steming from      Will the tools from this event you can learn how to improve and improve quickly.",
+        "Attend this free lecture on How To Achieve Self Confidence and remove self doubt from your mind!",
+        "This conference highlights the most exciting research in the fields of biomimetics and biohybrid systems under the theme of Living Machines.",
+        "SWL Imaging Training Academy in collaboration with Medicare and Health Education England present a Thoracic Imaging Study Day",
+        "One important factor in improving your efficiency is to work on your self-development. When you take the time to understand your strengths, weaknesses, and areas for improvement, you can develop strategies to overcome obstacles and increase your productivity. For example, if you struggle with procrastination, you can learn time management techniques or use tools to help you stay focused and on track.",
+        "Anime North is Toronto's largest fan-run Japanese Animation convention, being held May 26-28, 2023 at the Toronto Congress Centre",
+      ]),
 
-//       location: {
-//         longitude:faker.datatype.number(), 
-//         latitude: faker.datatype.number(),
-//         placeId:faker.datatype.number(),
-//         venueName: faker.lorem.words(),
-//         streetNumber:faker.datatype.number(),   
-//         route:faker.lorem.words(),
-//         administrativeAreaLevel1:faker.city(),       
-//         country:faker.country(),
-//         city:faker.city(),
-          
-//       },
+      ticketTiers: [
+        {
+          tierName: faker.helpers.arrayElement(["Regular", "VIP"]),
+          // tierName:"Free",
+          // tierName:"Free",
+          quantitySold: 2500,
+          // maxCapacity: faker.datatype.number(3000,8000),
+          maxCapacity: 9000,
+          price: faker.finance.amount(),
+          // price:"Free",
+          // price:"Free",
+          startSelling: faker.date.future(),
+          endSelling: faker.date.future(),
+        },
 
-    
-//     },
-//     privatePassword: faker.internet.password(),
-//     // ticketTiers: [
-//     //   {
-//     //     quantitySold: faker.datatype.number(),
-//     //     capacity: faker.datatype.number(),
-//     //     tier: faker.random.arrayElement(["Free", "Regular", "VIP"]),
-//     //     price: faker.finance.amount(),
-//     //   },
-//     //   {
-//     //     quantitySold: faker.datatype.number(),
-//     //     capacity: faker.datatype.number(),
-//     //     tier: faker.random.arrayElement(["Free", "Regular", "VIP"]),
-//     //     price: faker.finance.amount(),
-//     //   },
-//     //   {
-//     //     quantitySold: faker.datatype.number(),
-//     //     capacity: faker.datatype.number(),
-//     //     tier: faker.random.arrayElement(["Free", "Regular", "VIP"]),
-//     //     price: faker.finance.amount(),
-//     //   },
-//     // ],
-//     eventStatus: faker.helpers.arrayElement([
-//       "started",
-//       "ended",
-//       "completed",
-//       "cancelled",
-//       "live",
-//     ]),
-//     startSelling: {
-//       timezone: faker.address.timeZone(),
-//       utc: faker.date.future(),
-//     },
-//     endSelling: {
-//       timezone: faker.address.timeZone(),
-//       utc: faker.date.future(),
-//     },
-//     publicDate: {
-//       timezone: faker.address.timeZone(),
-//       utc: faker.date.future(),
-//     },
-//     emailMessage: faker.lorem.sentences(),
-//     eventQRimage: faker.image.imageUrl(),
-//     evenImage: faker.image.imageUrl(),
-//     creatorID:faker.datatype.number(),
-//     streetNumber:faker.datatype.number(),
-//     promoCodes: [
-//       {
-//         code: faker.random.alphaNumeric(10),
-//         percentage: faker.datatype.number({ min: 10, max:60 }),
-//         remainingUses: faker.datatype.number(),
-//       },
-//       {
-//         code: faker.random.alphaNumeric(10),
-//         percentage: faker.datatype.number({ min: 10, max: 60 }),
-//         remainingUses: faker.datatype.number(),
-//       },
-//     ],
-//     isVerified: faker.datatype.boolean(),
-//     isPublic: faker.datatype.boolean(),
-//     published:faker.datatype.boolean(),
+        {
+          // tierName: faker.helpers.arrayElement(["Free", "Regular", "VIP"]),
+          // tierName: faker.helpers.arrayElement([ "Regular", "VIP"]),
+          tierName: "Free",
+          // tierName: faker.helpers.arrayElement([ "Regular", "VIP"]),
+          // quantitySold: faker.datatype.number(0,2500),
+          quantitySold: 1500,
+          // maxCapacity: faker.datatype.number(3000,6000),
 
-//   });
+          maxCapacity: 4000,
+          // price: faker.finance.amount(),
+          price: "Free",
+          // price:"Free",
+          startSelling: faker.date.future(),
+          endSelling: faker.date.future(),
+        },
+      ],
+      eventStatus: faker.helpers.arrayElement([
+        "started",
+        "ended",
+        "completed",
+        "cancelled",
+        "live",
+      ]),
 
-//   events.push(newEvent);
-// // newEvent.save((err) => {
-// //     if (err) {
-// //       console.log(err);
-// //     }
-// //   });
+      published: faker.datatype.boolean(),
+      isPublic: faker.datatype.boolean(),
 
-// newEvent.save()
- 
-// }
+      publicDate: faker.date.future(),
+      // isOnline: faker.datatype.boolean(),
+      isOnline: true,
+      eventUrl: "https://www.tessera.social/",
+      onlineEventUrl: "https://www.tessera.social/",
+      privatePassword: faker.internet.password(),
 
-// res.status(201).json(
-//   {
-//   success:true,
-//   message: "Database Seeded",
-//   }
-// )
+      soldTickets: [
+        {
+          ticketId: faker.helpers.arrayElement(["6434110d4537615b85caea52"]),
+        },
 
-//   }
+        {
+          userId: faker.helpers.arrayElement([
+            "6439f95a3d607d6c49e56a1e",
+            "643a56706f55e9085d193f48",
+            "643a7ffc96470deb953e2bc1",
+            "643a93166c05d2711e8c72f7",
+            "643a96c2a31dbc29e76badb8",
+            "643a9cc18e628222267815dc",
+          ]),
+        },
+      ],
 
+      creatorId: faker.helpers.arrayElement([
+        "6417b9099e62572b43c9267e",
+        "6418b9920a40ca7bd287fcd4",
+        "641d66a88344a16b3df1019a",
+        "641ee21476e39de14334bff3",
+        "641eddf055c9b5c70ae4ecdf",
+      ]),
 
-// console.log('Database seeded!')
+      promocodes: faker.helpers.arrayElement([
+        "64393801b48bff2e5d22cdd3",
+        "6439387edb728b680beea649",
+        "6439396ba9d318e958edc858",
+        "64394a2d880ae848d65f8c7e",
+        "643959a3021ab8c901ae5e23",
+      ]),
+    });
+    events.push(newEvent);
+    newEvent.save();
+  }
 
+  res.status(201).json({
+    success: true,
+    message: "Database Seeded",
+  });
+}
 
-
-// // await eventModel.insertMany(events);
-
-// // process.exit();
-
-// //  }
- 
-// seedDB();
-// // Seed the database with 10 events
-// // for (let i = 0; i < 10; i++) {
-// //   const event = generateEvent();
-// //   event.save();
-// // }
-
-// module.exports = { seedDB };
-
+module.exports = { seedDB };

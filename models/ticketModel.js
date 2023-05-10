@@ -16,16 +16,26 @@ const ticketSchema = new mongoose.Schema(
       required: true,
     },
 
+    buyerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "userModel",
+      required: true,
+    },
+
     promocodeUsed: {
       type: mongoose.Schema.Types.String,
       ref: "promocodeModel",
     },
-    purchaseDate: {
+    // it takes a uuid id
+    orderId: {
       type: String,
+    },
+    purchaseDate: {
+      type: Date,
       required: true,
     },
     purchasePrice: {
-      type: Number,
+      type: String,
       required: true,
     },
     tierName: {

@@ -13,6 +13,7 @@ const bcrypt = require("bcrypt");
  */
 async function passwordEncryption(userPassword) {
 	try {
+		if (userPassword == null) return;
 		// Generate verification token
 		//const encryptedPassword = jwt.sign({ userPassword }, process.env.SECRETJWT);
 		const salt = await bcrypt.genSalt(10);
@@ -40,14 +41,17 @@ async function passwordEncryption(userPassword) {
  */
 async function comparePassword(userStoredPassword, userPassword) {
 	try {
-		const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
+		//const encryptedPassword = jwt.sign(userPassword, process.env.SECRETJWT);
+		const isMatched = await bcrypt.compare(userPassword, userStoredPassword);
 		console.log("password stored = " + userStoredPassword);
+		console.log("password  = " + userPassword);
+		console.log(isMatched);
 
-		if (encryptedPassword == userStoredPassword) {
-			console.log("password = " + encryptedPassword);
+		if (isMatched) {
+			//console.log("password = " + encryptedPassword);
 			return true;
 		} else {
-			console.log("password = " + encryptedPassword);
+			//console.log("password = " + encryptedPassword);
 			return false;
 		}
 	} catch (error) {

@@ -83,7 +83,11 @@ const eventSchema = new mongoose.Schema(
 
     ticketTiers: [
       {
-        tierName: String,
+        // need the tierName to be unique
+        tierName: {
+          type: String,
+          unique: true,
+        },
 
         quantitySold: Number,
 
@@ -106,8 +110,11 @@ const eventSchema = new mongoose.Schema(
       type: String,
       enum: ["started", "ended", "completed", "cancelled", "live"],
     },
-
-    published: Boolean, // if the creator have published the event ( it will be availble for the users to book tickets)
+    // if the creator have published the event ( it will be availble for the users to book tickets)
+    published: {
+      type: Boolean,
+      default: false,
+    },
 
     isPublic: Boolean, // if true so the event will be public - if false the event will be private
 
@@ -133,6 +140,10 @@ const eventSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "userModel",
         },
+        // it takes a uuid id
+        orderId: {
+          type: String,
+        },
       },
     ],
 
@@ -144,8 +155,11 @@ const eventSchema = new mongoose.Schema(
 
     promocodes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "promocodeModel",
+        promocodeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "promocodeModel",
+        },
+        code: String,
       },
     ],
   },
@@ -159,17 +173,19 @@ eventSchema.pre("save", async function (next) {
   if (!this.isModified("privatePassword")) {
     next();
   }
-  this.privatePassword = await passwordEncryption(this.privatePassword);
+  if (this.privatePassword != null) {
+    this.privatePassword = await passwordEncryption(this.privatePassword);
+  } else this.privatePassword = await passwordEncryption(null);
 });
 
-eventSchema.pre("findOneAndUpdate", function (next) {
-  const update = this.getUpdate();
-  if (update.basicInfo) {
-    const err = new Error("Cannot update basicInfo");
-    err.status = 403;
-    return next(err);
-  }
-  next();
-});
+/*eventSchema.pre("findOneAndUpdate", function (next) {
+	const update = this.getUpdate();
+	if (update.basicInfo) {
+		const err = new Error("Cannot update basicInfo");
+		err.status = 403;
+		return next(err);
+	}
+	next();
+}); */
 module.exports = mongoose.model("eventModel", eventSchema);
 //TODO comment the attributes
