@@ -1,23 +1,32 @@
 void setBuildStatus(String message, String state) {
     step([
         $class: "GitHubCommitStatusSetter",
-        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/mo-gaafar/tessera-backend/"],
-        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: env.GIT_URL],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/${STAGE_NAME}"],
         errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-        statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+        statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]]]
     ]);
 }
 
 pipeline {
     agent any
-
+    
     stages {
         stage('Build') {
             environment {
                 DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
             }
             steps {
+                setBuildStatus("Building container", "PENDING");
                 sh 'docker build -f ./Dockerfile -t $DOCKERHUB_USERNAME/tessera-backend-dev .'
+            }
+            post {
+                success {
+                    setBuildStatus("Container built successfully", "SUCCESS");
+                }
+                failure {
+                    setBuildStatus("Container build failed", "FAILURE");
+                }
             }
         }
 
@@ -38,6 +47,7 @@ pipeline {
                 DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
             }
             steps {
+                setBuildStatus("Running tests", "PENDING");
                 sh 'docker run \
                     -e BASE_URL \
                     -e PORT \
@@ -56,6 +66,15 @@ pipeline {
                     -e AWS_S3_SECRET_KEY \
                     -e AWS_S3_REGION \
                     $DOCKERHUB_USERNAME/tessera-backend-dev sh -c "CI=true npm run test:ci"'
+                
+            }
+            post {
+                success {
+                    setBuildStatus("Passed all tests", "SUCCESS");
+                }
+                failure {
+                    setBuildStatus("One or more tests failed", "FAILURE");
+                }
             }
         }
 
@@ -65,14 +84,33 @@ pipeline {
                 DOCKERHUB_ACCESS_TOKEN = credentials('DOCKERHUB_ACCESS_TOKEN')
             }
             steps {
+                setBuildStatus("Pushing container", "PENDING");
                 sh 'echo $DOCKERHUB_ACCESS_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin'
                 sh 'docker push $DOCKERHUB_USERNAME/tessera-backend-dev'
+
+            }
+            post {
+                success {
+                    setBuildStatus("Container pushed", "SUCCESS");
+                }
+                failure {
+                    setBuildStatus("Failed to push to Docker Hub", "FAILURE");
+                }
             }
         }
 
         stage('Deploy') {
             steps {
+                setBuildStatus("Deploying", "PENDING");
                 build job: "deploy", wait: true
+            }
+            post {
+                success {
+                    setBuildStatus("Deployed successfully", "SUCCESS");
+                }
+                failure {
+                    setBuildStatus("Deployment failed", "FAILURE");
+                }
             }
         }
     }
@@ -80,12 +118,6 @@ pipeline {
     post {
         always {
             deleteDir()
-        }
-        success {
-            setBuildStatus("Build succeeded", "SUCCESS");
-        }
-        failure {
-            setBuildStatus("Build failed", "FAILURE");
         }
     }
 }
