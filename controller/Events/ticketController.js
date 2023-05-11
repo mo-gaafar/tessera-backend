@@ -106,6 +106,9 @@ async function bookTicket(req, res) {
       orderId
     );
 
+    console.log(
+      "🚀 ~ file: ticketController.js:109 ]]]]]]]]]]]]]]]]]]]]]]]]]]]]~"
+    );
     // send email with order and Qr-Code
     sendOrderEmail(
       eventId,
@@ -131,6 +134,22 @@ async function bookTicket(req, res) {
       message: err.message,
     });
   }
+  console.log(
+    "🚀 ~ file: ticketController.js:134 ~ bookTicket ~ contactInformation:",
+    contactInformation
+  );
+  console.log(
+    "🚀 ~ file: ticketController.js:134 ~ bookTicket ~ promocodeObj:",
+    promocodeObj
+  );
+  console.log(
+    "🚀 ~ file: ticketController.js:134 ~ bookTicket ~ sendOrderEmail:",
+    sendOrderEmail
+  );
+  console.log(
+    "🚀 ~ file: ticketController.js:134 ~ bookTicket ~ sendOrderEmail:",
+    sendOrderEmail
+  );
 }
 
 /**
@@ -152,6 +171,7 @@ async function sendOrderEmail(
   firstName
 ) {
   try {
+    console.log("🚀 ~ file: ticketController.js:147 ~ sendOrderEmail:");
     let totalOrderPrice = 0;
     // add new attribute in ticketTierSelected equal to the new price multiplied with the quantity using the implemented functions
     for (let i = 0; i < ticketTierSelectedArray.length; i++) {
@@ -197,7 +217,7 @@ async function sendOrderEmail(
     await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
     // await sendUserEmail(email, order, addAttendeeOption, qrcodeImage);
   } catch (error) {
-    throw error;
+    console.error(error);
   }
 }
 
@@ -216,52 +236,56 @@ async function generateTickets(
   buyerId,
   orderId
 ) {
-  // Loop through each ticket tier object in the array
-  for (let i = 0; i < ticketTiers.length; i++) {
-    // Destructure the properties of the current ticket tier object
-    tickets = [];
-    const { tierName, quantity } = ticketTiers[i];
+  try {
+    // Loop through each ticket tier object in the array
+    for (let i = 0; i < ticketTiers.length; i++) {
+      // Destructure the properties of the current ticket tier object
+      tickets = [];
+      const { tierName, quantity } = ticketTiers[i];
 
-    // check if the quantitySold excceds the maxCapacity in the tickets tier
-    if (ticketTiers[i].quantitySold >= ticketTiers[i].maxCapacity) {
-      // throw error if quantitySold exceeds maxCapacity
-      throw new Error(
-        `The quantity of tickets sold exceeds the capacity of the ticket tier. Ticket tier: ${tierName}. Quantity sold: ${ticketTiers[i].quantitySold}. Max capacity: ${ticketTiers[i].maxCapacity}.`
-      );
+      // check if the quantitySold excceds the maxCapacity in the tickets tier
+      if (ticketTiers[i].quantitySold >= ticketTiers[i].maxCapacity) {
+        // throw error if quantitySold exceeds maxCapacity
+        throw new Error(
+          `The quantity of tickets sold exceeds the capacity of the ticket tier. Ticket tier: ${tierName}. Quantity sold: ${ticketTiers[i].quantitySold}. Max capacity: ${ticketTiers[i].maxCapacity}.`
+        );
+      }
+
+      // Loop through each quantity of the current ticket tier and create a ticket object for each one
+      for (let j = 0; j < quantity; j++) {
+        // Calculate the total price of the ticket
+        const ticketPrice = await calculateTotalPrice(
+          ticketTiers[i],
+          promocodeObj
+        );
+
+        // Create a new ticket object
+        const ticket = new ticketModel({
+          eventId: eventId,
+          userId: userId,
+          buyerId: buyerId,
+          promocodeUsed: promocodeObj ? promocodeObj.code : null,
+          orderId: orderId,
+          purchaseDate: Date.now(),
+          purchasePrice: ticketPrice,
+          tierName: tierName,
+        });
+
+        await ticket.save();
+
+        // Add the ticket to the tickets array
+        const soldTicket = {
+          ticketId: ticket._id,
+          userId: userId,
+          orderId: orderId,
+        };
+
+        // add the tickets to the event schema
+        await addSoldTicketToEvent(eventId, soldTicket, tierName);
+      }
     }
-
-    // Loop through each quantity of the current ticket tier and create a ticket object for each one
-    for (let j = 0; j < quantity; j++) {
-      // Calculate the total price of the ticket
-      const ticketPrice = await calculateTotalPrice(
-        ticketTiers[i],
-        promocodeObj
-      );
-
-      // Create a new ticket object
-      const ticket = new ticketModel({
-        eventId: eventId,
-        userId: userId,
-        buyerId: buyerId,
-        promocodeUsed: promocodeObj ? promocodeObj.code : null,
-        orderId: orderId,
-        purchaseDate: Date.now(),
-        purchasePrice: ticketPrice,
-        tierName: tierName,
-      });
-
-      await ticket.save();
-
-      // Add the ticket to the tickets array
-      const soldTicket = {
-        ticketId: ticket._id,
-        userId: userId,
-        orderId: orderId,
-      };
-
-      // add the tickets to the event schema
-      await addSoldTicketToEvent(eventId, soldTicket, tierName);
-    }
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -276,28 +300,52 @@ async function calculateTotalPrice(
   promocodeObj,
   forEmail = null
 ) {
-  if (ticketTierSelected.price == "Free") {
-    ticketTierSelected.price = 0;
-  }
-  let ticketPrice = ticketTierSelected.price; // Get the base ticket price
-
-  let discount = 0;
-  if (promocodeObj) {
-    // Check if a promocode was provided
-    discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
-    ticketPrice = ticketPrice - discount; // Apply the discount to the base price
-
-    promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
-
-    if (forEmail) {
-      await promocodeObj.save();
+  try {
+    if (ticketTierSelected.price == "Free") {
+      ticketTierSelected.price = 0;
     }
+    let ticketPrice = ticketTierSelected.price; // Get the base ticket price
+
+    let discount = 0;
+    if (promocodeObj) {
+      //check if the promocode limit is still available
+      if (promocodeObj.remainingUses <= 0) {
+        new Error("The promocode is no longer available");
+      }
+      console.log(
+        "🚀 ~ file: ticketController.js:295 ~ Error: The promocode is no longer available"
+      );
+
+      if (ticketPrice == 0) {
+        new Error("The promocode cannot be applied to free tickets");
+      }
+      console.log(
+        "🚀 ~ file: ticketController.js:299 ~ The promocode cannot be applied to free tickets:"
+      );
+
+      if (ticketPrice != 0 && promocodeObj.remainingUses > 0) {
+        discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
+        ticketPrice = ticketPrice - discount; // Apply the discount to the base price
+
+        promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
+        console.log(
+          "🚀 ~ file: ticketController.js:299 ~ iffffffffffffffffffffffffffffffffffff"
+        );
+      }
+      // Check if a promocode was provided
+
+      if (!forEmail) {
+        await promocodeObj.save();
+        console.log("🚀 ~ file: ticketController.js:319 ~ saveeeeeeeeeeee:");
+      }
+      // add new atribute in ticketTierSelected equal to the new price multiplied with the quantity
+      ticketTierSelected.totalPrice = ticketPrice * ticketTierSelected.quantity;
+
+      return ticketPrice; // Return the total purchase price
+    }
+  } catch (error) {
+    console.error(error);
   }
-
-  // add new atribute in ticketTierSelected equal to the new price multiplied with the quantity
-  ticketTierSelected.totalPrice = ticketPrice * ticketTierSelected.quantity;
-
-  return ticketPrice; // Return the total purchase price
 }
 
 /**

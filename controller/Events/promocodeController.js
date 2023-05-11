@@ -7,6 +7,7 @@ const multer = require("multer");
 const { parse } = require("csv-parse");
 const { authorized } = require("../../utils/Tokens");
 const upload = multer();
+const logger = require("../../utils/logger");
 
 /**
 Imports promocodes from a CSV file and adds them to an event.
@@ -293,6 +294,76 @@ async function checkPromocode(req, res) {
   }
 }
 
+async function retriveAllPromocodesForEvent(req, res) {
+  try {
+    const eventId = req.params.event_Id;
+
+    const event = await eventModel.findById(eventId); //search event by id
+
+    //check if no events
+    if (!event) {
+      return res.status(404).json({ message: "No event Found" });
+    }
+    //authorize that user exists
+    const userExist = await authorized(req);
+
+    if (event.creatorId.toString() !== userExist.user_id.toString()) {
+      // check if the creator of the event matches the user making the delete request
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to retrieve this event",
+      });
+    }
+
+    // find all the promocodes of the event
+    const promocodes = await promocodeModel.find({ event: eventId });
+
+    // add status attribute if the prmocode remainingUses is equal or less than zero let status == not valid else valid
+    for (const promocode of promocodes) {
+      if (promocode.remainingUses <= 0) {
+        promocode.status = "not valid";
+      } else {
+        promocode.status = "valid";
+      }
+    }
+
+    // retrieve the required attributes
+    const attributes = ["code", "discount", "remainingUses", "status"];
+
+    // retrieve the promocodes
+    const promoCodes = selectRequiredAttribute(promocodes, attributes);
+
+    // return the promocodes
+    return res.status(200).json({
+      success: true,
+      message: "Promocodes by creator listed successfully",
+      prmocodes: promoCodes,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+function selectRequiredAttribute(objects, attributes) {
+  try {
+    const promoCodes = [];
+
+    objects.forEach((obj) => {
+      const promoCodeObj = {};
+      for (const attribute of attributes) {
+        promoCodeObj[attribute] = obj[attribute];
+      }
+      promoCodes.push(promoCodeObj);
+    });
+
+    return promoCodes;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   createPromocode,
   checkPromocode,
@@ -300,4 +371,5 @@ module.exports = {
   checkPromocodeExists,
   importPromocode,
   upload,
+  retriveAllPromocodesForEvent,
 };
