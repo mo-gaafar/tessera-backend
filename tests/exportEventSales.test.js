@@ -1,7 +1,7 @@
 const axios = require("axios");
 const {
 	exportEventSales,
-} = require("../../controller/Dashboard/dashboardController");
+} = require("../controller/Dashboard/dashboardController");
 
 jest.mock("axios");
 

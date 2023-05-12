@@ -2,7 +2,7 @@ const axios = require("axios");
 const moment = require("moment");
 const {
 	exportsListEvents,
-} = require("../../controller/Events/eventsRetrievalController");
+} = require("../controller/Events/eventsRetrievalController");
 
 jest.mock("axios");
 

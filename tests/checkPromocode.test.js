@@ -1,8 +1,6 @@
-const {
-	checkPromocode,
-} = require("../../controller/Events/promocodeController");
-const promocodeModel = require("../../models/promocodeModel");
-const promocodeController = require("../../controller/Events/promocodeController");
+const { checkPromocode } = require("../controller/Events/promocodeController");
+const promocodeModel = require("../models/promocodeModel");
+const promocodeController = require("../controller/Events/promocodeController");
 
 describe("checkPromocode", () => {
 	it("should return success if promocode exists for the event", async () => {

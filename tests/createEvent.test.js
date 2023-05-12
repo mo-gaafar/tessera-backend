@@ -1,12 +1,12 @@
-const { createEvent } = require("../../controller/Events/eventController");
-const eventModel = require("../../models/eventModel");
-const userModel = require("../../models/userModel");
+const { createEvent } = require("../controller/Events/eventController");
+const eventModel = require("../models/eventModel");
+const userModel = require("../models/userModel");
 
-const { authorized } = require("../../utils/Tokens");
+const { authorized } = require("../utils/Tokens");
 
-jest.mock("../../models/eventModel");
-jest.mock("../../models/userModel");
-jest.mock("../../utils/Tokens");
+jest.mock("../models/eventModel");
+jest.mock("../models/userModel");
+jest.mock("../utils/Tokens");
 
 describe("createEvent", () => {
 	beforeEach(() => {

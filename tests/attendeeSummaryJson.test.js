@@ -1,9 +1,9 @@
-const eventModel = require("../../models/eventModel");
-const ticketModel = require("../../models/ticketModel");
-const userModel2 = require("../../models/userModel");
+const eventModel = require("../models/eventModel");
+const ticketModel = require("../models/ticketModel");
+const userModel2 = require("../models/userModel");
 const {
 	AttendeeSumJason,
-} = require("../../controller/Dashboard/dashboardController");
+} = require("../controller/Dashboard/dashboardController");
 
 describe("AttendeeSumJason function", () => {
 	let req;
