@@ -7,9 +7,11 @@ const {
   verifyToken,
   authorized,
 } = require("../../utils/Tokens");
-const jwt = require("jsonwebtoken");
-
-const { comparePassword } = require("../../utils/passwords");
+const {
+  passwordEncryption,
+  comparePassword,
+} = require("../../utils/passwords");
+const logger = require("../../utils/logger");
 
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.
@@ -193,17 +195,17 @@ async function updateEvent(req, res) {
 
 // const token= GenerateToken("643a56706f55e9085d193f48")
 // console.log("token is:",token)
-
-// Publishes an event by updating its attributes, such as making it public or setting a password or link to access it.
-// @async
-// @function publishEvent
-// @param {Object} req - The request object containing the attributes of the event to be published.
-// @param {string} req.body.isPublic - whether the event is public or privates
-// @param {string} req.body.isPublic - whether the event is public or private
-// @param {Object} res - The response object containing the updated event attributes.
-// @returns {Object} Returns the updated event object with its attributes.
-// @throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
-// */
+/** 
+Publishes an event by updating its attributes, such as making it public or setting a password or link to access it.
+@async
+@function publishEvent
+@param {Object} req - The request object containing the attributes of the event to be published.
+@param {string} req.body.isPublic - whether the event is public or privates
+@param {string} req.body.isPublic - whether the event is public or private
+@param {Object} res - The response object containing the updated event attributes.
+@returns {Object} Returns the updated event object with its attributes.
+@throws {Object} Throws an error if the event is not found or if the user is not authorized to publish it.
+*/
 async function publishEvent(req, res) {
   try {
     // getting attributes from body
@@ -309,24 +311,24 @@ async function publishEvent(req, res) {
 
         // event accessed by password
         else if (hasPassword) {
-          isMatch = await comparePassword(
-            privatePasswordStored,
-            generatedPassword
+          const update_password = {
+            privatePassword: await passwordEncryption(generatedPassword),
+          };
+
+          await eventModel.findOneAndUpdate(
+            { _id: req.params.eventID },
+            update_password,
+            {
+              new: true,
+              runValidators: true,
+            }
           );
-          console.log("isMatch:", isMatch);
-          if (isMatch) {
-            res.status(200).json({
-              success: true,
-              message: "Event is accessed by password",
-              url,
-            });
-          } else {
-            return res.status(401).json({
-              success: false,
-              message: "Failed to access password",
-              url: null,
-            });
-          }
+
+          res.status(200).json({
+            success: true,
+            message: "Event is accessed by password",
+            url,
+          });
         }
 
         // event accessed by link
@@ -378,6 +380,36 @@ async function publishEvent(req, res) {
     res.status(400).json({
       success: false,
       message: "invalid error",
+    });
+  }
+}
+
+async function privatePasswordCheck(req, res) {
+  const userEnteredPassword = req.body.passwordEntered;
+
+  console.log("enteredPassword:", userEnteredPassword);
+
+  const event = await eventModel.findById(req.params.eventID); //getting event by its ID
+
+  databasePassword = event.privatePassword;
+
+  const isPasswordVerified = await comparePassword(
+    databasePassword,
+    userEnteredPassword
+  );
+
+  const url = await event.eventUrl; // getting url for event
+
+  if (isPasswordVerified) {
+    res.status(200).json({
+      success: true,
+      message: "Event is accessed by this password",
+      eventUrl: url,
+    });
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: "passwords does not match",
     });
   }
 }
@@ -449,4 +481,5 @@ module.exports = {
   updateEvent,
   publishEvent,
   uploadImage,
+  privatePasswordCheck,
 };

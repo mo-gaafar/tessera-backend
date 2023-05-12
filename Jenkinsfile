@@ -44,6 +44,11 @@ pipeline {
                 FACEBOOK_CLIENT_SECRET = credentials('FACEBOOK_CLIENT_SECRET')
                 GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
                 GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
+                AWS_S3_BUCKET = credentials('AWS_S3_BUCKET')
+                AWS_S3_ACCESS_KEY = credentials('AWS_S3_ACCESS_KEY')
+                AWS_S3_SECRET_KEY = credentials('AWS_S3_SECRET_KEY')
+                AWS_S3_REGION = credentials('AWS_S3_REGION')
+                NODE_ENV = credentials('NODE_ENV')
                 DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')
             }
             steps {
@@ -65,6 +70,7 @@ pipeline {
                     -e AWS_S3_ACCESS_KEY \
                     -e AWS_S3_SECRET_KEY \
                     -e AWS_S3_REGION \
+                    -e NODE_ENV \
                     $DOCKERHUB_USERNAME/tessera-backend-dev sh -c "CI=true npm run test:ci"'
                 
             }

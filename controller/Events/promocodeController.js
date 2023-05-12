@@ -7,9 +7,9 @@ const multer = require("multer");
 const { parse } = require("csv-parse");
 const { authorized } = require("../../utils/Tokens");
 const upload = multer();
+const logger = require("../../utils/logger");
 
 /**
-
 Imports promocodes from a CSV file and adds them to an event.
 @async
 @function importPromocode
@@ -97,6 +97,20 @@ async function importPromocode(req, res) {
   }
 }
 
+/**
+ * Creates a new promocode for a given event.
+ * @async
+ * @function
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @param {string} req.params.event_Id - The ID of the event to create the promocode for.
+ * @param {Object} req.body - The request body.
+ * @param {string} req.body.code - The promocode code.
+ * @param {number} req.body.discount - The discount percentage.
+ * @param {number} req.body.limitOfUses - The maximum number of times the promocode can be used.
+ * @returns {Promise<Object>} A Promise that resolves with the new promocode object.
+ * @throws {Error} If the event is not found, if the user is not authorized, if the promocode code already exists, or if there is an error adding the promocode to the database or event.
+ */
 async function createPromocode(req, res) {
   const eventId = req.params.event_Id;
   const { code, discount, limitOfUses } = req.body;
@@ -107,10 +121,10 @@ async function createPromocode(req, res) {
       throw new Error("Event not found");
     }
 
-    // Verify the JWT token and get an object contains the status of authorization and user id if authorized
+    // Verify the JWT token and get an object containing the status of authorization and user ID if authorized
     const userStatus = await authorized(req);
 
-    // decodedId equals the user Id got from the bearer token
+    // decodedId equals the user ID got from the bearer token
     let decodedId = null;
     if (userStatus.authorized) {
       decodedId = userStatus.user_id.toString();
@@ -135,19 +149,23 @@ async function createPromocode(req, res) {
     if (promocodeExists) {
       throw new Error("Promocode code already exists for this event");
     }
+
     let promocodeObj = {};
     promocodeObj.code = code;
     promocodeObj.discount = discount;
     promocodeObj.limitOfUses = limitOfUses;
-    console.log(
-      "🚀 ~ file: promocodeController.js:142 ~ createPromocode ~ promocodeObj:",
-      promocodeObj
-    );
+
+    // Log the promocode object before adding it to the database
+    logger.info("Promocode object:", { promocodeObj });
 
     await addPromocodeToDatabase(eventId, promocodeObj);
 
-    // add the promcode to the event Schema
+    // Add the promocode to the event Schema
     await addPromocodeToEvent(eventId, promocodeObj);
+
+    // Log the successful creation of the promocode
+    logger.info("Promocode created successfully", { promocodeObj });
+
     // Return the new promocode object in the response.
     return res.status(200).json({
       success: true,
@@ -155,7 +173,9 @@ async function createPromocode(req, res) {
       promocodeObj,
     });
   } catch (err) {
-    console.error(err);
+    // Log the error message if an error occurs
+    logger.error("Error in createPromocode", { error: err });
+    //console.error(err);
 
     // Return an error response if an error occurs.
     return res.status(401).json({
@@ -165,6 +185,18 @@ async function createPromocode(req, res) {
   }
 }
 
+/**
+ * Adds a new promocode to the database.
+ * @async
+ * @function
+ * @param {string} eventId - The ID of the event that the promocode belongs to.
+ * @param {Object} promocode - The promocode object.
+ * @param {string} promocode.code - The promocode code.
+ * @param {number} promocode.discount - The discount percentage.
+ * @param {number|string} promocode.limitOfUses - The maximum number of times the promocode can be used. Use "unlimited" for unlimited uses.
+ * @returns {Promise<Object>} A Promise that resolves with the new promocode object.
+ * @throws {Error} If there is an error creating or saving the promocode object.
+ */
 async function addPromocodeToDatabase(eventId, promocode) {
   code = promocode.code;
   discount = promocode.discount;
@@ -198,7 +230,6 @@ async function checkPromocodeExists(eventId, code) {
     return promocode ? promocode.discount : false;
   } catch (err) {
     // If an error occurs, log it and re-throw the error.
-    console.error(err);
     throw err;
   }
 }
@@ -233,32 +264,128 @@ async function addPromocodeToEvent(eventId, promocode) {
   }
 }
 
+/**
+ * Check if a promocode exists for a specific event.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Promise<Object>} The response JSON object.
+ * @throws {Error} If an error occurs during the process.
+ */
 async function checkPromocode(req, res) {
   const eventId = req.params.eventId;
-
   const codeName = req.query.code;
-  console.log(
-    "🚀 ~ file: promocodeController.js:206 ~ checkPromocode ~ codeName:",
-    codeName
-  );
+
   try {
+    // Check if the promocode exists for the event
     const isExists = await checkPromocodeExists(eventId, codeName);
 
-    if (isExists == false)
+    // Return an error response if the promocode does not exist
+    if (!isExists) {
       return res.status(404).json({
         success: false,
         message: "Promocode does not exist",
       });
+    }
 
+    // Return a success response with the promocode discount
     return res.status(200).json({
       success: true,
       message: "Promocode exists",
-      discout: isExists / 100,
+      discount: isExists / 100,
     });
   } catch (err) {
-    // If an error occurs, log it and re-throw the error.
-    console.error(err);
-    throw err;
+    // Return an error response if an error occurs
+    return res.status(401).json({
+      success: false,
+      message: "Promocode does not exist",
+    });
+  }
+}
+
+/**
+ * Retrieve all promocodes for a specific event.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Promise<Object>} The response JSON object.
+ * @throws {Error} If an error occurs during the process.
+ */
+async function retriveAllPromocodesForEvent(req, res) {
+  try {
+    const eventId = req.params.event_Id;
+
+    // Find the event by ID
+    const event = await eventModel.findById(eventId);
+
+    // Check if the event exists
+    if (!event) {
+      return res.status(404).json({ message: "No event Found" });
+    }
+
+    // Authorize that the user exists
+    const userExist = await authorized(req);
+
+    // Check if the creator of the event matches the user making the request
+    if (event.creatorId.toString() !== userExist.user_id.toString()) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to retrieve this event",
+      });
+    }
+
+    // Find all the promocodes of the event
+    const promocodes = await promocodeModel.find({ event: eventId });
+
+    // Add status attribute to each promocode based on remainingUses
+    for (const promocode of promocodes) {
+      if (promocode.remainingUses <= 0) {
+        promocode.status = "not valid";
+      } else {
+        promocode.status = "valid";
+      }
+    }
+
+    // Retrieve the required attributes for each promocode
+    const attributes = ["code", "discount", "remainingUses", "status"];
+    const promoCodes = selectRequiredAttribute(promocodes, attributes);
+
+    // Return the promocodes in the response
+    return res.status(200).json({
+      success: true,
+      message: "Promocodes by creator listed successfully",
+      promocodes: promoCodes,
+    });
+  } catch (error) {
+    // Return an error response if an error occurs
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * Selects the required attributes from an array of objects and returns an array of objects containing only the selected attributes.
+ *
+ * @param {Object[]} objects - The array of objects from which to select attributes.
+ * @param {string[]} attributes - The attributes to select from each object.
+ * @returns {Object[]} - The array of objects containing only the selected attributes.
+ * @throws {Error} If an error occurs during the selection process.
+ */
+function selectRequiredAttribute(objects, attributes) {
+  try {
+    const promoCodes = [];
+
+    objects.forEach((obj) => {
+      const promoCodeObj = {};
+      for (const attribute of attributes) {
+        promoCodeObj[attribute] = obj[attribute];
+      }
+      promoCodes.push(promoCodeObj);
+    });
+
+    return promoCodes;
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -269,4 +396,6 @@ module.exports = {
   checkPromocodeExists,
   importPromocode,
   upload,
+  retriveAllPromocodesForEvent,
+  addPromocodeToDatabase,
 };

@@ -1,0 +1,10 @@
+{"email":"ewtesserackend@gmail.com","emailConfirmation":"ewtesserackend@gmail.com","level":"info","message":"Sign up request received","service":"your-service-name","timestamp":"2023-05-10 21:58:06"}
+{"level":"info","message":"User created","service":"your-service-name","timestamp":"2023-05-10 21:58:07","user":{"__v":0,"_id":"645be93ed5c01c143252c69c","email":"ewtesserackend@gmail.com","emailConfirmation":"ewtesserackend@gmail.com","firstName":"tessera","isVerified":false,"lastName":"backend","password":"$2b$10$InnVjtrBhtGyLY1kZMMe4OGloN1e83jnmNwKDnsQ667XVqYlG5e5u","userType":"normal"}}
+{"email":"ewtesserackend@gmail.com","level":"info","message":"Verification email sent","service":"your-service-name","timestamp":"2023-05-10 21:58:09"}
+{"email":"ewtesserackend@gmail.com","level":"info","message":"Verification email sent successfully","service":"your-service-name","timestamp":"2023-05-10 21:58:09"}
+{"email":"etesserackend@gmail.com","level":"info","message":"Sign-in attempt","service":"your-service-name","timestamp":"2023-05-10 21:58:56"}
+{"email":"etesserackend@gmail.com","level":"info","message":"User logged in successfully","service":"your-service-name","timestamp":"2023-05-10 21:58:56"}
+{"email":"ewtesserackend@gmail.com","level":"info","message":"Sign-in attempt","service":"your-service-name","timestamp":"2023-05-10 21:59:20"}
+{"email":"ewtesserackend@gmail.com","level":"error","message":"Please verify your email address","service":"your-service-name","timestamp":"2023-05-10 21:59:21"}
+{"email":"ewtesserackend@gmail.com","level":"info","message":"Sign-in attempt","service":"your-service-name","timestamp":"2023-05-10 21:59:32"}
+{"email":"ewtesserackend@gmail.com","level":"info","message":"User logged in successfully","service":"your-service-name","timestamp":"2023-05-10 21:59:33"}

@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const moment = require("moment");
 const { exportToCsv } = require("../../utils/exports");
+const logger = require("../../utils/logger");
 
 /**
  * List events filtered by creator id and optionally by status (upcoming, past, or draft)
@@ -356,8 +357,7 @@ async function exportsListEvents(req, res) {
     res.setHeader("Content-Disposition", "attachment; filename=listEvents.csv");
     res.download(csvFilePath);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: "Error occurred while fetching event sales data",
     });

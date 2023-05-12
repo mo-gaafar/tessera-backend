@@ -87,17 +87,23 @@ async function bookTicket(req, res) {
 
     // Get the promocode object from the database by the promocode code
     let promocodeObj = null;
-    if (promocode) {
-      promocodeObj = await promocodeModel.findOne({ code: promocode });
-      if (!promocodeObj) {
-        throw new Error("Promocode not found");
+    if (promocode != null) {
+      if (promocode) {
+        promocodeObj = await promocodeModel.findOne({ code: promocode });
+        if (!promocodeObj) {
+          throw new Error("Promocode not found");
+        }
       }
     }
     // generate order id
     const orderId = await generateUniqueId();
 
     // Generate the tickets
-    generateTickets(
+    console.log(
+      "🚀 ~ file: ticketController.js:144 ~ bookTicket ~ promocodeObj:",
+      promocodeObj
+    );
+    const outputOfGenerateTickets = await generateTickets(
       ticketTierSelected,
       eventId,
       promocodeObj,
@@ -106,22 +112,30 @@ async function bookTicket(req, res) {
       orderId
     );
 
-    // send email with order and Qr-Code
-    sendOrderEmail(
-      eventId,
-      promocodeObj,
-      ticketTierSelected,
-      email,
-      orderId,
-      contactInformation.first_name
-    );
+    if (outputOfGenerateTickets == true) {
+      // send email with order and Qr-Code
+      sendOrderEmail(
+        eventId,
+        promocodeObj,
+        ticketTierSelected,
+        email,
+        orderId,
+        contactInformation.first_name
+      );
+      // Return a success response if the ticket is created successfully.
+      return res.status(200).json({
+        success: true,
+        message:
+          "Ticket has been created successfully" + ` Email sent to ${email}`,
+      });
+    } else {
+      // Return an error response if an error occurs.
 
-    // Return a success response if the ticket is created successfully.
-    return res.status(200).json({
-      success: true,
-      message:
-        "Ticket has been created successfully" + ` Email sent to ${email}`,
-    });
+      return res.status(400).json({
+        success: false,
+        message: outputOfGenerateTickets.toString(),
+      });
+    }
   } catch (err) {
     console.error(err);
 
@@ -152,7 +166,9 @@ async function sendOrderEmail(
   firstName
 ) {
   try {
+    console.log("🚀 ~ file: ticketController.js:147 ~ sendOrderEmail:");
     let totalOrderPrice = 0;
+
     // add new attribute in ticketTierSelected equal to the new price multiplied with the quantity using the implemented functions
     for (let i = 0; i < ticketTierSelectedArray.length; i++) {
       totalPrice = await calculateTotalPrice(
@@ -165,19 +181,22 @@ async function sendOrderEmail(
       totalOrderPrice += ticketTierSelectedArray[i].totalPrice; // add to total order price
     }
 
-    console.log(
-      "🚀 ~ file: ticketController.js:150 ~ totalOrderPrice:",
-      totalOrderPrice
-    );
     // get the event basic info from events
     let event = await eventModel.findOne({ _id: eventID });
     let eventBasicInfo = event.basicInfo;
 
     // get the location info from events
-    let location = eventBasicInfo.location;
+    let location;
+    let locationString;
+    if (event.isOnline) {
+      location = "Online Event";
+      locationString = location;
+    } else {
+      location = eventBasicInfo.location;
+      locationString = `${location.streetNumber} ${location.route}, ${location.city}, ${location.administrativeAreaLevel1}, ${location.country}`;
+    }
 
     // generate location string
-    const locationString = `${location.streetNumber} ${location.route}, ${location.city}, ${location.administrativeAreaLevel1}, ${location.country}`;
 
     // generate QrCode and connects it to the evenURL
     const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
@@ -191,13 +210,12 @@ async function sendOrderEmail(
       firstName,
       locationString,
     };
-    console.log("🚀 ~ file: ticketController.js:123 ~ order:", order);
 
     // send email with order and Qr-Code
     await sendUserEmail(email, order, orderBookedOption, qrcodeImage);
     // await sendUserEmail(email, order, addAttendeeOption, qrcodeImage);
   } catch (error) {
-    throw error;
+    console.error(error);
   }
 }
 
@@ -216,52 +234,88 @@ async function generateTickets(
   buyerId,
   orderId
 ) {
-  // Loop through each ticket tier object in the array
-  for (let i = 0; i < ticketTiers.length; i++) {
-    // Destructure the properties of the current ticket tier object
-    tickets = [];
-    const { tierName, quantity } = ticketTiers[i];
+  try {
+    // Loop through each ticket tier object in the array
+    for (let i = 0; i < ticketTiers.length; i++) {
+      // Destructure the properties of the current ticket tier object
+      tickets = [];
+      const { tierName, quantity } = ticketTiers[i];
 
-    // check if the quantitySold excceds the maxCapacity in the tickets tier
-    if (ticketTiers[i].quantitySold >= ticketTiers[i].maxCapacity) {
-      // throw error if quantitySold exceeds maxCapacity
-      throw new Error(
-        `The quantity of tickets sold exceeds the capacity of the ticket tier. Ticket tier: ${tierName}. Quantity sold: ${ticketTiers[i].quantitySold}. Max capacity: ${ticketTiers[i].maxCapacity}.`
-      );
-    }
-
-    // Loop through each quantity of the current ticket tier and create a ticket object for each one
-    for (let j = 0; j < quantity; j++) {
-      // Calculate the total price of the ticket
-      const ticketPrice = await calculateTotalPrice(
-        ticketTiers[i],
-        promocodeObj
+      // search the database for the tickettier
+      const ticketTier = await eventModel.findOne(
+        { _id: eventId },
+        { ticketTiers: { $elemMatch: { tierName: tierName } } }
       );
 
-      // Create a new ticket object
-      const ticket = new ticketModel({
-        eventId: eventId,
-        userId: userId,
-        buyerId: buyerId,
-        promocodeUsed: promocodeObj ? promocodeObj.code : null,
-        orderId: orderId,
-        purchaseDate: Date.now(),
-        purchasePrice: ticketPrice,
-        tierName: tierName,
-      });
+      // check if the quantitySold excceds the maxCapacity in the tickets tier
+      if (
+        ticketTier.ticketTiers[0].quantitySold >=
+        ticketTier.ticketTiers[0].maxCapacity
+      ) {
+        // throw error if quantitySold exceeds maxCapacity
+        throw new Error(
+          `The quantity of tickets sold exceeds the capacity of the ticket tier. Ticket tier: ${tierName}. Quantity sold: ${ticketTier.ticketTiers[0].quantitySold}. Max capacity: ${ticketTier.ticketTiers[0].maxCapacity}.`
+        );
+      }
 
-      await ticket.save();
+      // Loop through each quantity of the current ticket tier and create a ticket object for each one
+      let ticketPrice;
+      for (let j = 0; j < quantity; j++) {
+        // Calculate the total price of the ticket
+        ticketPrice = await calculateTotalPrice(
+          ticketTiers[i],
+          promocodeObj,
+          null
+        );
 
-      // Add the ticket to the tickets array
-      const soldTicket = {
-        ticketId: ticket._id,
-        userId: userId,
-        orderId: orderId,
-      };
+        console.log(
+          "🚀 ~ file: ticketController.js:273 ~ ticketPrice:",
+          ticketPrice
+        );
+        // check if ticketPrice equal error message return error message
+        if (ticketPrice == "The promocode is no longer available") {
+          throw new Error("The promocode is no longer available");
+        } else if (
+          ticketPrice == "The promocode cannot be applied to free tickets"
+        ) {
+          throw new Error("The promocode cannot be applied to free tickets");
+        } else {
+          // Create a new ticket object
+          const ticket = new ticketModel({
+            eventId: eventId,
+            userId: userId,
+            buyerId: buyerId,
+            promocodeUsed: promocodeObj ? promocodeObj.code : null,
+            orderId: orderId,
+            purchaseDate: Date.now(),
+            purchasePrice: ticketPrice,
+            tierName: tierName,
+          });
+          console.log("🚀 ~ file: ticketController.js:261 ~ ticket:", ticket);
 
-      // add the tickets to the event schema
-      await addSoldTicketToEvent(eventId, soldTicket, tierName);
+          await ticket.save();
+
+          // Add the ticket to the tickets array
+          const soldTicket = {
+            ticketId: ticket._id,
+            userId: userId,
+            orderId: orderId,
+          };
+
+          // add the tickets to the event schema
+          await addSoldTicketToEvent(
+            eventId,
+            soldTicket,
+            tierName,
+            promocodeObj
+          );
+        }
+      }
     }
+    return true;
+  } catch (error) {
+    console.error(error);
+    return error;
   }
 }
 
@@ -276,28 +330,68 @@ async function calculateTotalPrice(
   promocodeObj,
   forEmail = null
 ) {
-  if (ticketTierSelected.price == "Free") {
-    ticketTierSelected.price = 0;
-  }
-  let ticketPrice = ticketTierSelected.price; // Get the base ticket price
+  try {
+    let remainingOfUses;
 
-  let discount = 0;
-  if (promocodeObj) {
-    // Check if a promocode was provided
-    discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
-    ticketPrice = ticketPrice - discount; // Apply the discount to the base price
-
-    promocodeObj.remainingUses = promocodeObj.remainingUses - 1;
-
-    if (forEmail) {
-      await promocodeObj.save();
+    if (ticketTierSelected.price == "Free") {
+      ticketTierSelected.price = 0; // set it to zero if it is free
     }
+
+    // Calculate the total purchase price
+    let ticketPrice = ticketTierSelected.price; // Get the base ticket price
+
+    console.log(
+      "🚀 ~ file: ticketController.js:315 ~ promocodeObj:",
+      promocodeObj
+    );
+    // check if the promocodeObj not equal null
+    if (promocodeObj != null && ticketPrice > 0) {
+      if (promocodeObj.remainingUses == "unlimited") {
+        remainingOfUses = 1000000000000; // Set a high number for unlimited remaining uses
+      } else {
+        remainingOfUses = promocodeObj.remainingUses;
+        console.log(
+          "🚀 ~ file: ticketController.js:335 ~ remainingOfUses:",
+          remainingOfUses
+        );
+      }
+
+      let discount = 0;
+
+      if (promocodeObj) {
+        // Check if the promocode limit is still available
+        if (remainingOfUses <= 0) {
+          return "The promocode is no longer available";
+        }
+
+        if (ticketPrice == 0) {
+          return "The promocode cannot be applied to free tickets";
+        }
+
+        if (ticketPrice != 0 && remainingOfUses > 0) {
+          discount = (ticketPrice * promocodeObj.discount) / 100; // Calculate the discount amount
+
+          ticketPrice = ticketPrice - discount; // Apply the discount to the base price
+
+          if (!forEmail && promocodeObj.remainingUses != "unlimited") {
+            promocodeObj.remainingUses = promocodeObj.remainingUses - 1; // Decrease the remaining uses of the promocode
+          }
+        }
+        // Check if a promocode was provided
+
+        if (!forEmail) {
+          await promocodeObj.save(); // Save the updated promocode object
+        }
+      }
+    }
+
+    // Add a new attribute in ticketTierSelected equal to the new price multiplied by the quantity
+    ticketTierSelected.totalPrice = ticketPrice * ticketTierSelected.quantity;
+
+    return ticketPrice; // Return the total purchase price
+  } catch (error) {
+    console.error(error);
   }
-
-  // add new atribute in ticketTierSelected equal to the new price multiplied with the quantity
-  ticketTierSelected.totalPrice = ticketPrice * ticketTierSelected.quantity;
-
-  return ticketPrice; // Return the total purchase price
 }
 
 /**
@@ -306,10 +400,15 @@ async function calculateTotalPrice(
  * @function addSoldTicketToEvent
  * @param {string} eventId - The ID of the event to add the sold ticket to
  * @param {object} soldTicket - The sold ticket object to add to the event's soldTickets array
- * @returns {Void} update the event object with the added sold ticket and increment the quantitySold in the ticket tiers in the event model
+ * @returns {Void} update the event object with the added sold ticket and increment the quantitySold in the ticket tiers in the event model and add the sold tickects to the promocode tickets array
  * @throws {Error} If the event is not found or if the sold ticket is already associated with the event
  */
-async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
+async function addSoldTicketToEvent(
+  eventId,
+  soldTicket,
+  tierName,
+  promocodeObj
+) {
   try {
     // Find the event in the database using the event ID.
     const event = await eventModel.findById(eventId);
@@ -331,6 +430,16 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
 
     // Save the updated event to the database.
     await event.save();
+
+    if (promocodeObj != null) {
+      // add the sold ticket to the tickets array in the promocode
+      promocodeObj.tickets.push(soldTicket.ticketId);
+
+      // Save the updated promocode to the database.
+      await promocodeObj.save();
+    }
+
+    // Return the updated event.
   } catch (err) {
     console.error(err);
 
@@ -338,9 +447,6 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
     throw new Error(err.message);
   }
 }
-
-// const token = GenerateToken("643a56706f55e9085d193f48")
-// console.log("token is:", token)
 
 /**
  * Creates a new ticket tier for an event.
@@ -358,7 +464,6 @@ async function addSoldTicketToEvent(eventId, soldTicket, tierName) {
  * @throws {Error} If there is an internal server error.
  * @throws {Error} If the ticket tier creator is not the one who created the event.
  */
-
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
   try {
@@ -423,6 +528,7 @@ async function createTicketTier(req, res) {
       // creating new tier object
       const newTicketTier = {
         tierName,
+        quantitySold,
         maxCapacity,
         price,
         startSelling,
@@ -482,8 +588,6 @@ async function retrieveTicketTier(req, res) {
       endSelling: tier.endSelling,
     }));
 
-    // console.log("price:",price)
-
     return res.status(200).json({
       success: true,
       message: "Ticket tier details for the event",
@@ -502,25 +606,24 @@ async function retrieveTicketTier(req, res) {
     });
   }
 }
+
 /**
 
-
-// * Edits a ticket tier for an event.
-//  * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
-//  * @param {Object} req.params - The parameters of the request.
-//  * @param {string} req.params.eventID - The ID of the desired event to edit.
-//  * @param {Object} req.body - The body of the request.
-//  * @param {string} req.body.tierName - The name of the tier you want to edit
-//  * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
-//  * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
-//  * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
-//  * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
-//  * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
-//  * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
-//  * @param {Object} res - The response object.
-//  * @returns {Object} An object containing the success status and a message is sent
-//  */
-
+* Edits a ticket tier for an event.
+ * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
+ * @param {Object} req.params - The parameters of the request.
+ * @param {string} req.params.eventID - The ID of the desired event to edit.
+ * @param {Object} req.body - The body of the request.
+ * @param {string} req.body.tierName - The name of the tier you want to edit
+ * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
+ * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
+ * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
+ * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
+ * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
+ * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
+ * @param {Object} res - The response object.
+ * @returns {Object} An object containing the success status and a message is sent
+ */
 async function editTicketTier(req, res) {
   try {
     const eventID = req.params.eventID; // get the event ID from the request URL
@@ -533,6 +636,7 @@ async function editTicketTier(req, res) {
         message: "Please enter the name of the tier to edit",
       });
     }
+
     const newTierName = req.body.ticketTiers[0].tierName;
     const newMaxCapacity = req.body.ticketTiers[0].maxCapacity;
     const newPrice = req.body.ticketTiers[0].price;
@@ -566,19 +670,20 @@ async function editTicketTier(req, res) {
         message: "You are not authorized to edit tier for this event",
       });
     } else {
-      const ticketTier = event.ticketTiers.find(
-        (tier) => tier.tierName === newTierName
-      ); // searching if the tier name provided in the body is already found in the array
-      console.log("found:", ticketTier);
+      if (enteredTierName != newTierName) {
+        const ticketTier = event.ticketTiers.find(
+          (tier) => tier.tierName === newTierName
+        ); // searching if the tier name provided in the body is already found in the array
+        console.log("found:", ticketTier);
 
-      // tier name that is needed to be edited is not unique
-      if (ticketTier) {
-        return res.status(404).json({
-          success: false,
-          message: "Cannot edit ticket tier",
-        });
+        // tier name that is needed to be edited is not unique
+        if (ticketTier) {
+          return res.status(404).json({
+            success: false,
+            message: "Cannot edit ticket tier",
+          });
+        }
       }
-
       // update the ticket tier attributes with the body parameters using the tier ID
       const updatedEvent = await eventModel.findOneAndUpdate(
         { _id: eventID, "ticketTiers.tierName": enteredTierName },

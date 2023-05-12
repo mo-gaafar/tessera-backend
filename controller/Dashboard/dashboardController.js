@@ -10,7 +10,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const { exportToCsv } = require("../../utils/exports");
-
+const { authorized } = require("../../utils/Tokens");
 // to be modified
 
 /**
@@ -79,8 +79,11 @@ async function AttendeeSumJason(req, res) {
       attendeeSummary: attendeeSummary,
     });
   } catch (error) {
-    console.error(error);
-    return { error: error.message };
+    res.status(400).send({
+      success: false,
+      message: error.message,
+    });
+    //return { error: error.message };
   }
 }
 
@@ -93,8 +96,10 @@ async function getAttendeeSummary(eventID) {
     const response = await axios.get(url);
     return response.data.attendeeSummary;
   } catch (error) {
-    console.error(error);
-    return { error: error.message };
+    res.status(400).send({
+      success: false,
+      message: error.message,
+    });
   }
 }
 /**
@@ -131,8 +136,10 @@ async function exportAttendeeSummary(req, res) {
       console.log("CSV file downloaded successfully");
     });
   } catch (error) {
-    console.error(error);
-    return { error: error.message };
+    res.status(400).send({
+      success: false,
+      message: error.message,
+    });
   }
 }
 
@@ -193,14 +200,24 @@ async function exportEventSales(req, res) {
       console.log("CSV file downloaded successfully");
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: "Error occurred while fetching event sales data",
     });
   }
 }
 
+/**
+Retrieves the total event sales or sales by tier type according to a certain event ID
+@async
+@function eventSoldTickets
+@param {Object} res - The response object that total event sales or sales by tier type and a message
+@param {Object} req.params - The parameters of the request.
+@param {string} req.params.eventID - The ID of the event to get its sales
+@returns {Object} - The event sales with a message
+@throws {Error} - If desired tier name is Free
+@throws {Error} - If event is not found
+*/
 async function eventSales(req, res) {
   const event = await eventModel.findById(req.params.eventID);
   console.log("Event to be used is:", event);
@@ -210,6 +227,7 @@ async function eventSales(req, res) {
   console.log("desired tier name:", desiredTierName);
   totalSales = 0;
   salesByTierType = 0;
+  allSales = 0;
 
   for (let i = 0; i < event.ticketTiers.length; i++) {
     const tierObject = event.ticketTiers[i];
@@ -224,6 +242,7 @@ async function eventSales(req, res) {
     console.log(" tier price:", tierPrice);
 
     if (allTiers === "true") {
+      allSales = 1;
       if (tierName === "Free") {
         totalSales = totalSales + 0;
       } else {
@@ -234,7 +253,8 @@ async function eventSales(req, res) {
     } else if (allTiers === "false") {
       console.log("inside false");
       if (desiredTierName === "Free") {
-        res.status(404).json({
+        console.log("desired tier name is Free");
+        return res.status(404).json({
           success: false,
           message: "There are no event sales for free ticket tiers ",
         });
@@ -248,13 +268,13 @@ async function eventSales(req, res) {
     }
   }
 
-  if (totalSales > 0) {
+  if (allSales === 1) {
     res.status(200).json({
       success: true,
       message: "Total Event Sales:  ",
       totalSales,
     });
-  } else {
+  } else if (allSales === 0) {
     console.log("inside last salesByType");
 
     res.status(200).json({
@@ -265,71 +285,106 @@ async function eventSales(req, res) {
   }
 }
 
+/**
+Retrieves the total sold tickets for an event or sold tickets by tier
+@async
+@function eventSoldTickets
+@param {Object} res - The response object that has total sold tickets or sold tickets by tier type and a message
+@param {Object} req.params - The parameters of the request.
+@param {string} req.params.eventID - The ID of the event to get its total sold tickets or sold tickets by tier type
+@returns {Object} - The sold tickets,capacity, percentage of sold tickets from capacity with a message
+@throws {Error} - If event is not found
+*/
 async function eventSoldTickets(req, res) {
+  // Find the event by ID
   const event = await eventModel.findById(req.params.eventID);
   console.log("Event to be used in event sold tickets:", event);
+
+  // Get query parameters
   const allTiers = req.query.allTiers;
   console.log("all tiers:", allTiers);
   const desiredTierName = req.query.tierName;
   console.log("desired tier name:", desiredTierName);
 
-  totSales = 0;
-  salesByTierType = 0;
-  totalMaxCapacity = 0;
-  soldTickets = 0;
-  soldTicketsByTierType = 0;
+  // Initialize variables
+  let totSales = 0;
+  let salesByTierType = 0;
+  let totalMaxCapacity = 0;
+  let soldTickets = 0;
+  let soldTicketsByTierType = 0;
+  let capacityOfDesiredTier = 0;
+  let perSoldTicketsByTierType = 0;
+  let allSales = 0;
 
-  allSales = 0;
-
+  // Iterate over ticket tiers
   for (let i = 0; i < event.ticketTiers.length; i++) {
     const tierObject = event.ticketTiers[i];
     const tierName = tierObject.tierName;
-    const tierPrice = tierObject.price;
+    let tierPrice = tierObject.price;
+
+    // Update tier price if it's "Free"
+    if (tierPrice === "Free") {
+      tierPrice = 0;
+    }
+
     console.log(`Tier ${i + 1}: ${tierName}`);
-    maxCapacity = tierObject.maxCapacity;
+
+    const maxCapacity = tierObject.maxCapacity;
     const tierQuantitySold = tierObject.quantitySold;
     console.log(" max Capacity:", maxCapacity);
+
     if (allTiers === "true") {
+      // Calculate sales for all tiers
       allSales = 1;
-      if (tierPrice === "Free") {
-        totSales = totSales + 0;
-        totalMaxCapacity = totalMaxCapacity + maxCapacity;
+      if (tierPrice === 0) {
+        soldTickets += tierQuantitySold;
+        totSales += 0;
+        totalMaxCapacity += maxCapacity;
         console.log(" tier qs:", tierQuantitySold);
-        soldTickets = soldTickets + tierQuantitySold;
       } else {
-        soldTickets = soldTickets + tierQuantitySold;
-        totalMaxCapacity = totalMaxCapacity + maxCapacity;
+        soldTickets += tierQuantitySold;
+        totalMaxCapacity += maxCapacity;
         console.log(" tier qs:", tierQuantitySold);
         console.log(" tier price:", tierPrice);
-        totSales = totSales + tierQuantitySold * tierPrice;
+        totSales += tierQuantitySold * tierPrice;
         console.log(" event quantity sold:", totSales);
       }
     } else if (allTiers === "false") {
+      // Calculate sales for desired tier
       if (tierName === desiredTierName) {
         console.log("inside desired");
 
         capacityOfDesiredTier = maxCapacity;
-        soldTicketsByTierType = soldTicketsByTierType + tierQuantitySold;
+        soldTicketsByTierType += tierQuantitySold;
         soldTicketsByTierType = Math.round(soldTicketsByTierType);
         perSoldTicketsByTierType =
           (soldTicketsByTierType / capacityOfDesiredTier) * 100;
+        console.log(
+          "percentage of sold tickets by tier type:",
+          perSoldTicketsByTierType
+        );
         perSoldTicketsByTierType = Math.round(perSoldTicketsByTierType);
         console.log("event quantity sold:", soldTicketsByTierType);
       }
     }
   }
-  // 	}
+
   totSales = Math.round(totSales);
   totalMaxCapacity = Math.round(totalMaxCapacity);
 
   if (allSales === 1) {
+    // Response for all tiers
     soldTickets = Math.round(soldTickets);
+
     console.log(" event quantity sold:", totSales);
     console.log(" total max capacity", totalMaxCapacity);
     console.log(" sold Tickets:", soldTickets);
+
     soldTicketsFromCapacity = (soldTickets / totalMaxCapacity) * 100;
     soldTicketsFromCapacity = Math.round(soldTicketsFromCapacity);
+
     console.log("per of sold tickets:", soldTicketsFromCapacity);
+
     res.status(200).json({
       success: true,
       message: "Event sold tickets as a percentage of the capacity ",
@@ -348,6 +403,53 @@ async function eventSoldTickets(req, res) {
   }
 }
 
+/**
+ * Retrieves the URL for a specific event if the user is authorized.
+ *
+ * @async
+ * @function
+ * @param {Object} res - The response object.
+ * @param {Object} req - The request object containing the event ID in the parameters.
+ * @returns {Object} Returns an object with the event URL if successful, or an error message if unsuccessful.
+ * @throws {Error} Throws an error if an invalid parameter is provided.
+ */
+async function getEventUrl(req, res) {
+  try {
+    const eventId = req.params.eventID;
+    const event = await eventModel.findById(eventId); //search event by id
+
+    //check if no events
+    if (!event) {
+      return res.status(404).json({ message: "No event Found" });
+    }
+
+    //authorize that user exists
+    const userExist = await authorized(req);
+
+    if (event.creatorId.toString() !== userExist.user_id.toString()) {
+      // check if the creator of the event matches the user making the delete request
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to retrieve this event",
+      });
+    }
+
+    // get the event URL
+    const url = await event.eventUrl;
+
+    res.status(200).json({
+      success: true,
+      message: "Event URL retrieved successfully",
+      url,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
 module.exports = {
   eventSales,
   eventSoldTickets,
@@ -356,12 +458,5 @@ module.exports = {
   AttendeeSumJason,
   getAttendeeSummary,
   exportAttendeeSummary,
+  getEventUrl,
 };
-
-// module.exports = {
-// 	eventSales,
-// 	eventSoldTickets,
-// 	exportAttendeeSummary,
-// 	exportEventSales,
-// 	AttendeeSumJason,
-// };

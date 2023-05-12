@@ -8,6 +8,8 @@ const {
   sendSocialPassword,
 } = require("../../utils/sendEmail");
 const { GenerateToken, verifyToken } = require("../../utils/Tokens");
+const logger = require("../../utils/logger");
+
 /**
  * Sign user up using facebook or google login for web application by user information.
  * @async
@@ -26,7 +28,11 @@ async function webSignUp(userInfo, socialMediaType) {
       symbols: true,
       excludeSimilarCharacters: true,
     });
-    // create user
+
+    // Log the generated password
+    logger.info("Generated password for new user", { password: newPassword });
+
+    // Create user object with the provided information
     const newUser = {
       firstName: userInfo.name.givenName,
       lastName: userInfo.name.familyName,
@@ -35,20 +41,28 @@ async function webSignUp(userInfo, socialMediaType) {
       password: newPassword,
       userType: socialMediaType,
     };
+
+    // Check the social media type and update the user object accordingly
     if (newUser.userType === "google") {
-      //create new user using information retreived from google api
       newUser.googleId = userInfo.id;
     } else if (newUser.userType === "facebook") {
-      //create new user using information retreived from google api
-      // await sendUserEmail(user.email, newPassword, sendSocialPassword);
       newUser.facebookId = userInfo.id;
     }
-    //New user is created and user shall be redirected to the landing page
-    const user = await User.create(newUser); //create new user
-    //send user email with new generated password
+
+    // Create a new user in the database
+    const user = await User.create(newUser);
+
+    // Log the successful user creation
+    logger.info("New user created", { user });
+
+    // Send user email with the new generated password
     await sendUserEmail(user.email, newPassword, sendSocialPassword);
+
+    // Log the successful email sending
+    logger.info("Verification email sent to the new user", { user });
   } catch (err) {
-    //error
+    // Log the error message if an error occurs
+    logger.error("Error in webSignUp", { error: err });
     console.error(err);
   }
 }
