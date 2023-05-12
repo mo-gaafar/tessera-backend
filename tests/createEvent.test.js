@@ -1,100 +1,75 @@
+const { createEvent } = require("../controller/Events/eventController");
 const eventModel = require("../models/eventModel");
-const {
-  retrieveTicketTier,
-  createTicketTier,
-} = require("../controller/Events/ticketController");
 const userModel = require("../models/userModel");
-const { retrieveToken, verifyToken, authorized } = require("../utils/Tokens");
 
-jest.mock("../models/eventModel"); //mocking event model
-jest.mock("../models/userModel"); //mocking user model
-jest.mock("../utils/Tokens.js");
-// const authorized = jest.fn().mockResolvedValue({ authorized: true, user_id: 'mockUserId' });
+const { authorized } = require("../utils/Tokens");
 
-describe("createTicketTier", () => {
-  const mockEvent = {
-    _id: "mockEventId",
-    name: "Mock Event",
-    creatorId: "mockCreatorId",
-    ticketTiers: [],
-  };
+jest.mock("../models/eventModel");
+jest.mock("../models/userModel");
+jest.mock("../utils/Tokens");
 
-  const mockUser = {
-    _id: "mockCreatorId",
-    username: "mockUser",
-    password: "mockPassword",
-  };
-
-  const mockReq = {
-    params: { eventID: "mockEventId" },
-    body: {
-      tierName: "VIP",
-      maxCapacity: 500,
-      price: "1000",
-      startSelling: new Date("2023-05-05"),
-      endSelling: new Date("2023-05-20"),
-    },
-  };
-
-  const mockRes = {
-    status: jest.fn(() => mockRes),
-    json: jest.fn(),
-  };
-
+describe("createEvent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should return a 404 status if event is not found", async () => {
-    eventModel.findById.mockResolvedValue(null);
+  it("should create an event successfully", async () => {
+    const req = {
+      body: {
+        title: "Test Event",
+        description: "Test description",
+        location: "Test Location",
+        date: "2023-04-18",
+      },
+    };
+    const res = {
+      status: jest.fn(() => res),
+      json: jest.fn(),
+    };
 
-    await createTicketTier(mockReq, mockRes);
+    authorized.mockResolvedValueOnce({
+      authorized: true,
+      user_id: "testuser123",
+    });
 
-    expect(mockRes.status).toHaveBeenCalledWith(404);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      success: false,
-      message: "No event Found",
+    eventModel.create.mockResolvedValueOnce({});
+
+    await createEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Event has been created successfully",
     });
   });
 
-  it("should return a 402 status if user is not found", async () => {
-    authorized.mockResolvedValue({ authorized: false, user_id: null });
-    eventModel.findById.mockResolvedValue(mockEvent);
+  it(" error creating the event", async () => {
+    const req = {
+      body: {
+        title: "Test Event",
+        description: "Test description",
+        location: "Test Location",
+        date: "2023-04-18",
+      },
+    };
+    const res = {
+      status: jest.fn(() => res),
+      json: jest.fn(),
+    };
 
-    await createTicketTier(mockReq, mockRes);
+    authorized.mockResolvedValueOnce({
+      authorized: true,
+      user_id: "testuser123",
+    });
 
-    expect(authorized).toHaveBeenCalledWith(mockReq);
-    expect(eventModel.findById).toHaveBeenCalledWith(mockReq.params.eventID);
-    expect(mockRes.status).toHaveBeenCalledWith(402);
-    expect(mockRes.json).toHaveBeenCalledWith({
+    eventModel.create.mockRejectedValueOnce(new Error("Error creating event"));
+
+    await createEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
       success: false,
-      message: "the user is not found",
-    });
-  });
-
-  it("should return a 401 status if user is not authorized to create ticket tier for this event", async () => {
-    authorized.mockResolvedValue({ authorized: true, user_id: "mockUserId" });
-    eventModel.findById.mockResolvedValue({
-      ...mockEvent,
-      creatorId: "otherUserId",
-    });
-
-    await createTicketTier(mockReq, mockRes);
-
-    expect(authorized).toHaveBeenCalledWith(mockReq);
-    expect(eventModel.findById).toHaveBeenCalledWith(mockReq.params.eventID);
-    expect(mockRes.status).toHaveBeenCalledWith(401);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      success: false,
-      message: "You are not authorized to create tier for this event",
-    });
-  });
-
-  it("should return a 404 status if tier name is not unique", async () => {
-    authorized.mockResolvedValue({ authorized: true, user_id: mockUser._id });
-    eventModel.findById.mockResolvedValue({
-      mockEvent,
-      ticketTiers: [{ tierName: "VIP" }],
+      message: "Error creating event",
     });
   });
 });

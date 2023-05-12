@@ -1,12 +1,10 @@
-const {
-	createPromocode,
-} = require("../../controller/Events/promocodeController");
+const { createPromocode } = require("../controller/Events/promocodeController");
 
 // Mock dependencies
-jest.mock("../../models/eventModel");
-jest.mock("../../models/promocodeModel");
-jest.mock("../../utils/Tokens");
-jest.mock("../../utils/logger");
+jest.mock("../models/eventModel");
+jest.mock("../models/promocodeModel");
+jest.mock("../utils/Tokens");
+jest.mock("../utils/logger");
 
 describe("createPromocode", () => {
 	const req = {
@@ -31,7 +29,7 @@ describe("createPromocode", () => {
 
 	it("should return an error if event is not found", async () => {
 		// Mock eventModel.findById to return null (event not found)
-		const eventModel = require("../../models/eventModel");
+		const eventModel = require("../models/eventModel");
 		eventModel.findById.mockResolvedValue(null);
 
 		await createPromocode(req, res);
@@ -47,11 +45,11 @@ describe("createPromocode", () => {
 	it("should return an error if user is not authorized", async () => {
 		// Mock eventModel.findById to return a mock event object
 		const mockEvent = { creatorId: "user123" };
-		const eventModel = require("../../models/eventModel");
+		const eventModel = require("../models/eventModel");
 		eventModel.findById.mockResolvedValue(mockEvent);
 
 		// Mock authorized to return unauthorized status
-		const authorized = require("../../utils/Tokens").authorized;
+		const authorized = require("../utils/Tokens").authorized;
 		authorized.mockResolvedValue({ authorized: false });
 
 		await createPromocode(req, res);
