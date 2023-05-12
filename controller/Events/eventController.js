@@ -10,6 +10,7 @@ const {
 const jwt = require("jsonwebtoken");
 
 const { comparePassword } = require("../../utils/passwords");
+const logger = require("../../utils/logger");
 
 /**
 Asynchronous function that creates a new event based on the request body and adds the creatorId based on the token.

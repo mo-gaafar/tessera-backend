@@ -6,6 +6,7 @@ const {
   sendSocialPassword,
 } = require("../../utils/sendEmail");
 const { mobileSignUp, mobileSignIn } = require("./mobileSocialsController");
+const logger = require("../../utils/logger");
 
 /**
  * Allows mobile app user to sign in or sign up to my app using facebook login using user information.

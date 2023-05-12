@@ -8,6 +8,8 @@ const {
   sendSocialPassword,
 } = require("../../utils/sendEmail");
 const { GenerateToken, verifyToken } = require("../../utils/Tokens");
+const logger = require("../../utils/logger");
+
 /**
  * Sign user up using facebook or google login for web application by user information.
  * @async
