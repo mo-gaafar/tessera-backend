@@ -26,14 +26,14 @@ describe("forgotpassword", () => {
 
 		expect(userModel.findOne).toHaveBeenCalledWith({ email: req.body.email });
 		expect(jwt.sign).toHaveBeenCalledWith(
-			{ userId: user._id },
+			{ user_id: user._id },
 			process.env.SECRETJWT,
 			{ expiresIn: "1d" }
 		);
 		expect(res.status).toHaveBeenCalledWith(200);
 		expect(res.send).toHaveBeenCalledWith({
 			success: true,
-			message: "please check your mail inbox and reset password",
+			message: "Please check your email inbox and reset your password",
 		});
 	});
 

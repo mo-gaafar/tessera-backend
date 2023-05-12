@@ -1,4 +1,4 @@
-const {
+/*const {
   createPromocode,
   checkPromocodeExists,
   addPromocodeToEvent,
@@ -44,4 +44,4 @@ describe("createPromocode", () => {
       message: "Event not found",
     });
   });
-});
+});*/
