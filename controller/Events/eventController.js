@@ -309,24 +309,21 @@ async function publishEvent(req, res) {
 
         // event accessed by password
         else if (hasPassword) {
-          isMatch = await comparePassword(
-            privatePasswordStored,
-            generatedPassword
+          const update_password = { privatePassword: generatedPassword };
+          const updatedEvent_password = await eventModel.findOneAndUpdate(
+            { _id: req.params.eventID },
+            update_password,
+            {
+              new: true,
+              runValidators: true,
+            }
           );
-          console.log("isMatch:", isMatch);
-          if (isMatch) {
-            res.status(200).json({
-              success: true,
-              message: "Event is accessed by password",
-              url,
-            });
-          } else {
-            return res.status(401).json({
-              success: false,
-              message: "Failed to access password",
-              url: null,
-            });
-          }
+
+          res.status(200).json({
+            success: true,
+            message: "Event is accessed by password",
+            url,
+          });
         }
 
         // event accessed by link

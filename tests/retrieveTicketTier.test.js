@@ -35,7 +35,7 @@ describe("retrieveTicketTier", () => {
     jest.clearAllMocks();
   });
 
-  it(" return ticket tier details for an event", async () => {
+  it("should return ticket tier details for an event", async () => {
     eventModel.findById.mockResolvedValue(mockEvent); //  mock implementation for findById to return the mockEvent object when it is called.
 
     //set up mock request and response objects to pass as arguments to retrieveTicketTier
@@ -47,11 +47,21 @@ describe("retrieveTicketTier", () => {
 
     await retrieveTicketTier(req, res); //calls the retrieveTicketTier function with the mock request and response objects.
 
+    const expectedTicketTierDetails = mockEvent.ticketTiers.map((tier) => ({
+      tierName: tier.tierName,
+      quantitySold: tier.quantitySold,
+      maxCapacity: tier.maxCapacity,
+      price: tier.price,
+      percentageSold: (tier.quantitySold / tier.maxCapacity) * 100,
+      startSelling: tier.startSelling,
+      endSelling: tier.endSelling,
+    }));
+
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "Ticket tier details for the event",
-      ticketTiers: mockEvent.ticketTiers,
+      ticketTiers: expectedTicketTierDetails,
     });
   });
 

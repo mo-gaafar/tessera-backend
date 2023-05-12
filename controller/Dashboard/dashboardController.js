@@ -24,83 +24,83 @@ including the attendee's name, email, ticket type and price, order ID and date, 
 @returns {object} - Returns an object with an error message if there is an error, otherwise undefined.
 */
 async function AttendeeSumJason(req, res) {
-	try {
-		//search for event
-		const event = await eventModel.findById(req.params.eventID);
-		if (!event) {
-			return res.status(404).send("Event not found");
-		}
-		//Retrieve soldTicket attribute of event
-		const soldTickets = event.soldTickets;
-		//empty array for grouping
-		const groupedTickets = {};
-		//loop on each sold ticket in event array
-		for (let i = 0; i < soldTickets.length; i++) {
-			const ticket = await ticketModel.findById(soldTickets[i].ticketId);
-			//check ticket is found
-			if (!ticket) {
-				return res.status(404).send("ticket not found");
-			}
-			//retrieve usermodel of user and buyer
-			const user = await userModel2.findById(soldTickets[i].userId);
-			const buyer = await userModel2.findById(ticket.buyerId);
-			if (!user || !buyer) {
-				return res.status(404).send("user not found");
-			}
+  try {
+    //search for event
+    const event = await eventModel.findById(req.params.eventID);
+    if (!event) {
+      return res.status(404).send("Event not found");
+    }
+    //Retrieve soldTicket attribute of event
+    const soldTickets = event.soldTickets;
+    //empty array for grouping
+    const groupedTickets = {};
+    //loop on each sold ticket in event array
+    for (let i = 0; i < soldTickets.length; i++) {
+      const ticket = await ticketModel.findById(soldTickets[i].ticketId);
+      //check ticket is found
+      if (!ticket) {
+        return res.status(404).send("ticket not found");
+      }
+      //retrieve usermodel of user and buyer
+      const user = await userModel2.findById(soldTickets[i].userId);
+      const buyer = await userModel2.findById(ticket.buyerId);
+      if (!user || !buyer) {
+        return res.status(404).send("user not found");
+      }
 
-			//populate csv Fields data
-			const attendeeInfo = {
-				OrderId: soldTickets[i].orderId,
-				OrderDate: moment(ticket.createdAt).format("M/D/YY h:mm A"),
-				Attending: "Attending",
-				"Attendee Name": user.firstName + " " + user.lastName,
-				"attendee email": user.email,
-				"Event name": event.basicInfo.eventName,
-				"Ticket Type": ticket.tierName,
-				"Ticket Price": ticket.purchasePrice,
-				"Buyer name": buyer.firstName + " " + user.lastName,
-				"Buyer email": buyer.email,
-			};
-			//add quantity for same ticket type in same OrderID
-			const key = `${attendeeInfo.OrderId}_${attendeeInfo["Ticket Type"]}`;
-			if (key in groupedTickets) {
-				groupedTickets[key]["Ticket Quantity"] += 1;
-			} else {
-				attendeeInfo["Ticket Quantity"] = 1;
-				groupedTickets[key] = attendeeInfo;
-			}
-		}
-		//assign to attendee summary
+      //populate csv Fields data
+      const attendeeInfo = {
+        OrderId: soldTickets[i].orderId,
+        OrderDate: moment(ticket.createdAt).format("M/D/YY h:mm A"),
+        Attending: "Attending",
+        "Attendee Name": user.firstName + " " + user.lastName,
+        "attendee email": user.email,
+        "Event name": event.basicInfo.eventName,
+        "Ticket Type": ticket.tierName,
+        "Ticket Price": ticket.purchasePrice,
+        "Buyer name": buyer.firstName + " " + user.lastName,
+        "Buyer email": buyer.email,
+      };
+      //add quantity for same ticket type in same OrderID
+      const key = `${attendeeInfo.OrderId}_${attendeeInfo["Ticket Type"]}`;
+      if (key in groupedTickets) {
+        groupedTickets[key]["Ticket Quantity"] += 1;
+      } else {
+        attendeeInfo["Ticket Quantity"] = 1;
+        groupedTickets[key] = attendeeInfo;
+      }
+    }
+    //assign to attendee summary
 
-		const attendeeSummary = Object.values(groupedTickets);
-		return res.status(200).json({
-			success: true,
-			message: "Summary jason return successfully",
-			attendeeSummary: attendeeSummary,
-		});
-	} catch (error) {
-		res.status(400).send({
-			success: false,
-			message: error.message,
-		});
-		//return { error: error.message };
-	}
+    const attendeeSummary = Object.values(groupedTickets);
+    return res.status(200).json({
+      success: true,
+      message: "Summary jason return successfully",
+      attendeeSummary: attendeeSummary,
+    });
+  } catch (error) {
+    res.status(400).send({
+      success: false,
+      message: error.message,
+    });
+    //return { error: error.message };
+  }
 }
 
 async function getAttendeeSummary(eventID) {
-	try {
-		const url =
-			process.env.BASE_URL + `/dashboard/reportJason/attendees-list/${eventID}`;
-		// Get event data from the API endpoint
-		// Extract relevant data from the response
-		const response = await axios.get(url);
-		return response.data.attendeeSummary;
-	} catch (error) {
-		res.status(400).send({
-			success: false,
-			message: error.message,
-		});
-	}
+  try {
+    const url =
+      process.env.BASE_URL + `/dashboard/reportJason/attendees-list/${eventID}`;
+    // Get event data from the API endpoint
+    // Extract relevant data from the response
+    const response = await axios.get(url);
+    return response.data.attendeeSummary;
+  } catch (error) {
+    res.status(400).send({
+      success: false,
+      message: error.message,
+    });
+  }
 }
 /**
 
@@ -114,33 +114,33 @@ Export attendee summary to CSV file and download it
 @throws {Error} If there is an error finding the event, ticket or user data, or exporting the CSV file
 */
 async function exportAttendeeSummary(req, res) {
-	try {
-		const attendeeSummary = await getAttendeeSummary(req.params.eventID);
+  try {
+    const attendeeSummary = await getAttendeeSummary(req.params.eventID);
 
-		const csvHeaders = [
-			{ id: "OrderId", title: "OrderId" },
-			{ id: "OrderDate", title: "Order Date" },
-			{ id: "Attending", title: "Attending Status" },
-			{ id: "Attendee Name", title: "Name" },
-			{ id: "attendee email", title: "Email" },
-			{ id: "Event name", title: "Event name" },
-			{ id: "Ticket Quantity", title: "Ticket Quantity" },
-			{ id: "Ticket Type", title: "Ticket Type" },
-			{ id: "Ticket Price", title: "Ticket Price" },
-			{ id: "Buyer name", title: "Buyer Name" },
-			{ id: "Buyer email", title: "Buyer Email" },
-		];
-		await exportToCsv(attendeeSummary, "attendee_summary.csv", csvHeaders);
-		//download
-		res.download("attendee_summary.csv", () => {
-			console.log("CSV file downloaded successfully");
-		});
-	} catch (error) {
-		res.status(400).send({
-			success: false,
-			message: error.message,
-		});
-	}
+    const csvHeaders = [
+      { id: "OrderId", title: "OrderId" },
+      { id: "OrderDate", title: "Order Date" },
+      { id: "Attending", title: "Attending Status" },
+      { id: "Attendee Name", title: "Name" },
+      { id: "attendee email", title: "Email" },
+      { id: "Event name", title: "Event name" },
+      { id: "Ticket Quantity", title: "Ticket Quantity" },
+      { id: "Ticket Type", title: "Ticket Type" },
+      { id: "Ticket Price", title: "Ticket Price" },
+      { id: "Buyer name", title: "Buyer Name" },
+      { id: "Buyer email", title: "Buyer Email" },
+    ];
+    await exportToCsv(attendeeSummary, "attendee_summary.csv", csvHeaders);
+    //download
+    res.download("attendee_summary.csv", () => {
+      console.log("CSV file downloaded successfully");
+    });
+  } catch (error) {
+    res.status(400).send({
+      success: false,
+      message: error.message,
+    });
+  }
 }
 
 /**
@@ -155,213 +155,262 @@ Export event sales to a CSV file and download it
 @throws {Error} If an error occurs while fetching event sales data
 */
 async function exportEventSales(req, res) {
-	// configure axios
-	const instance = axios.create({
-		baseURL: process.env.BASE_URL,
-		timeout: 1000,
-	});
-	// read params and queries
-	const eventID = req.params.eventID;
-	const allTiers = req.query.allTiers;
-	const tierName = req.query.tierName;
-	// prepare the Url of axios to call
-	const url =
-		process.env.BASE_URL +
-		`/dashboard/eventsales/events/${eventID}?allTiers=${allTiers}&tierName=${tierName}`;
-	// replace with the actual event ID
-	try {
-		// axios call
-		const response = await instance.get(url);
-		console.log(response.data);
-		// write to csv
-		const csvHeaders = [
-			// Headers
-			{ id: "eventID", title: "Event ID" },
-			// Data
-			{ id: "eventSales", title: "Event Sales" },
-		];
-		const csvFilePath = "event_sales.csv";
-		const data = [
-			// create the csv record
-			{
-				eventID: req.params.eventID,
-				eventSales: response.data.totalSales || response.data.salesByTierType,
-			},
-		];
-		await exportToCsv(data, csvFilePath, csvHeaders);
+  // configure axios
+  const instance = axios.create({
+    baseURL: process.env.BASE_URL,
+    timeout: 1000,
+  });
+  // read params and queries
+  const eventID = req.params.eventID;
+  const allTiers = req.query.allTiers;
+  const tierName = req.query.tierName;
+  // prepare the Url of axios to call
+  const url =
+    process.env.BASE_URL +
+    `/dashboard/eventsales/events/${eventID}?allTiers=${allTiers}&tierName=${tierName}`;
+  // replace with the actual event ID
+  try {
+    // axios call
+    const response = await instance.get(url);
+    console.log(response.data);
+    // write to csv
+    const csvHeaders = [
+      // Headers
+      { id: "eventID", title: "Event ID" },
+      // Data
+      { id: "eventSales", title: "Event Sales" },
+    ];
+    const csvFilePath = "event_sales.csv";
+    const data = [
+      // create the csv record
+      {
+        eventID: req.params.eventID,
+        eventSales: response.data.totalSales || response.data.salesByTierType,
+      },
+    ];
+    await exportToCsv(data, csvFilePath, csvHeaders);
 
-		// download the csv
-		res.setHeader("Content-Type", "text/csv");
-		res.setHeader(
-			"Content-Disposition",
-			"attachment; filename=event_sales.csv"
-		);
-		res.download(csvFilePath, () => {
-			console.log("CSV file downloaded successfully");
-		});
-	} catch (error) {
-		res.status(400).json({
-			success: false,
-			message: "Error occurred while fetching event sales data",
-		});
-	}
+    // download the csv
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=event_sales.csv"
+    );
+    res.download(csvFilePath, () => {
+      console.log("CSV file downloaded successfully");
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: "Error occurred while fetching event sales data",
+    });
+  }
 }
 
+/**
+Retrieves the total event sales or sales by tier type according to a certain event ID
+@async
+@function eventSoldTickets
+@param {Object} res - The response object that total event sales or sales by tier type and a message
+@param {Object} req.params - The parameters of the request.
+@param {string} req.params.eventID - The ID of the event to get its sales
+@returns {Object} - The event sales with a message
+@throws {Error} - If desired tier name is Free
+@throws {Error} - If event is not found
+*/
 async function eventSales(req, res) {
-	const event = await eventModel.findById(req.params.eventID);
-	console.log("Event to be used is:", event);
-	const allTiers = req.query.allTiers;
-	console.log("all tiers:", allTiers);
-	const desiredTierName = req.query.tierName;
-	console.log("desired tier name:", desiredTierName);
-	totalSales = 0;
-	salesByTierType = 0;
+  const event = await eventModel.findById(req.params.eventID);
+  console.log("Event to be used is:", event);
+  const allTiers = req.query.allTiers;
+  console.log("all tiers:", allTiers);
+  const desiredTierName = req.query.tierName;
+  console.log("desired tier name:", desiredTierName);
+  totalSales = 0;
+  salesByTierType = 0;
+  allSales = 0;
 
-	for (let i = 0; i < event.ticketTiers.length; i++) {
-		const tierObject = event.ticketTiers[i];
-		const tierName = tierObject.tierName;
-		console.log(`Tier ${i + 1}: ${tierName}`);
-		const tierQuantitySold = tierObject.quantitySold;
-		tierPrice = tierObject.price;
-		if (tierPrice == "Free") {
-			tierPrice = 0;
-		}
-		console.log(" tier qs:", tierQuantitySold);
-		console.log(" tier price:", tierPrice);
+  for (let i = 0; i < event.ticketTiers.length; i++) {
+    const tierObject = event.ticketTiers[i];
+    const tierName = tierObject.tierName;
+    console.log(`Tier ${i + 1}: ${tierName}`);
+    const tierQuantitySold = tierObject.quantitySold;
+    tierPrice = tierObject.price;
+    if (tierPrice == "Free") {
+      tierPrice = 0;
+    }
+    console.log(" tier qs:", tierQuantitySold);
+    console.log(" tier price:", tierPrice);
 
-		if (allTiers === "true") {
-			if (tierName === "Free") {
-				totalSales = totalSales + 0;
-			} else {
-				totalSales = totalSales + tierQuantitySold * tierPrice;
-				totalSales = Math.round(totalSales);
-				console.log(" event sales:", totalSales);
-			}
-		} else if (allTiers === "false") {
-			console.log("inside false");
-			if (desiredTierName === "Free") {
-				res.status(404).json({
-					success: false,
-					message: "There are no event sales for free ticket tiers ",
-				});
-			} else if (tierName === desiredTierName) {
-				console.log("inside desired");
+    if (allTiers === "true") {
+      allSales = 1;
+      if (tierName === "Free") {
+        totalSales = totalSales + 0;
+      } else {
+        totalSales = totalSales + tierQuantitySold * tierPrice;
+        totalSales = Math.round(totalSales);
+        console.log(" event sales:", totalSales);
+      }
+    } else if (allTiers === "false") {
+      console.log("inside false");
+      if (desiredTierName === "Free") {
+        console.log("desired tier name is Free");
+        return res.status(404).json({
+          success: false,
+          message: "There are no event sales for free ticket tiers ",
+        });
+      } else if (tierName === desiredTierName) {
+        console.log("inside desired");
 
-				salesByTierType = salesByTierType + tierQuantitySold * tierPrice;
-				salesByTierType = Math.round(salesByTierType);
-				console.log("event quantity sold:", salesByTierType);
-			}
-		}
-	}
+        salesByTierType = salesByTierType + tierQuantitySold * tierPrice;
+        salesByTierType = Math.round(salesByTierType);
+        console.log("event quantity sold:", salesByTierType);
+      }
+    }
+  }
 
-	if (totalSales > 0) {
-		res.status(200).json({
-			success: true,
-			message: "Total Event Sales:  ",
-			totalSales,
-		});
-	} else {
-		console.log("inside last salesByType");
+  if (allSales === 1) {
+    res.status(200).json({
+      success: true,
+      message: "Total Event Sales:  ",
+      totalSales,
+    });
+  } else if (allSales === 0) {
+    console.log("inside last salesByType");
 
-		res.status(200).json({
-			success: true,
-			message: "Event Sales by the specified tier type:  ",
-			salesByTierType,
-		});
-	}
+    res.status(200).json({
+      success: true,
+      message: "Event Sales by the specified tier type:  ",
+      salesByTierType,
+    });
+  }
 }
 
+/**
+Retrieves the total sold tickets for an event or sold tickets by tier
+@async
+@function eventSoldTickets
+@param {Object} res - The response object that has total sold tickets or sold tickets by tier type and a message
+@param {Object} req.params - The parameters of the request.
+@param {string} req.params.eventID - The ID of the event to get its total sold tickets or sold tickets by tier type
+@returns {Object} - The sold tickets,capacity, percentage of sold tickets from capacity with a message
+@throws {Error} - If event is not found
+*/
 async function eventSoldTickets(req, res) {
-	const event = await eventModel.findById(req.params.eventID);
-	console.log("Event to be used in event sold tickets:", event);
-	const allTiers = req.query.allTiers;
-	console.log("all tiers:", allTiers);
-	const desiredTierName = req.query.tierName;
-	console.log("desired tier name:", desiredTierName);
+  // Find the event by ID
+  const event = await eventModel.findById(req.params.eventID);
+  console.log("Event to be used in event sold tickets:", event);
 
-	totSales = 0;
-	salesByTierType = 0;
-	totalMaxCapacity = 0;
-	soldTickets = 0;
-	soldTicketsByTierType = 0;
+  // Get query parameters
+  const allTiers = req.query.allTiers;
+  console.log("all tiers:", allTiers);
+  const desiredTierName = req.query.tierName;
+  console.log("desired tier name:", desiredTierName);
 
-	allSales = 0;
+  // Initialize variables
+  let totSales = 0;
+  let salesByTierType = 0;
+  let totalMaxCapacity = 0;
+  let soldTickets = 0;
+  let soldTicketsByTierType = 0;
+  let capacityOfDesiredTier = 0;
+  let perSoldTicketsByTierType = 0;
+  let allSales = 0;
 
-	for (let i = 0; i < event.ticketTiers.length; i++) {
-		const tierObject = event.ticketTiers[i];
-		const tierName = tierObject.tierName;
-		const tierPrice = tierObject.price;
-		console.log(`Tier ${i + 1}: ${tierName}`);
-		maxCapacity = tierObject.maxCapacity;
-		const tierQuantitySold = tierObject.quantitySold;
-		console.log(" max Capacity:", maxCapacity);
-		if (allTiers === "true") {
-			allSales = 1;
-			if (tierPrice === "Free") {
-				totSales = totSales + 0;
-				totalMaxCapacity = totalMaxCapacity + maxCapacity;
-				console.log(" tier qs:", tierQuantitySold);
-				soldTickets = soldTickets + tierQuantitySold;
-			} else {
-				soldTickets = soldTickets + tierQuantitySold;
-				totalMaxCapacity = totalMaxCapacity + maxCapacity;
-				console.log(" tier qs:", tierQuantitySold);
-				console.log(" tier price:", tierPrice);
-				totSales = totSales + tierQuantitySold * tierPrice;
-				console.log(" event quantity sold:", totSales);
-			}
-		} else if (allTiers === "false") {
-			if (tierName === desiredTierName) {
-				console.log("inside desired");
+  // Iterate over ticket tiers
+  for (let i = 0; i < event.ticketTiers.length; i++) {
+    const tierObject = event.ticketTiers[i];
+    const tierName = tierObject.tierName;
+    let tierPrice = tierObject.price;
 
-				capacityOfDesiredTier = maxCapacity;
-				soldTicketsByTierType = soldTicketsByTierType + tierQuantitySold;
-				soldTicketsByTierType = Math.round(soldTicketsByTierType);
-				perSoldTicketsByTierType =
-					(soldTicketsByTierType / capacityOfDesiredTier) * 100;
-				perSoldTicketsByTierType = Math.round(perSoldTicketsByTierType);
-				console.log("event quantity sold:", soldTicketsByTierType);
-			}
-		}
-	}
-	// 	}
-	totSales = Math.round(totSales);
-	totalMaxCapacity = Math.round(totalMaxCapacity);
+    // Update tier price if it's "Free"
+    if (tierPrice === "Free") {
+      tierPrice = 0;
+    }
 
-	if (allSales === 1) {
-		soldTickets = Math.round(soldTickets);
-		console.log(" event quantity sold:", totSales);
-		console.log(" total max capacity", totalMaxCapacity);
-		console.log(" sold Tickets:", soldTickets);
-		soldTicketsFromCapacity = (soldTickets / totalMaxCapacity) * 100;
-		soldTicketsFromCapacity = Math.round(soldTicketsFromCapacity);
-		console.log("per of sold tickets:", soldTicketsFromCapacity);
-		res.status(200).json({
-			success: true,
-			message: "Event sold tickets as a percentage of the capacity ",
-			soldTickets,
-			totalMaxCapacity,
-			soldTicketsFromCapacity,
-		});
-	} else if (allSales === 0) {
-		res.status(200).json({
-			success: true,
-			message: "Event sold tickets by tier as a percentage of the capacity ",
-			soldTicketsByTierType,
-			capacityOfDesiredTier,
-			perSoldTicketsByTierType,
-		});
-	}
+    console.log(`Tier ${i + 1}: ${tierName}`);
+
+    const maxCapacity = tierObject.maxCapacity;
+    const tierQuantitySold = tierObject.quantitySold;
+    console.log(" max Capacity:", maxCapacity);
+
+    if (allTiers === "true") {
+      // Calculate sales for all tiers
+      allSales = 1;
+      if (tierPrice === 0) {
+        soldTickets += tierQuantitySold;
+        totSales += 0;
+        totalMaxCapacity += maxCapacity;
+        console.log(" tier qs:", tierQuantitySold);
+      } else {
+        soldTickets += tierQuantitySold;
+        totalMaxCapacity += maxCapacity;
+        console.log(" tier qs:", tierQuantitySold);
+        console.log(" tier price:", tierPrice);
+        totSales += tierQuantitySold * tierPrice;
+        console.log(" event quantity sold:", totSales);
+      }
+    } else if (allTiers === "false") {
+      // Calculate sales for desired tier
+      if (tierName === desiredTierName) {
+        console.log("inside desired");
+
+        capacityOfDesiredTier = maxCapacity;
+        soldTicketsByTierType += tierQuantitySold;
+        soldTicketsByTierType = Math.round(soldTicketsByTierType);
+        perSoldTicketsByTierType =
+          (soldTicketsByTierType / capacityOfDesiredTier) * 100;
+        console.log(
+          "percentage of sold tickets by tier type:",
+          perSoldTicketsByTierType
+        );
+        perSoldTicketsByTierType = Math.round(perSoldTicketsByTierType);
+        console.log("event quantity sold:", soldTicketsByTierType);
+      }
+    }
+  }
+
+  totSales = Math.round(totSales);
+  totalMaxCapacity = Math.round(totalMaxCapacity);
+
+  if (allSales === 1) {
+    // Response for all tiers
+    soldTickets = Math.round(soldTickets);
+
+    console.log(" event quantity sold:", totSales);
+    console.log(" total max capacity", totalMaxCapacity);
+    console.log(" sold Tickets:", soldTickets);
+
+    soldTicketsFromCapacity = (soldTickets / totalMaxCapacity) * 100;
+    soldTicketsFromCapacity = Math.round(soldTicketsFromCapacity);
+
+    console.log("per of sold tickets:", soldTicketsFromCapacity);
+
+    res.status(200).json({
+      success: true,
+      message: "Event sold tickets as a percentage of the capacity ",
+      soldTickets,
+      totalMaxCapacity,
+      soldTicketsFromCapacity,
+    });
+  } else if (allSales === 0) {
+    res.status(200).json({
+      success: true,
+      message: "Event sold tickets by tier as a percentage of the capacity ",
+      soldTicketsByTierType,
+      capacityOfDesiredTier,
+      perSoldTicketsByTierType,
+    });
+  }
 }
 
 module.exports = {
-	eventSales,
-	eventSoldTickets,
-	exportAttendeeSummary,
-	exportEventSales,
-	AttendeeSumJason,
-	getAttendeeSummary,
-	exportAttendeeSummary,
+  eventSales,
+  eventSoldTickets,
+  exportAttendeeSummary,
+  exportEventSales,
+  AttendeeSumJason,
+  getAttendeeSummary,
+  exportAttendeeSummary,
 };
 
 // module.exports = {

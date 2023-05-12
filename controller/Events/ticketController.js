@@ -397,7 +397,6 @@ async function addSoldTicketToEvent(
  * @throws {Error} If there is an internal server error.
  * @throws {Error} If the ticket tier creator is not the one who created the event.
  */
-
 async function createTicketTier(req, res) {
   //getting the attributes of ticket tier from body
   try {
@@ -462,6 +461,7 @@ async function createTicketTier(req, res) {
       // creating new tier object
       const newTicketTier = {
         tierName,
+        quantitySold,
         maxCapacity,
         price,
         startSelling,
@@ -539,25 +539,24 @@ async function retrieveTicketTier(req, res) {
     });
   }
 }
+
 /**
 
-
-// * Edits a ticket tier for an event.
-//  * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
-//  * @param {Object} req.params - The parameters of the request.
-//  * @param {string} req.params.eventID - The ID of the desired event to edit.
-//  * @param {Object} req.body - The body of the request.
-//  * @param {string} req.body.tierName - The name of the tier you want to edit
-//  * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
-//  * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
-//  * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
-//  * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
-//  * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
-//  * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
-//  * @param {Object} res - The response object.
-//  * @returns {Object} An object containing the success status and a message is sent
-//  */
-
+* Edits a ticket tier for an event.
+ * @param {Object} req - The  request object that has the tier ID and the the tier array of objects
+ * @param {Object} req.params - The parameters of the request.
+ * @param {string} req.params.eventID - The ID of the desired event to edit.
+ * @param {Object} req.body - The body of the request.
+ * @param {string} req.body.tierName - The name of the tier you want to edit
+ * @param {Array<Object>} req.body.ticketTiers - An array of objects containing the updated ticket tier information.
+ * @param {string} req.body.ticketTiers.tierName - The type of the ticket tier.
+ * @param {number} req.body.ticketTiers.maxCapacity - The  capacity of the ticket tier.
+ * @param {number} req.body.ticketTiers.price - The price of the ticket tier.
+ * @param {Date} req.body.ticketTiers.startSelling - The date to start selling the ticket tier.
+ * @param {Date} req.body.ticketTiers.endSelling - The date to stop selling the ticket tier
+ * @param {Object} res - The response object.
+ * @returns {Object} An object containing the success status and a message is sent
+ */
 async function editTicketTier(req, res) {
   try {
     const eventID = req.params.eventID; // get the event ID from the request URL
@@ -570,6 +569,7 @@ async function editTicketTier(req, res) {
         message: "Please enter the name of the tier to edit",
       });
     }
+
     const newTierName = req.body.ticketTiers[0].tierName;
     const newMaxCapacity = req.body.ticketTiers[0].maxCapacity;
     const newPrice = req.body.ticketTiers[0].price;
@@ -603,19 +603,20 @@ async function editTicketTier(req, res) {
         message: "You are not authorized to edit tier for this event",
       });
     } else {
-      const ticketTier = event.ticketTiers.find(
-        (tier) => tier.tierName === newTierName
-      ); // searching if the tier name provided in the body is already found in the array
-      console.log("found:", ticketTier);
+      if (enteredTierName != newTierName) {
+        const ticketTier = event.ticketTiers.find(
+          (tier) => tier.tierName === newTierName
+        ); // searching if the tier name provided in the body is already found in the array
+        console.log("found:", ticketTier);
 
-      // tier name that is needed to be edited is not unique
-      if (ticketTier) {
-        return res.status(404).json({
-          success: false,
-          message: "Cannot edit ticket tier",
-        });
+        // tier name that is needed to be edited is not unique
+        if (ticketTier) {
+          return res.status(404).json({
+            success: false,
+            message: "Cannot edit ticket tier",
+          });
+        }
       }
-
       // update the ticket tier attributes with the body parameters using the tier ID
       const updatedEvent = await eventModel.findOneAndUpdate(
         { _id: eventID, "ticketTiers.tierName": enteredTierName },
