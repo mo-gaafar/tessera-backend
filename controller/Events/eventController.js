@@ -7,9 +7,10 @@ const {
   verifyToken,
   authorized,
 } = require("../../utils/Tokens");
-const jwt = require("jsonwebtoken");
-
-const { comparePassword } = require("../../utils/passwords");
+const {
+  passwordEncryption,
+  comparePassword,
+} = require("../../utils/passwords");
 const logger = require("../../utils/logger");
 
 /**
@@ -310,8 +311,11 @@ async function publishEvent(req, res) {
 
         // event accessed by password
         else if (hasPassword) {
-          const update_password = { privatePassword: generatedPassword };
-          const updatedEvent_password = await eventModel.findOneAndUpdate(
+          const update_password = {
+            privatePassword: await passwordEncryption(generatedPassword),
+          };
+
+          await eventModel.findOneAndUpdate(
             { _id: req.params.eventID },
             update_password,
             {
@@ -376,6 +380,36 @@ async function publishEvent(req, res) {
     res.status(400).json({
       success: false,
       message: "invalid error",
+    });
+  }
+}
+
+async function privatePasswordCheck(req, res) {
+  const userEnteredPassword = req.body.passwordEntered;
+
+  console.log("enteredPassword:", userEnteredPassword);
+
+  const event = await eventModel.findById(req.params.eventID); //getting event by its ID
+
+  databasePassword = event.privatePassword;
+
+  const isPasswordVerified = await comparePassword(
+    databasePassword,
+    userEnteredPassword
+  );
+
+  const url = await event.eventUrl; // getting url for event
+
+  if (isPasswordVerified) {
+    res.status(200).json({
+      success: true,
+      message: "Event is accessed by this password",
+      eventUrl: url,
+    });
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: "passwords does not match",
     });
   }
 }
@@ -447,4 +481,5 @@ module.exports = {
   updateEvent,
   publishEvent,
   uploadImage,
+  privatePasswordCheck,
 };

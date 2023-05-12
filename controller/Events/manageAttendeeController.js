@@ -53,7 +53,7 @@ async function addAttendee(req, res) {
       !ticketTierSelected ||
       ticketTierSelected.length === 0 ||
       !contactInformation ||
-      !SendEmail
+      SendEmail == undefined
     ) {
       console.log("No attendees information was provided or it's incomplete");
       return res.status(404).json({
@@ -132,41 +132,49 @@ async function addAttendee(req, res) {
         invitationsExist = false;
       }
     }
+    // generate order id
+    const orderId = await generateUniqueId();
 
     //book tickets for attendees added manually
-    await bookTicketForAttendees(
+    const outputOfBookTicketForAttendees = await bookTicketForAttendees(
       event,
       user,
       ticketTierSelected,
       promocode,
-      eventId
+      eventId,
+      orderId
     );
 
     console.log("Ticket has been created successfully");
+    if (outputOfBookTicketForAttendees == true) {
+      // generate QrCode and connects it to the evenURL
+      const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
 
-    // generate QrCode and connects it to the evenURL
-    const qrcodeImage = await generateQRCodeWithLogo(event.eventUrl);
+      //if creator want to send email
+      if (SendEmail) {
+        sendEmailsToattendees(
+          event,
+          user,
+          ticketTierSelected,
+          invitationsExist,
+          orderId,
+          qrcodeImage
+        );
+      }
 
-    // generate order id
-    const orderId = await generateUniqueId();
+      return res.status(200).json({
+        success: true,
+        eventImage: event.basicInfo.eventImage,
+        ticketTiers: event.ticketTiers,
+      });
+    } else {
+      // Return an error response if an error occurs.
 
-    //if creator want to send email
-    if (SendEmail) {
-      sendEmailsToattendees(
-        event,
-        user,
-        ticketTierSelected,
-        invitationsExist,
-        orderId,
-        qrcodeImage
-      );
+      return res.status(400).json({
+        success: false,
+        message: outputOfBookTicketForAttendees.toString(),
+      });
     }
-
-    return res.status(200).json({
-      success: true,
-      eventImage: event.basicInfo.eventImage,
-      ticketTiers: event.ticketTiers,
-    });
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -194,7 +202,8 @@ async function bookTicketForAttendees(
   user,
   ticketTierSelected,
   promocode,
-  eventId
+  eventId,
+  orderId
 ) {
   // check all the ticket tiers in the ticketTierSelected array if they all exist with the correct price in the ticket tiers of the event model
   for (let i = 0; i < ticketTierSelected.length; i++) {
@@ -229,13 +238,19 @@ async function bookTicketForAttendees(
   const buyerId = user._id;
 
   //generate the tickets
-  await generateTickets(
+  console.log(
+    "🚀 ~ file: manageAttendeeController.js:242 ~ ticketTierSelected:",
+    ticketTierSelected
+  );
+  const outputOfGenerateTickets = await await generateTickets(
     ticketTierSelected,
     eventId,
     promocodeObj,
     user._id,
-    buyerId
+    buyerId,
+    orderId
   );
+  return outputOfGenerateTickets;
 }
 
 /**
@@ -325,7 +340,9 @@ async function sendEmailsToattendees(
     for (const tier of ticketTierSelected) {
       //some tickets information for email
       const ticketname = tier.tierName;
-      const price = tier.price;
+      // const price = tier.price;
+      var price = parseInt(tier.price);
+      // price = price.replace(/[^0-9.-]+/g, "");
       //loop over the tickettier array to acess ticket info of each attendee
       if (tier.tickets) {
         for (const attendee of tier.tickets) {

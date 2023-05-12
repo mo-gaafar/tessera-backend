@@ -16,4 +16,9 @@ router.post(
   eventController.uploadImage
 );
 
+router.post(
+  "/event-management/comparePassword/:eventID",
+  eventController.privatePasswordCheck
+);
+
 module.exports = router; //exporting the module in order to use it in other files
