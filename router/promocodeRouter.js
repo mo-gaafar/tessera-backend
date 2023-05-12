@@ -7,19 +7,24 @@ const multer = require("multer");
 //const storage = multer.memoryStorage(); // Store file in memory instead of disk
 const upload = multer();
 router.post(
-	"/manage/events/:event_Id/promocode/create",
-	promocodeController.createPromocode
+  "/manage/events/:event_Id/promocode/create",
+  promocodeController.createPromocode
 );
 
 router.post(
-	"/event-management/import-promo/:eventID",
-	upload.single("csvFile"),
-	promocodeController.importPromocode
+  "/event-management/import-promo/:eventID",
+  upload.single("csvFile"),
+  promocodeController.importPromocode
 );
 
 router.get(
-	"/attendee/ticket/:eventId/promocode/retrieve",
-	promocodeController.checkPromocode
+  "/attendee/ticket/:eventId/promocode/retrieve",
+  promocodeController.checkPromocode
+);
+
+router.get(
+  "/manage/events/:event_Id/promocode/retrieve",
+  promocodeController.retriveAllPromocodesForEvent
 );
 
 module.exports = router;
