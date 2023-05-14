@@ -48,10 +48,27 @@ async function importPromocode(req, res) {
     // Assuming the first row of the csv file contains the column names
     const [header, ...rows] = csvData;
     const [headerCode, headerDiscount, headerlimitOfUses] = header;
+    // Check if the header row contains the expected column names
+    if (
+      headerCode !== "code" ||
+      headerDiscount !== "discount" ||
+      headerlimitOfUses !== "limitOfUses" ||
+      header.length > 3
+    ) {
+      return res
+        .status(400)
+        .send(
+          "Invalid CSV format. Header row does not match expected column names."
+        );
+    }
 
     // Process each row of the CSV file and create a new promocode object for each
     const promocodes = rows.map((row) => {
       const [code, discount, limitOfUses] = row;
+      // Check if any of the fields are empty
+      if (!code || !discount || !limitOfUses) {
+        throw new Error("Empty fields found in the CSV file");
+      }
       return {
         code,
         discount: parseInt(discount),

@@ -6,6 +6,9 @@ const cors = require("cors");
 //const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
+const cron = require("node-cron");
+
+const Event = require("./models/eventModel");
 
 //Import routes
 const usersRoutes = require("./router/userRouter");
@@ -20,20 +23,35 @@ const eventsRetrievalRouter = require("./router/eventsRetrievalRouter");
 const dashboardRouter = require("./router/dashboardRouter");
 // const seedingRouter = require("./router/seedingRouter");
 
+const task = cron.schedule("* * * * * *", async () => {
+  const currDate = new Date();
+  const events = await Event.find({ publicDate: !null });
+  events.forEach(async (event) => {
+    if (event.publicDate < currDate) {
+      event.isScheduled = false;
+      event.published = true;
+      if (event.isPublic.toString() == "false") {
+        event.isPublic = true;
+      }
+      await event.save();
+    }
+  });
+});
+
 const app = express();
 //connect to mongoose (database)n
 async function connectDB() {
-	mongoose
-		.connect(process.env.MONGODB_URI)
-		.then(() => console.log("DB Connected"))
-		.catch((err) => console.log(err));
+  mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => console.log("DB Connected"))
+    .catch((err) => console.log(err));
 }
 //calling function connect to database using the connection string
 connectDB();
 
 // Define a route handler for the default home page
 app.get("/", (req, res) => {
-	res.send("Hello World!");
+  res.send("Hello World!");
 });
 
 // Add middleware
@@ -47,20 +65,20 @@ app.use(express.json());
  * In session-based authentication, the user’s state is stored in the server’s memory or a database.
  */
 app.use(
-	session({
-		secret: "glory to the king",
-		resave: false,
-		saveUninitialized: true,
-	})
+  session({
+    secret: "glory to the king",
+    resave: false,
+    saveUninitialized: true,
+  })
 );
 
 const corsOptions = {
-	origin: "*",
-	methods: "GET,POST,PATCH,DELETE,PUT",
-	allowedHeaders: "Content-Type,X-Forwarded-For,Token,Authorization,",
-	credentials: true,
-	preflightContinue: false,
-	optionsSuccessStatus: 204,
+  origin: "*",
+  methods: "GET,POST,PATCH,DELETE,PUT",
+  allowedHeaders: "Content-Type,X-Forwarded-For,Token,Authorization,",
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
@@ -93,16 +111,16 @@ app.use("./uploads", express.static("uploads"));
 // Start the server on port 3000
 const PORT = 3000;
 const server = app.listen(PORT, () =>
-	console.log(`It's aliveee on http://localhost:${PORT}`)
+  console.log(`It's aliveee on http://localhost:${PORT}`)
 );
 
 app.use((err, req, res, next) => {
-	if (!err) {
-		return next();
-	}
+  if (!err) {
+    return next();
+  }
 
-	res.status(500);
-	res.send("500: Internal server error");
+  res.status(500);
+  res.send("500: Internal server error");
 });
 
 module.exports = server;
