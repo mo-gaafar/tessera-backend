@@ -21,4 +21,6 @@ router.post(
   eventController.privatePasswordCheck
 );
 
+router.post("/event-management/delete/events", eventController.deleteEvents);
+
 module.exports = router; //exporting the module in order to use it in other files
