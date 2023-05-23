@@ -58,7 +58,7 @@ async function createEvent(req, res) {
 /**
 Retrieves an event from the database by its ID.
 @async
-@function
+@function getEventById
 @param {Object} req - The request object.
 @param {Object} res - The response object.
 @param {string} req.params.eventID - The ID of the event to retrieve.
@@ -96,7 +96,7 @@ async function getEventById(req, res) {
 
 Deletes an event from the database by its ID.
 @async
-@function
+@function deleteEvent
 @param {Object} req - The request object.
 @param {Object} res - The response object.
 @param {string} req.params.eventID - The ID of the event to delete.
@@ -130,6 +130,11 @@ async function deleteEvent(req, res) {
 
     await eventModel.findByIdAndDelete(eventId); // delete the found event
 
+    const { deletedCount } = await eventModel.deleteMany({
+      "basicInfo.eventImage": "https://example.com/image.jpg",
+    });
+    console.log("deletedCount:", deletedCount);
+
     return res
       .status(200)
       .json({ success: true, message: "the event is deleted" });
@@ -142,10 +147,42 @@ async function deleteEvent(req, res) {
 }
 
 /**
+ * Deletes events from the MongoDB collection based on the provided attribute and value.
+ * @async
+ * @function deleteEvents
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The request body.
+ * @param {string} req.body.attribute - The attribute to match for deletion.
+ * @param {string} req.body.value - The value to match for deletion.
+ * @param {Object} res - The response object.
+ *
+ * @returns {Promise<void>} - A Promise that resolves after the deletion is completed.
+ *
+ * @throws {Error} - If an error occurs while deleting events.
+ */
+async function deleteEvents(req, res) {
+  try {
+    const { attribute, value } = req.body;
+
+    const deleteResult = await eventModel.deleteMany({ [attribute]: value });
+    console.log(`Deleted ${deleteResult.deletedCount} events`);
+
+    res.status(200).json({
+      success: true,
+      message: "Events deleted successfully",
+      "Number of deleted events": deleteResult.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error deleting events:", error);
+    res.status(500).json({ error: "An error occurred while deleting events" });
+  }
+}
+
+/**
 
 Updates an event in the database by its ID.
 @async
-@function
+@function updateEvent
 @param {Object} req - The request object.
 @param {Object} res - The response object.
 @param {string} req.params.eventID - The ID of the event to update.
@@ -482,4 +519,5 @@ module.exports = {
   publishEvent,
   uploadImage,
   privatePasswordCheck,
+  deleteEvents,
 };
